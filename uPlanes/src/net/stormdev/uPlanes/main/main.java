@@ -5,7 +5,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.logging.Level;
 
 import net.stormdev.uPlanes.utils.Colors;
@@ -14,6 +13,13 @@ import net.stormdev.uPlanes.utils.CustomLogger;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
+import com.comphenix.protocol.events.PacketAdapter;
+import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.events.PacketEvent;
 
 /**
  * Entry point class for the application
@@ -28,6 +34,8 @@ public class main extends JavaPlugin {
 	public static Colors colors; 
 	public static CustomLogger logger = null;
 	
+	public ProtocolManager protocolManager = null;
+	
 	
 	/**
 	 * Startup code
@@ -41,7 +49,6 @@ public class main extends JavaPlugin {
 				|| langFile.length() < 1) {
 			try {
 				langFile.createNewFile();
-				// newC.save(configFile);
 			} catch (IOException e) {
 			}
 			
@@ -104,6 +111,7 @@ public class main extends JavaPlugin {
 				config.getString("colorScheme.title"),
 				config.getString("colorScheme.title"));
 		logger.info("Config loaded!");
+		//TODO Actually do something productive
 		logger.info("uPlanes v"+plugin.getDescription().getVersion()+" has been enabled!");
 	}
 	
@@ -134,5 +142,34 @@ public class main extends JavaPlugin {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	/**
+	 * Code to setup use of ProtocolLib
+	 */
+	private Boolean setupProtocol() {
+		try {
+			this.protocolManager = ProtocolLibrary.getProtocolManager();
+			/*
+			 * ((ProtocolManager)this.protocolManager).addPacketListener(new
+			 * PacketAdapter(plugin, ConnectionSide.CLIENT_SIDE,
+			 * ListenerPriority.NORMAL, 0x1b) {
+			 */
+			
+			((ProtocolManager) this.protocolManager).addPacketListener(
+					  new PacketAdapter(this, PacketType.Play.Client.STEER_VEHICLE) {
+						  @Override
+						  public void onPacketReceiving(PacketEvent event) {
+								PacketContainer packet = event.getPacket();
+								float sideways = packet.getFloat().read(0);
+								float forwards = packet.getFloat().read(1);
+								MotionManager.move(event.getPlayer(), forwards,
+										sideways);
+						  }
+					});
+		} catch (Exception e) {
+			return false;
+		}
+		return true;
 	}
 }
