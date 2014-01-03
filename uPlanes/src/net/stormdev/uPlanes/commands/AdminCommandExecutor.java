@@ -58,7 +58,7 @@ public class AdminCommandExecutor implements CommandExecutor {
 				double speed = 30;
 			    double health = 50;
 				
-			    for(int i=5;i<args.length;i++){
+			    for(int i=4;i<args.length;i++){
 					name += " "+args[i];
 				}
 			    
