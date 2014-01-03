@@ -81,6 +81,9 @@ public class main extends JavaPlugin {
         	if (!config.contains("general.planes.heightLimit")) {
 				config.set("general.planes.heightLimit", 256.0);
 			}
+        	if (!config.contains("general.planes.defaultSpeed")) {
+				config.set("general.planes.defaultSpeed", 30.0);
+			}
         	if (!config.contains("colorScheme.success")) {
 				config.set("colorScheme.success", "&a");
 			}

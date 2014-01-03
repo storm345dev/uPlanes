@@ -17,6 +17,7 @@ public class PlaneUpdateEvent extends VehicleUpdateEvent implements Cancellable 
 		super(vehicle);
 		this.toTravel = toTravel;
 		this.player = player;
+		this.pressed = pressed;
 	}
 	
 	public Keypress getPressedKey(){

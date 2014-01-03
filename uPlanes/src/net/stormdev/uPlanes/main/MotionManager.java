@@ -24,7 +24,7 @@ public class MotionManager {
 			return;
 		}
 		Minecart plane = (Minecart) ent;
-		if(!plane.hasMetadata("uPlanes.isAPlane")){ //TODO Use UUID to determine like in uCarsTrade
+		if(!main.plugin.listener.isAPlane(plane)){
 			//Not a plane
 			return;
 		}
@@ -32,7 +32,7 @@ public class MotionManager {
 		if (f == 0) {
 			return;
 		}
-		Keypress pressed = Keypress.UNKNOWN;
+		Keypress pressed = Keypress.W;
 		Boolean forwards = true; // if true, forwards, else backwards
 		int side = 0; // -1=left, 0=straight, 1=right
 		Boolean turning = false;
@@ -74,6 +74,7 @@ public class MotionManager {
 			plane.removeMetadata("plane.left", main.plugin);
 		}
 		if(!forwards){
+			pressed = Keypress.S;
 			x =  - x;
 			z =  - z;
 		}
