@@ -22,6 +22,7 @@ public class PlanesManager {
 	File saveFile = null;
 	public PlanesManager(File saveFile){
 		this.saveFile = saveFile;
+		load();
 	}
 	public Boolean isAPlane(UUID PlaneId){
 		if(cache.containsKey(PlaneId)){

@@ -18,6 +18,9 @@ public class PlaneGenerator {
 		if(health > maxHealth){
 			health = maxHealth;
 		}
+		if(speed < 0.3){
+			speed = 0.3;
+		}
 		
 		plane.health = health;
 		plane.mutliplier = speed;
