@@ -1,0 +1,12 @@
+name: uPlanes
+main: net.stormdev.uPlanes.main.main
+version: 1.0
+softdepend: [Vault]
+depend: [ProtocolLib]
+commands:
+   uPlanes:
+        description: This gives uPlanes info
+        usage: /<command>
+        permission: uplanes.uplanes
+        permission-message: You don't have access to this command
+        default: true
