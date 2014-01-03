@@ -23,6 +23,7 @@ public class uCarsCompatibility {
 
 			public Boolean isACar(Minecart car) {
 				if(main.plugin.planeManager.isAPlane(car.getUniqueId())){
+					car.setMetadata("ucars.ignore", new StatValue(true, main.plugin));
 					return false;
 				}
 				return true;
