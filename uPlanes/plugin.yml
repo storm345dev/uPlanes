@@ -15,4 +15,4 @@ commands:
         usage: /<command> give [<Random>]/[<Speed> <Health> <Name>]
         permission: uplanes.admin
         permission-message: You don't have access to this command
-        default: true
+        default: op
