@@ -2,6 +2,7 @@ package net.stormdev.uPlanes.main;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 import net.stormdev.uPlanes.utils.Keypress;
@@ -9,6 +10,7 @@ import net.stormdev.uPlanes.utils.Lang;
 import net.stormdev.uPlanes.utils.Plane;
 import net.stormdev.uPlanes.utils.PlaneDeathEvent;
 import net.stormdev.uPlanes.utils.PlaneUpdateEvent;
+import net.stormdev.uPlanes.utils.Stat;
 import net.stormdev.uPlanes.utils.StatValue;
 
 import org.bukkit.ChatColor;
@@ -29,9 +31,14 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.ItemDespawnEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
+import org.bukkit.event.inventory.InventoryAction;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
 import org.bukkit.event.vehicle.VehicleDestroyEvent;
+import org.bukkit.inventory.AnvilInventory;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.MetadataValue;
@@ -236,6 +243,125 @@ public class uPlanesListener implements Listener {
 		Plane plane = PlaneGenerator.gen();
         event.setCurrentItem(PlaneItemMethods.getItem(plane));
         main.plugin.planeManager.setPlane(plane.id, plane);
+		return;
+	}
+	
+	@EventHandler (priority = EventPriority.MONITOR)
+	void carUpgradeAnvil(InventoryClickEvent event){
+		if(event.getAction()==InventoryAction.CLONE_STACK){
+			ItemStack cloned = event.getCursor();
+			if(cloned.getType() == Material.MINECART || 
+					cloned.getItemMeta() == null ||
+					cloned.getItemMeta().getLore() == null ||
+					cloned.getItemMeta().getLore().size() < 2){
+				event.setCancelled(true);
+				return;
+			}
+			return;
+		}
+		final Player player = (Player) event.getWhoClicked();
+		InventoryView view = event.getView();
+		final Inventory i = event.getInventory();
+		if(!(i instanceof AnvilInventory)){
+			return;
+		}
+		int slotNumber = event.getRawSlot();
+		if(!(slotNumber == view.convertSlot(slotNumber))){
+			//Not clicking in the anvil
+			return;
+		}
+		//AnvilInventory i = (AnvilInventory) inv;
+		Boolean update = true;
+		Boolean save = false;
+		Boolean pickup = false;
+		if(event.getAction() == InventoryAction.PICKUP_ALL || event.getAction() == InventoryAction.PICKUP_HALF || event.getAction() == InventoryAction.PICKUP_ONE || event.getAction() == InventoryAction.PICKUP_SOME){
+			update = false;
+			pickup = true;
+			if(slotNumber == 2){ //Result slot
+				save = true;
+			}
+		}
+		ItemStack item = null;
+		try {
+			item = i.getItem(0);
+		} catch (Exception e) {
+			return;
+		}
+		if(item == null){
+			return;
+		}
+		if(!(item.getType() == Material.MINECART) || 
+				item.getItemMeta().getLore().size() < 2){
+			return; //Not a car
+		}
+		//Anvil contains a car in first slot.
+		ItemMeta meta = item.getItemMeta();
+		List<String> lore = meta.getLore();
+		final UUID id;
+		try {
+			if(lore.size() < 1){
+				return;
+			}
+			id = UUID.fromString(ChatColor.stripColor(lore.get(0)));
+		} catch (Exception e) {
+			return;
+		}
+		Plane plane = plugin.planeManager.getPlane(id);
+		if(plane == null){
+			return;
+		}
+		final ConcurrentHashMap<String, Stat> stats = plane.stats;
+        if(save && slotNumber ==2){
+			//They are renaming it
+        	ItemStack result = event.getCurrentItem();
+        	String name = ChatColor.stripColor(result.getItemMeta().getDisplayName());
+        	plane.name = name;
+        	plugin.planeManager.setPlane(id, plane);
+        	player.sendMessage(main.colors.getSuccess()+"+"+main.colors.getInfo()+" Renamed plane to: '"+name+"'");
+        	return;
+		}
+		InventoryAction a = event.getAction();
+		ItemStack upgrade = null;
+		Boolean set = false;
+		final ItemStack up = upgrade;
+		final Boolean updat = update;
+		final Boolean sav = save;
+		final Plane ca = plane;
+		if(slotNumber == 1 && (a==InventoryAction.PLACE_ALL || a==InventoryAction.PLACE_ONE || a==InventoryAction.PLACE_SOME) && event.getCursor().getType()!=Material.AIR){
+			//upgrade = event.getCursor().clone();
+			plugin.getServer().getScheduler().runTaskLater(plugin, new Runnable(){
+
+				public void run() {
+					ItemStack upgrade = up;
+					try {
+						upgrade = i.getItem(1); //Upgrade slot
+					} catch (Exception e) {
+						return;
+					}
+					if(upgrade == null){
+						return;
+					}
+					//A dirty trick to get the inventory to look correct on the client
+					UpgradeManager.applyUpgrades(upgrade, ca, updat, sav, player, i, id);
+					return;
+				}}, 1l);
+			set = true;
+			return;
+		}
+		if(!set){
+		    try {
+				upgrade = i.getItem(1); //Upgrade slot
+			} catch (Exception e) {
+				return;
+			}
+		}
+		if(upgrade == null){
+			return;
+		}
+		if(pickup && slotNumber == 1){
+			return; //Don't bother tracking and updating, etc...
+		} 
+		UpgradeManager.applyUpgrades(upgrade, plane, update, save, player, i, id);
 		return;
 	}
 	
