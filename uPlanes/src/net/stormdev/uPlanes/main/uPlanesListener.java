@@ -4,12 +4,17 @@ import net.stormdev.uPlanes.utils.Keypress;
 import net.stormdev.uPlanes.utils.Plane;
 import net.stormdev.uPlanes.utils.PlaneUpdateEvent;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Effect;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.CraftItemEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
 public class uPlanesListener implements Listener {
@@ -58,6 +63,24 @@ public class uPlanesListener implements Listener {
 		exhaust.getWorld().playEffect(exhaust, Effect.SMOKE, 1);
 		
 		vehicle.setVelocity(event.getTravelVector());
+		return;
+	}
+	
+	@EventHandler(priority = EventPriority.MONITOR)
+	void itemCraft(CraftItemEvent event){
+		if(event.isCancelled()){
+			return;
+		}
+		ItemStack recipe = event.getCurrentItem();
+		if(!(recipe.getType() == Material.MINECART)){
+			return;
+		}
+		if(!ChatColor.stripColor(recipe.getItemMeta().getDisplayName()).equalsIgnoreCase("plane")){
+			return;
+		}
+		Plane plane = PlaneGenerator.gen(); //TODO Make a plane generator
+        event.setCurrentItem(PlaneItemMethods.getItem(plane));
+        main.plugin.planeManager.setPlane(plane.id, plane);
 		return;
 	}
 	

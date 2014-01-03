@@ -5,13 +5,18 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Random;
 import java.util.logging.Level;
 
 import net.stormdev.uPlanes.utils.Colors;
 import net.stormdev.uPlanes.utils.CustomLogger;
 
+import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.comphenix.protocol.PacketType;
@@ -37,6 +42,7 @@ public class main extends JavaPlugin {
 	public ProtocolManager protocolManager = null;
 	public uPlanesListener listener = null;
 	public PlanesManager planeManager = null;
+	public Random random = new Random();
 	
 	/**
 	 * Startup code
@@ -137,6 +143,25 @@ public class main extends JavaPlugin {
 		listener = new uPlanesListener(this);
 		this.planeManager = new PlanesManager(planesSaveFile);
 		getServer().getPluginManager().registerEvents(listener, this);
+		
+		//Create a blank plane item
+		ItemStack plane = new ItemStack(Material.MINECART);
+		ItemMeta im = plane.getItemMeta();
+		im.setDisplayName("Plane");
+		plane.setItemMeta(im);
+		
+		ShapedRecipe recipe = new ShapedRecipe(plane);
+		recipe.shape("012","345","678");
+		recipe.setIngredient('0', Material.REDSTONE);
+		recipe.setIngredient('1', Material.LEVER);
+		recipe.setIngredient('2', Material.REDSTONE);
+		recipe.setIngredient('3', Material.WOOD_PLATE);
+		recipe.setIngredient('4', Material.MINECART);
+		recipe.setIngredient('5', Material.WOOD_PLATE);
+		recipe.setIngredient('7', Material.REDSTONE_TORCH_ON);
+		
+		getServer().addRecipe(recipe);
+		
 		logger.info("uPlanes v"+plugin.getDescription().getVersion()+" has been enabled!");
 	}
 	
