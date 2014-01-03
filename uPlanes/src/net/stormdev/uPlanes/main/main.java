@@ -8,6 +8,8 @@ import java.io.OutputStream;
 import java.util.Random;
 import java.util.logging.Level;
 
+import net.stormdev.uPlanes.commands.AdminCommandExecutor;
+import net.stormdev.uPlanes.commands.InfoCommandExecutor;
 import net.stormdev.uPlanes.utils.Colors;
 import net.stormdev.uPlanes.utils.CustomLogger;
 import net.stormdev.uPlanes.utils.uCarsCompatibility;
@@ -70,11 +72,20 @@ public class main extends JavaPlugin {
 			getLogger().log(Level.WARNING, "Error creating/loading lang file! Regenerating..");
 		}
 		
+		if(!lang.contains("general.info.msg")){
+			lang.set("general.info.msg", "uPlanes %version%, by storm345, is working!");
+		}
 		if(!lang.contains("general.damage.msg")){
 			lang.set("general.damage.msg", "&c-%damage%&6 (%remainder%) - [&b%cause%&6]");
 		}
 		if(!lang.contains("general.upgrade.msg")){
 			lang.set("general.upgrade.msg", "&a+%amount% &e%stat%. Value: %value%");
+		}
+		if(!lang.contains("general.spawn.msg")){
+			lang.set("general.spawn.msg", "Given you a plane!");
+		}
+		if(!lang.contains("general.playersOnly")){
+			lang.set("general.playersOnly", "Players only!");
 		}
 		
 		if (new File(getDataFolder().getAbsolutePath() + File.separator
@@ -178,6 +189,9 @@ public class main extends JavaPlugin {
 		getServer().addRecipe(recipe);
 		
 		setupUCarsCompatibility();
+		
+		getCommand("uPlanes").setExecutor(new InfoCommandExecutor());
+		getCommand("plane").setExecutor(new AdminCommandExecutor());
 		
 		logger.info("uPlanes v"+plugin.getDescription().getVersion()+" has been enabled!");
 	}
