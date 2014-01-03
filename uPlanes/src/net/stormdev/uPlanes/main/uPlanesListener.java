@@ -1,6 +1,7 @@
 package net.stormdev.uPlanes.main;
 
 import net.stormdev.uPlanes.utils.Keypress;
+import net.stormdev.uPlanes.utils.Plane;
 import net.stormdev.uPlanes.utils.PlaneUpdateEvent;
 
 import org.bukkit.Effect;
@@ -22,6 +23,18 @@ public class uPlanesListener implements Listener {
 	@EventHandler
 	void planeFlightControl(PlaneUpdateEvent event){
 		Vehicle vehicle = event.getVehicle();
+		
+		if(!(vehicle instanceof Minecart)){
+			return;
+		}
+		
+		Minecart cart = (Minecart) vehicle;
+		Plane plane = getPlane(cart);
+		
+		if(plane == null){ //Not a plane, just a Minecart
+			return;
+		}
+		
 		Location loc = vehicle.getLocation();
 		Vector travel = event.getTravelVector();
 		double y = 0.0;
@@ -47,6 +60,11 @@ public class uPlanesListener implements Listener {
 		vehicle.setVelocity(event.getTravelVector());
 		return;
 	}
+	
+	public Plane getPlane(Minecart m){
+		return plugin.planeManager.getPlane(m.getUniqueId());
+	}
+	
 	public Boolean isAPlane(Minecart m){
 		return plugin.planeManager.isAPlane(m.getUniqueId());
 	}
