@@ -66,7 +66,11 @@ public class main extends JavaPlugin {
 		try {
 			lang.load(langFile);
 		} catch(Exception e){
+			lang = new YamlConfiguration();
 			getLogger().log(Level.WARNING, "Error creating/loading lang file! Regenerating..");
+		}
+		if(!lang.contains("general.damage.msg")){
+			lang.set("general.damage.msg", "&c-%damage%%6 (%remainder%) - [&b%cause%&6]");
 		}
 		if (new File(getDataFolder().getAbsolutePath() + File.separator
 				+ "config.yml").exists() == false
@@ -99,6 +103,9 @@ public class main extends JavaPlugin {
 			}
         	if (!config.contains("general.planes.maxHealth")) {
 				config.set("general.planes.maxHealth", 100.0);
+			}
+        	if (!config.contains("general.planes.punchDamage")) {
+				config.set("general.planes.punchDamage", 15.0);
 			}
         	if (!config.contains("colorScheme.success")) {
 				config.set("colorScheme.success", "&a");
