@@ -46,17 +46,25 @@ import org.bukkit.util.Vector;
 
 public class uPlanesListener implements Listener {
 	private main plugin;
+	
 	private double defaultHealth;
 	private double punchDamage;
+	private double heightLimit;
+	private boolean perms;
+	private String perm;
 	public uPlanesListener(main instance){
 		this.plugin = instance;
 		
 		defaultHealth = main.config.getDouble("general.planes.defaultHealth");
 		punchDamage = main.config.getDouble("general.planes.punchDamage");
+		heightLimit = main.config.getDouble("general.planes.heightLimit");
+		perms = main.config.getBoolean("general.planes.perms");
+		perm = main.config.getString("general.planes.flyPerm");
 	}
 	@EventHandler
 	void planeFlightControl(PlaneUpdateEvent event){
 		Vehicle vehicle = event.getVehicle();
+		Player player = event.getPlayer();
 		
 		if(!(vehicle instanceof Minecart)){
 			return;
@@ -67,6 +75,12 @@ public class uPlanesListener implements Listener {
 		
 		if(plane == null){ //Not a plane, just a Minecart
 			return;
+		}
+		
+		if(perms){
+			if(!player.hasPermission(perm)){
+				return;
+			}
 		}
 		
 		cart.setMaxSpeed(5); //Don't crash the server...
@@ -89,6 +103,12 @@ public class uPlanesListener implements Listener {
 			break;
 		}
 		
+		if(loc.getY() >= heightLimit){
+			y = 0;
+			//Send message it's too high
+			player.sendMessage(main.colors.getError()+Lang.get("general.heightLimit"));
+		}
+		
 		travel.setY(y);
 		
 		Vector behind = travel.clone().multiply(-1); //Behind the plane
@@ -104,6 +124,9 @@ public class uPlanesListener implements Listener {
 		Action a = event.getAction();
 		if(!(a == Action.RIGHT_CLICK_BLOCK)){
 			return;
+		}
+		if(event.isCancelled()){
+			return; //Worldguard says no
 		}
 		
 		Player player = event.getPlayer();
