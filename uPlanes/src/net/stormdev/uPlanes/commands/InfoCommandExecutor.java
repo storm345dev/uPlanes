@@ -3,12 +3,11 @@ package net.stormdev.uPlanes.commands;
 import java.util.regex.Pattern;
 
 import net.stormdev.uPlanes.main.main;
+import net.stormdev.uPlanes.utils.Lang;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-
-import com.useful.ucars.Lang;
 
 public class InfoCommandExecutor implements CommandExecutor {
 

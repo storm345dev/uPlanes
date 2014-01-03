@@ -4,14 +4,13 @@ import net.stormdev.uPlanes.main.PlaneGenerator;
 import net.stormdev.uPlanes.main.PlaneItemMethods;
 import net.stormdev.uPlanes.main.main;
 import net.stormdev.uPlanes.utils.Colors;
+import net.stormdev.uPlanes.utils.Lang;
 import net.stormdev.uPlanes.utils.Plane;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-
-import com.useful.ucars.Lang;
 
 public class AdminCommandExecutor implements CommandExecutor {
 
