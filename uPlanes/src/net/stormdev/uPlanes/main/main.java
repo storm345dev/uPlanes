@@ -87,6 +87,12 @@ public class main extends JavaPlugin {
         	if (!config.contains("general.planes.defaultSpeed")) {
 				config.set("general.planes.defaultSpeed", 30.0);
 			}
+        	if (!config.contains("general.planes.defaultHealth")) {
+				config.set("general.planes.defaultHealth", 30.0);
+			}
+        	if (!config.contains("general.planes.maxHealth")) {
+				config.set("general.planes.maxHealth", 100.0);
+			}
         	if (!config.contains("colorScheme.success")) {
 				config.set("colorScheme.success", "&a");
 			}
