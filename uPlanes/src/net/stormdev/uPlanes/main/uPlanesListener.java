@@ -19,6 +19,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Vehicle;
@@ -26,11 +27,13 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.ItemDespawnEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
 import org.bukkit.event.vehicle.VehicleDestroyEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.util.Vector;
 
@@ -138,6 +141,23 @@ public class uPlanesListener implements Listener {
 	}
 	
 	@EventHandler
+	void lostPlanes(ItemDespawnEvent event){
+		Item i = event.getEntity();
+		ItemStack is = i.getItemStack();
+		if(is.getType() != Material.MINECART){
+			return;
+		}
+		ItemMeta im = is.getItemMeta();
+		if(im.getLore() == null || im.getLore().size() < 1){
+			return;
+		}
+		String id = ChatColor.stripColor(im.getLore().get(0));
+		UUID planeId = UUID.fromString(id);
+		plugin.planeManager.removePlane(planeId);
+		return;
+	}
+	
+	@EventHandler
 	void vehicleDamage(VehicleDamageEvent event){
 		Vehicle veh = event.getVehicle();
 		if(!(veh instanceof Minecart)){
@@ -189,8 +209,7 @@ public class uPlanesListener implements Listener {
 		
 		event.setDamage(0.0);
 		event.setCancelled(true);
-		
-		if(die){
+		if(die || health < 0.1){
 			//Kill the plane
 			PlaneDeathEvent evt = new PlaneDeathEvent(m, plane);
 			main.plugin.getServer().getPluginManager().callEvent(evt);
@@ -223,9 +242,6 @@ public class uPlanesListener implements Listener {
 	public void killPlane(Vehicle vehicle, Plane plane){
 		//Kill plane
 		UUID id = vehicle.getUniqueId();
-		if(!plane.isPlaced){
-			return;
-		}
 		plane.isPlaced = false;
 		plugin.planeManager.setPlane(id, plane);
 		Location loc = vehicle.getLocation();
