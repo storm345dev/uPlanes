@@ -37,6 +37,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
 import org.bukkit.event.vehicle.VehicleDestroyEvent;
+import org.bukkit.event.vehicle.VehicleUpdateEvent;
 import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
@@ -62,6 +63,61 @@ public class uPlanesListener implements Listener {
 		perms = main.config.getBoolean("general.planes.perms");
 		perm = main.config.getString("general.planes.flyPerm");
 	}
+	
+	@EventHandler
+	void vehicleUpdate(VehicleUpdateEvent event){
+		Vehicle veh = event.getVehicle();
+		if(!(veh instanceof Minecart)){
+			return;
+		}
+		Minecart car = (Minecart) veh;
+		Location loc = car.getLocation();
+		Entity passenger = car.getPassenger();
+		if(passenger == null){
+			return;
+		}
+		if(!veh.hasMetadata("plane.hover")){
+			return;
+		}
+		main.logger.info("Hovering...");
+		//Hover
+		Block b = loc.getBlock();
+		Vector vel = car.getVelocity();
+		Block under = b.getRelative(BlockFace.DOWN);
+		Block under2 = b.getRelative(BlockFace.DOWN,2);
+		Boolean descending = car.hasMetadata("plane.left");
+		Boolean ascending = car.hasMetadata("plane.right");
+		int count = 0;
+		if(!b.isEmpty()){
+			count++;
+		}
+		if(!under.isEmpty()){
+			count++;
+		}
+		if(!under2.isEmpty()){
+			count++;
+		}
+		switch(count){
+		case 0:vel.setY(-0.3);under.getWorld().playEffect(under.getLocation(), Effect.SMOKE, 1); break;
+		case 1:vel.setY(2); break;
+		case 2:vel.setY(1); break;
+		case 3:vel.setY(0.1);under.getWorld().playEffect(under.getLocation(), Effect.SMOKE, 1); break;
+		}
+		if(descending && ascending){
+			vel.setY(0);
+		}
+		else if(descending){
+			vel.setY(-0.6); //uCar gravity for road convenience
+		}
+		else if(ascending){
+		    vel.setY(0.6);	
+		}
+		if((loc.getY() < heightLimit) || descending){
+			car.setVelocity(vel);
+		}
+		return;
+	}
+	
 	@EventHandler
 	void planeFlightControl(PlaneUpdateEvent event){
 		Vehicle vehicle = event.getVehicle();
@@ -78,7 +134,12 @@ public class uPlanesListener implements Listener {
 			return;
 		}
 		
-		Boolean hover = plane.stats.contains("plane.hover");
+		Boolean hover = false;
+		
+		if(plane.stats.containsKey("plane.hover")){
+			hover = true;
+			vehicle.setMetadata("plane.hover", new StatValue(true, main.plugin));
+		}
 		
 		if(perms){
 			if(!player.hasPermission(perm)){
@@ -97,7 +158,7 @@ public class uPlanesListener implements Listener {
 	    Keypress press = event.getPressedKey();
 		
 	    if(!hover){
-			switch(press){
+	    	switch(press){
 			case A: 
 				y = 0.6; break; //Go up
 			case D: 
@@ -105,40 +166,7 @@ public class uPlanesListener implements Listener {
 			default:
 				break;
 			}
-		}
-		else{
-			//Hover!
-			Block b = loc.getBlock();
-			Block under = b.getRelative(BlockFace.DOWN);
-			Block under2 = b.getRelative(BlockFace.DOWN,2);
-			Boolean descending = press == Keypress.A;
-			Boolean ascending = press == Keypress.D;
-			int count = 0;
-			if(!b.isEmpty()){
-				count++;
-			}
-			if(!under.isEmpty()){
-				count++;
-			}
-			if(!under2.isEmpty()){
-				count++;
-			}
-			switch(count){
-			case 0:y=-0.3;under.getWorld().playEffect(under.getLocation(), Effect.SMOKE, 1); break;
-			case 1:y=2; break;
-			case 2:y=1; break;
-			case 3:y=0.1;under.getWorld().playEffect(under.getLocation(), Effect.SMOKE, 1); break;
-			}
-			if(descending && ascending){
-				y = 0;
-			}
-			else if(descending){
-				y = -0.6; //uCar gravity for road convenience
-			}
-			else if(ascending){
-			    y = 0.6;
-			}
-		}
+	    }
 		
 		if(loc.getY() >= heightLimit){
 			y = 0;
@@ -312,7 +340,7 @@ public class uPlanesListener implements Listener {
 		Plane plane = PlaneGenerator.gen();
 		if(hover){
 			plane.name = "Hover Plane";
-			plane.stats.put("plane.hover", new Stat("Hovercar", "Yes", main.plugin, true));
+			plane.stats.put("plane.hover", new Stat("Hover", "Yes", main.plugin, true));
 		}
         event.setCurrentItem(PlaneItemMethods.getItem(plane));
         main.plugin.planeManager.setPlane(plane.id, plane);

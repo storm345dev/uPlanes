@@ -46,7 +46,7 @@ public class AdminCommandExecutor implements CommandExecutor {
 				
 				if(hover){
 					plane.name = "Hover Plane";
-					plane.stats.put("plane.hover", new Stat("Hovercar:", "Yes", main.plugin, true));
+					plane.stats.put("plane.hover", new Stat("Hover", "Yes", main.plugin, true));
 				}
 				
 				main.plugin.planeManager.setPlane(plane.id, plane);
@@ -92,7 +92,7 @@ public class AdminCommandExecutor implements CommandExecutor {
 				plane.id = UUID.randomUUID();
 				
 				if(hover){
-					plane.stats.put("plane.hover", new Stat("Hovercar:", "Yes", main.plugin, true));
+					plane.stats.put("plane.hover", new Stat("Hover", "Yes", main.plugin, true));
 				}
 				
 				main.plugin.planeManager.setPlane(plane.id, plane);
