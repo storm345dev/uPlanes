@@ -1,6 +1,7 @@
 package net.stormdev.uPlanes.main;
 
 import net.stormdev.uPlanes.utils.Keypress;
+import net.stormdev.uPlanes.utils.Plane;
 import net.stormdev.uPlanes.utils.PlaneUpdateEvent;
 
 import org.bukkit.Effect;
