@@ -35,7 +35,7 @@ public class main extends JavaPlugin {
 	public static CustomLogger logger = null;
 	
 	public ProtocolManager protocolManager = null;
-	
+	public uPlanesListener listener = null;
 	
 	/**
 	 * Startup code
@@ -111,7 +111,18 @@ public class main extends JavaPlugin {
 				config.getString("colorScheme.title"),
 				config.getString("colorScheme.title"));
 		logger.info("Config loaded!");
-		//TODO Actually do something productive
+		//Actually do something productive
+		if(!setupProtocol()){
+			logger.info(colors.getError()+"An error occurred in setting up"
+					+ " with ProtocolLib, please check for a plugin update.");
+			try {
+				Thread.sleep(1000); //Tell them the message for 1000ms
+			} catch (InterruptedException e) {} 
+			getServer().getPluginManager().disablePlugin(this); //Disable
+			return;
+		}
+		listener = new uPlanesListener(this);
+		getServer().getPluginManager().registerEvents(listener, this);
 		logger.info("uPlanes v"+plugin.getDescription().getVersion()+" has been enabled!");
 	}
 	
