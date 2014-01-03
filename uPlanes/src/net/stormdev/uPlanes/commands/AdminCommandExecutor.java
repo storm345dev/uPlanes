@@ -1,5 +1,7 @@
 package net.stormdev.uPlanes.commands;
 
+import java.util.UUID;
+
 import net.stormdev.uPlanes.main.PlaneGenerator;
 import net.stormdev.uPlanes.main.PlaneItemMethods;
 import net.stormdev.uPlanes.main.main;
@@ -39,6 +41,8 @@ public class AdminCommandExecutor implements CommandExecutor {
 			if(type.equalsIgnoreCase("random")){
 				//Give them a random plane
 				plane = PlaneGenerator.gen();
+				main.plugin.planeManager.setPlane(plane.id, plane);
+				
 				player.getInventory().addItem(PlaneItemMethods.getItem(plane));
 				sender.sendMessage(main.colors.getSuccess()+spawnMsg);
 				return true;
@@ -70,6 +74,8 @@ public class AdminCommandExecutor implements CommandExecutor {
 				plane.mutliplier = speed;
 				plane.name = Colors.colorise(name);
 				plane.health = health;
+				plane.id = UUID.randomUUID();
+				main.plugin.planeManager.setPlane(plane.id, plane);
 				
 				player.getInventory().addItem(PlaneItemMethods.getItem(plane));
 				sender.sendMessage(main.colors.getSuccess()+spawnMsg);
