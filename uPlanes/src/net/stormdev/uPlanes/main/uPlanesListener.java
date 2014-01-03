@@ -78,12 +78,14 @@ public class uPlanesListener implements Listener {
 			return;
 		}
 		//Hover
+		if(veh.hasMetadata("plane.left") || veh.hasMetadata("plane.right")){
+			//Going up or down
+			return; //Ignore it
+		}
 		Block b = loc.getBlock();
 		Vector vel = car.getVelocity();
 		Block under = b.getRelative(BlockFace.DOWN);
 		Block under2 = b.getRelative(BlockFace.DOWN,2);
-		Boolean descending = car.hasMetadata("plane.right");
-		Boolean ascending = car.hasMetadata("plane.left");
 		int count = 0;
 		if(!b.isEmpty()){
 			count++;
@@ -95,21 +97,12 @@ public class uPlanesListener implements Listener {
 			count++;
 		}
 		switch(count){
-		case 0:vel.setY(-0.3);under.getWorld().playEffect(under.getLocation(), Effect.SMOKE, 1); break;
+		case 0:vel.setY(-0.3);break;
 		case 1:vel.setY(2); break;
 		case 2:vel.setY(1); break;
-		case 3:vel.setY(0.1);under.getWorld().playEffect(under.getLocation(), Effect.SMOKE, 1); break;
+		case 3:vel.setY(0.1);break;
 		}
-		if(descending && ascending){
-			vel.setY(0);
-		}
-		else if(descending){
-			vel.setY(-0.6); //uCar gravity for road convenience
-		}
-		else if(ascending){
-		    vel.setY(0.6);	
-		}
-		if((loc.getY() < heightLimit) || descending){
+		if((loc.getY() < heightLimit)){
 			car.setVelocity(vel);
 		}
 		return;
@@ -131,10 +124,7 @@ public class uPlanesListener implements Listener {
 			return;
 		}
 		
-		Boolean hover = false;
-		
 		if(plane.stats.containsKey("plane.hover")){
-			hover = true;
 			vehicle.setMetadata("plane.hover", new StatValue(true, main.plugin));
 		}
 		
@@ -154,16 +144,14 @@ public class uPlanesListener implements Listener {
 		travel.multiply(multiplier);
 	    Keypress press = event.getPressedKey();
 		
-	    if(!hover){
-	    	switch(press){
-			case A: 
-				y = 0.6; break; //Go up
-			case D: 
-				y = -0.6; break; //Go down
-			default:
-				break;
-			}
-	    }
+	    switch(press){
+		case A: 
+			y = 0.6; break; //Go up
+		case D: 
+			y = -0.6; break; //Go down
+		default:
+			break;
+		}
 		
 		if(loc.getY() >= heightLimit){
 			y = 0;
