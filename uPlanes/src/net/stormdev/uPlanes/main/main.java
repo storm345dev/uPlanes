@@ -10,6 +10,7 @@ import java.util.logging.Level;
 
 import net.stormdev.uPlanes.utils.Colors;
 import net.stormdev.uPlanes.utils.CustomLogger;
+import net.stormdev.uPlanes.utils.uCarsCompatibility;
 
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -162,6 +163,8 @@ public class main extends JavaPlugin {
 		
 		getServer().addRecipe(recipe);
 		
+		setupUCarsCompatibility();
+		
 		logger.info("uPlanes v"+plugin.getDescription().getVersion()+" has been enabled!");
 	}
 	
@@ -221,5 +224,11 @@ public class main extends JavaPlugin {
 			return false;
 		}
 		return true;
+	}
+	private void setupUCarsCompatibility(){
+		if(getServer().getPluginManager().getPlugin("uCars") == null){
+			return;
+		}
+		uCarsCompatibility.run();
 	}
 }

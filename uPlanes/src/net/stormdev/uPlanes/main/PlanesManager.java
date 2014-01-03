@@ -126,6 +126,7 @@ public class PlanesManager {
 		}
 	}
 	private void save(){
+		this.saveFile.getParentFile().mkdirs();
 		if(!this.saveFile.exists() || this.saveFile.length() < 1){
 			try {
 				this.saveFile.createNewFile();

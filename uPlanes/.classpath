@@ -9,5 +9,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="C:/Users/Edward/Documents/Bukkit Servers/plugintestserver/bukkit.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Edward/Documents/Bukkit Servers/plugintestserver/plugins/ucars.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
