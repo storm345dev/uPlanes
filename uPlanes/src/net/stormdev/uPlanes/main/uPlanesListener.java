@@ -94,7 +94,7 @@ public class uPlanesListener implements Listener {
 		Location exhaust = loc.add(behind);
 		exhaust.getWorld().playEffect(exhaust, Effect.SMOKE, 1);
 		
-		vehicle.setVelocity(event.getTravelVector());
+		vehicle.setVelocity(travel);
 		return;
 	}
 	
