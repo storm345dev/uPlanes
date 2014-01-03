@@ -70,7 +70,7 @@ public class main extends JavaPlugin {
 			getLogger().log(Level.WARNING, "Error creating/loading lang file! Regenerating..");
 		}
 		if(!lang.contains("general.damage.msg")){
-			lang.set("general.damage.msg", "&c-%damage%%6 (%remainder%) - [&b%cause%&6]");
+			lang.set("general.damage.msg", "&c-%damage%&6 (%remainder%) - [&b%cause%&6]");
 		}
 		if (new File(getDataFolder().getAbsolutePath() + File.separator
 				+ "config.yml").exists() == false
