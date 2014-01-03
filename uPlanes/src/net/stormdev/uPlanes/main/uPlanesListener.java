@@ -75,7 +75,7 @@ public class uPlanesListener implements Listener {
 		Vector travel = event.getTravelVector();
 		double y = 0.0;
 		double multiplier = (defaultSpeed*plane.mutliplier);
-		travel.multiply(multiplier);
+		travel = travel.multiply(multiplier);
 		
 		Keypress press = event.getPressedKey();
 		
