@@ -265,24 +265,24 @@ public class uPlanesListener implements Listener {
 		if(attacker != null && attacker instanceof Player){
 			//Plane being punched to death
 			damage = punchDamage;
-			msg = msg.replaceAll(Pattern.quote("%damage%"), damage+"");
+			msg = msg.replaceAll(Pattern.quote("%damage%"), damage+"HP");
 			health -= damage;
 			if(health <= 0){
 				die = true;
 				health = 0;
 			}
-			msg = msg.replaceAll(Pattern.quote("%remainder%"), health+"");
+			msg = msg.replaceAll(Pattern.quote("%remainder%"), health+"HP");
 			msg = msg.replaceAll(Pattern.quote("%cause%"), "Fist");
 			((Player)attacker).sendMessage(main.colors.getInfo()+msg);
 		}
 		else{
-			msg = msg.replaceAll(Pattern.quote("%damage%"), damage+"");
+			msg = msg.replaceAll(Pattern.quote("%damage%"), damage+"HP");
 			health -= damage;
 			if(health <= 0){
 				die = true;
 				health = 0;
 			}
-			msg = msg.replaceAll(Pattern.quote("%remainder%"), health+"");
+			msg = msg.replaceAll(Pattern.quote("%remainder%"), health+"HP");
 			msg = msg.replaceAll(Pattern.quote("%cause%"), "Damage");
 		}
 		if(m.getPassenger() != null && m.getPassenger() instanceof Player){
