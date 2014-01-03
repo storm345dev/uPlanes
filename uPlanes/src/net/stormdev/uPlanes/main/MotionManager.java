@@ -24,7 +24,8 @@ public class MotionManager {
 			return;
 		}
 		Minecart plane = (Minecart) ent;
-		if(!plane.hasMetadata("uPlanes.isAPlane")){
+		if(!plane.hasMetadata("uPlanes.isAPlane")){ //TODO Use UUID to determine like in uCarsTrade
+			//Not a plane
 			return;
 		}
 		Vector plaD = player.getEyeLocation().getDirection();
@@ -77,10 +78,9 @@ public class MotionManager {
 			z =  - z;
 		}
 		vec = new Vector(x, y, z);
-		final PlaneUpdateEvent event = new PlaneUpdateEvent(plane, vec, player);
+		final PlaneUpdateEvent event = new PlaneUpdateEvent(plane, vec, player, pressed);
 		main.plugin.getServer().getScheduler()
 				.runTask(main.plugin, new Runnable() {
-
 					public void run() {
 						main.plugin.getServer().getPluginManager()
 								.callEvent(event);

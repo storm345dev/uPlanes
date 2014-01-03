@@ -7,16 +7,20 @@ import org.bukkit.event.vehicle.VehicleUpdateEvent;
 import org.bukkit.util.Vector;
 
 public class PlaneUpdateEvent extends VehicleUpdateEvent implements Cancellable {
-	public Vector toTravel = new Vector();
-	public Boolean changePlayerYaw = false;
-	public float yaw = 90;
-	public Boolean cancelled = false;
-	public Player player = null;
+	private Vector toTravel;
+	private Boolean changePlayerYaw = false;
+	private Boolean cancelled = false;
+	private Player player;
+	private Keypress pressed;
 
-	public PlaneUpdateEvent(Vehicle vehicle, Vector toTravel, Player player) {
+	public PlaneUpdateEvent(Vehicle vehicle, Vector toTravel, Player player, Keypress pressed) {
 		super(vehicle);
 		this.toTravel = toTravel;
 		this.player = player;
+	}
+	
+	public Keypress getPressedKey(){
+		return pressed;
 	}
 
 	public Player getPlayer() {
