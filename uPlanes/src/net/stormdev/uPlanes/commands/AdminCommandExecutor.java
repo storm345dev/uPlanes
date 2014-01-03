@@ -35,10 +35,9 @@ public class AdminCommandExecutor implements CommandExecutor {
 			if(args.length < 2){
 				return false;
 			}
-			String type = args[1];
 			String spawnMsg = main.colors.getSuccess() + Lang.get("general.spawn.msg");
 			Plane plane = null;
-			if(type.equalsIgnoreCase("random")){
+			if(args[1].equalsIgnoreCase("random")){
 				//Give them a random plane
 				plane = PlaneGenerator.gen();
 				main.plugin.planeManager.setPlane(plane.id, plane);
@@ -49,13 +48,13 @@ public class AdminCommandExecutor implements CommandExecutor {
 			}
 			else{
 				//Speed, health, name
-				if(args.length < 5){
+				if(args.length < 4){
 					return false;
 				}
 				
-				String rawSpeed = args[2];
-				String rawHealth = args[3];
-				String name = args[4];
+				String rawSpeed = args[1];
+				String rawHealth = args[2];
+				String name = args[3];
 				double speed = 30;
 			    double health = 50;
 				
@@ -65,9 +64,15 @@ public class AdminCommandExecutor implements CommandExecutor {
 			    
 				try {
 					speed = Double.parseDouble(rawSpeed);
+				}  catch (NumberFormatException e) {
+					sender.sendMessage(main.colors.getError()+"NaN: "+rawSpeed);
+					return true;
+				}
+				try {
 					health = Double.parseDouble(rawHealth);
 				} catch (NumberFormatException e) {
-					return false;
+					sender.sendMessage(main.colors.getError()+"NaN: "+rawHealth);
+					return true;
 				}
 				
 				plane = new Plane();
