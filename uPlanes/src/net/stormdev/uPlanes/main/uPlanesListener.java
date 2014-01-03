@@ -1,7 +1,6 @@
 package net.stormdev.uPlanes.main;
 
 import net.stormdev.uPlanes.utils.Keypress;
-import net.stormdev.uPlanes.utils.Plane;
 import net.stormdev.uPlanes.utils.PlaneUpdateEvent;
 
 import org.bukkit.Effect;
@@ -49,7 +48,6 @@ public class uPlanesListener implements Listener {
 		return;
 	}
 	public Boolean isAPlane(Minecart m){
-		//TODO
-		return true;
+		return plugin.planeManager.isAPlane(m.getUniqueId());
 	}
 }

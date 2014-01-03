@@ -36,6 +36,7 @@ public class main extends JavaPlugin {
 	
 	public ProtocolManager protocolManager = null;
 	public uPlanesListener listener = null;
+	public PlanesManager planeManager = null;
 	
 	/**
 	 * Startup code
@@ -45,6 +46,8 @@ public class main extends JavaPlugin {
 		getDataFolder().mkdirs();
 		File langFile = new File(getDataFolder().getAbsolutePath()
 				+ File.separator + "lang.yml");
+		File planesSaveFile = new File(getDataFolder().getAbsolutePath()
+				+ File.separator + "Data" + File.separator + "planes.data");
 		if (langFile.exists() == false
 				|| langFile.length() < 1) {
 			try {
@@ -124,7 +127,9 @@ public class main extends JavaPlugin {
 			getServer().getPluginManager().disablePlugin(this); //Disable
 			return;
 		}
+		
 		listener = new uPlanesListener(this);
+		this.planeManager = new PlanesManager(planesSaveFile);
 		getServer().getPluginManager().registerEvents(listener, this);
 		logger.info("uPlanes v"+plugin.getDescription().getVersion()+" has been enabled!");
 	}
