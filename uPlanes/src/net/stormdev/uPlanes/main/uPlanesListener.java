@@ -79,14 +79,13 @@ public class uPlanesListener implements Listener {
 		if(!veh.hasMetadata("plane.hover")){
 			return;
 		}
-		main.logger.info("Hovering...");
 		//Hover
 		Block b = loc.getBlock();
 		Vector vel = car.getVelocity();
 		Block under = b.getRelative(BlockFace.DOWN);
 		Block under2 = b.getRelative(BlockFace.DOWN,2);
-		Boolean descending = car.hasMetadata("plane.left");
-		Boolean ascending = car.hasMetadata("plane.right");
+		Boolean descending = car.hasMetadata("plane.right");
+		Boolean ascending = car.hasMetadata("plane.left");
 		int count = 0;
 		if(!b.isEmpty()){
 			count++;
@@ -216,7 +215,9 @@ public class uPlanesListener implements Listener {
 		Minecart ent = (Minecart) toSpawn.getWorld().spawnEntity(toSpawn, EntityType.MINECART);
 		ent.setMetadata("ucars.ignore", new StatValue(true, main.plugin));
 		ent.setMetadata("plane.health", new StatValue(plane.health, main.plugin));
-		ent.setMetadata("plane.speed", new StatValue(plane.mutliplier, main.plugin));
+		if(plane.stats.containsKey("plane.hover")){
+			ent.setMetadata("plane.hover", new StatValue(true, main.plugin));
+		}
 		
 		plane.isPlaced = true;
 		plane.id = ent.getUniqueId();
