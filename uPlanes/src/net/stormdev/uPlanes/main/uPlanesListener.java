@@ -19,6 +19,7 @@ import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
@@ -77,6 +78,8 @@ public class uPlanesListener implements Listener {
 			return;
 		}
 		
+		Boolean hover = plane.stats.contains("plane.hover");
+		
 		if(perms){
 			if(!player.hasPermission(perm)){
 				return;
@@ -91,16 +94,50 @@ public class uPlanesListener implements Listener {
 		double multiplier = plane.mutliplier;
 		
 		travel.multiply(multiplier);
+	    Keypress press = event.getPressedKey();
 		
-		Keypress press = event.getPressedKey();
-		
-		switch(press){
-		case A: 
-			y = 0.5; break; //Go up
-		case D: 
-			y = -0.5; break; //Go down
-		default:
-			break;
+	    if(!hover){
+			switch(press){
+			case A: 
+				y = 0.6; break; //Go up
+			case D: 
+				y = -0.6; break; //Go down
+			default:
+				break;
+			}
+		}
+		else{
+			//Hover!
+			Block b = loc.getBlock();
+			Block under = b.getRelative(BlockFace.DOWN);
+			Block under2 = b.getRelative(BlockFace.DOWN,2);
+			Boolean descending = press == Keypress.A;
+			Boolean ascending = press == Keypress.D;
+			int count = 0;
+			if(!b.isEmpty()){
+				count++;
+			}
+			if(!under.isEmpty()){
+				count++;
+			}
+			if(!under2.isEmpty()){
+				count++;
+			}
+			switch(count){
+			case 0:y=-0.3;under.getWorld().playEffect(under.getLocation(), Effect.SMOKE, 1); break;
+			case 1:y=2; break;
+			case 2:y=1; break;
+			case 3:y=0.1;under.getWorld().playEffect(under.getLocation(), Effect.SMOKE, 1); break;
+			}
+			if(descending && ascending){
+				y = 0;
+			}
+			else if(descending){
+				y = -0.6; //uCar gravity for road convenience
+			}
+			else if(ascending){
+			    y = 0.6;
+			}
 		}
 		
 		if(loc.getY() >= heightLimit){
@@ -139,6 +176,7 @@ public class uPlanesListener implements Listener {
 		if(plane == null){
 			return; //Just a minecart
 		}
+		
 		inHand.setAmount(inHand.getAmount()-1);
 		if(player.getGameMode() == GameMode.CREATIVE){
 			player.setItemInHand(new ItemStack(Material.AIR)); //Remove from their hand
@@ -262,10 +300,20 @@ public class uPlanesListener implements Listener {
 		if(!(recipe.getType() == Material.MINECART)){
 			return;
 		}
+		Boolean hover = false;
 		if(!ChatColor.stripColor(recipe.getItemMeta().getDisplayName()).equalsIgnoreCase("plane")){
-			return;
+			if(!ChatColor.stripColor(recipe.getItemMeta().getDisplayName()).equalsIgnoreCase("hover plane")){
+				hover = true;
+			}
+			else{
+				return;
+			}
 		}
 		Plane plane = PlaneGenerator.gen();
+		if(hover){
+			plane.name = "Hover Plane";
+			plane.stats.put("plane.hover", new Stat("Hovercar", "Yes", main.plugin, true));
+		}
         event.setCurrentItem(PlaneItemMethods.getItem(plane));
         main.plugin.planeManager.setPlane(plane.id, plane);
 		return;

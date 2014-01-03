@@ -8,6 +8,7 @@ import net.stormdev.uPlanes.main.main;
 import net.stormdev.uPlanes.utils.Colors;
 import net.stormdev.uPlanes.utils.Lang;
 import net.stormdev.uPlanes.utils.Plane;
+import net.stormdev.uPlanes.utils.Stat;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -39,7 +40,15 @@ public class AdminCommandExecutor implements CommandExecutor {
 			Plane plane = null;
 			if(args[1].equalsIgnoreCase("random")){
 				//Give them a random plane
+				Boolean hover = args[args.length-1].equalsIgnoreCase("hover");
+				
 				plane = PlaneGenerator.gen();
+				
+				if(hover){
+					plane.name = "Hover Plane";
+					plane.stats.put("plane.hover", new Stat("Hovercar:", "Yes", main.plugin, true));
+				}
+				
 				main.plugin.planeManager.setPlane(plane.id, plane);
 				
 				player.getInventory().addItem(PlaneItemMethods.getItem(plane));
@@ -52,6 +61,7 @@ public class AdminCommandExecutor implements CommandExecutor {
 					return false;
 				}
 				
+				Boolean hover = args[args.length-1].equalsIgnoreCase("hover");
 				String rawSpeed = args[1];
 				String rawHealth = args[2];
 				String name = args[3];
@@ -80,6 +90,11 @@ public class AdminCommandExecutor implements CommandExecutor {
 				plane.name = Colors.colorise(name);
 				plane.health = health;
 				plane.id = UUID.randomUUID();
+				
+				if(hover){
+					plane.stats.put("plane.hover", new Stat("Hovercar:", "Yes", main.plugin, true));
+				}
+				
 				main.plugin.planeManager.setPlane(plane.id, plane);
 				
 				player.getInventory().addItem(PlaneItemMethods.getItem(plane));

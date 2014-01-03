@@ -193,9 +193,25 @@ public class main extends JavaPlugin {
 		recipe.setIngredient('3', Material.WOOD_PLATE);
 		recipe.setIngredient('4', Material.MINECART);
 		recipe.setIngredient('5', Material.WOOD_PLATE);
-		recipe.setIngredient('7', Material.REDSTONE_TORCH_ON);
+		
+		//Create a blank hoverplane item
+		ItemStack hplane = new ItemStack(Material.MINECART);
+		ItemMeta him = plane.getItemMeta();
+		him.setDisplayName("Hover Plane");
+		hplane.setItemMeta(him);
+		
+		ShapedRecipe hoverRecipe = new ShapedRecipe(hplane);
+		hoverRecipe.shape("012","345","678");
+		hoverRecipe.setIngredient('0', Material.REDSTONE);
+		hoverRecipe.setIngredient('1', Material.LEVER);
+		hoverRecipe.setIngredient('2', Material.REDSTONE);
+		hoverRecipe.setIngredient('3', Material.WOOD_PLATE);
+		hoverRecipe.setIngredient('4', Material.MINECART);
+		hoverRecipe.setIngredient('5', Material.WOOD_PLATE);
+		hoverRecipe.setIngredient('7', Material.REDSTONE_TORCH_ON);
 		
 		getServer().addRecipe(recipe);
+		getServer().addRecipe(hoverRecipe);
 		
 		setupUCarsCompatibility();
 		
