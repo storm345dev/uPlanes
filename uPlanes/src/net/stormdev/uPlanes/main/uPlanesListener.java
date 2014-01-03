@@ -49,7 +49,6 @@ import org.bukkit.util.Vector;
 public class uPlanesListener implements Listener {
 	private main plugin;
 	
-	private double defaultHealth;
 	private double punchDamage;
 	private double heightLimit;
 	private boolean perms;
@@ -57,7 +56,6 @@ public class uPlanesListener implements Listener {
 	public uPlanesListener(main instance){
 		this.plugin = instance;
 		
-		defaultHealth = main.config.getDouble("general.planes.defaultHealth");
 		punchDamage = main.config.getDouble("general.planes.punchDamage");
 		heightLimit = main.config.getDouble("general.planes.heightLimit");
 		perms = main.config.getBoolean("general.planes.perms");
@@ -330,8 +328,9 @@ public class uPlanesListener implements Listener {
 			return;
 		}
 		Boolean hover = false;
-		if(!ChatColor.stripColor(recipe.getItemMeta().getDisplayName()).equalsIgnoreCase("plane")){
-			if(!ChatColor.stripColor(recipe.getItemMeta().getDisplayName()).equalsIgnoreCase("hover plane")){
+		String name = ChatColor.stripColor(recipe.getItemMeta().getDisplayName());
+		if(!name.equalsIgnoreCase("plane")){
+			if(name.equalsIgnoreCase("hover plane")){
 				hover = true;
 			}
 			else{
