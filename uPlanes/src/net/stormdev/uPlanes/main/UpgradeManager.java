@@ -55,9 +55,9 @@ public class UpgradeManager {
 		else if(upgrade.getType() == Material.REDSTONE){
 			//Health upgrade
 			double speed = plane.mutliplier;
-			double maxSpeed = 4;
-			double bonus = (0.1*upgrade.getAmount());
-			speed += bonus; //Add 0.1 to health stat per item
+			double maxSpeed = 200;
+			double bonus = (1*upgrade.getAmount());
+			speed += bonus; //Add 1 to health stat per item
 			if(speed > maxSpeed){
 				speed = maxSpeed;
 			}
@@ -72,9 +72,9 @@ public class UpgradeManager {
 		else if(upgrade.getType() == Material.REDSTONE_BLOCK){
 			//Health upgrade
 			double speed = plane.mutliplier;
-			double maxSpeed = 4;
-			double bonus = (0.9*upgrade.getAmount());
-			speed += bonus; //Add 0.9 to health stat per item
+			double maxSpeed = 200;
+			double bonus = (9*upgrade.getAmount());
+			speed += bonus; //Add 9 to health stat per item
 			if(speed > maxSpeed){
 				speed = maxSpeed;
 			}

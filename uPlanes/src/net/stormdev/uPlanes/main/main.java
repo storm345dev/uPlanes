@@ -100,9 +100,11 @@ public class main extends JavaPlugin {
         	if (!config.contains("general.planes.heightLimit")) {
 				config.set("general.planes.heightLimit", 256.0);
 			}
+        	/*
         	if (!config.contains("general.planes.defaultSpeed")) {
 				config.set("general.planes.defaultSpeed", 30.0);
 			}
+			*/
         	if (!config.contains("general.planes.defaultHealth")) {
 				config.set("general.planes.defaultHealth", 30.0);
 			}

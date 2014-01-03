@@ -24,7 +24,7 @@ public class PlaneItemMethods {
 		im.setDisplayName(name);
 		lore.add(plane.id.toString());
 		lore.add(main.colors.getTitle()+"[Speed:] "
-				+main.colors.getInfo()+plane.mutliplier+"x");
+				+main.colors.getInfo()+plane.mutliplier);
 		lore.add(main.colors.getTitle()+"[Health:] "
 				+main.colors.getInfo()+plane.health);
 		

@@ -13,13 +13,13 @@ public class PlaneGenerator {
 		String name = "Plane";
 		
 		double health = main.plugin.random.nextInt(healthTopBand-healthBottomBand)+healthBottomBand;
-		double speed = (main.plugin.random.nextInt((defMult+5)-(defMult-5))+(defMult-5))/10;
+		double speed = (main.plugin.random.nextInt((defMult+50)-(defMult-50))+(defMult-50));
 		
 		if(health > maxHealth){
 			health = maxHealth;
 		}
-		if(speed < 0.3){
-			speed = 0.3;
+		if(speed < 10){
+			speed = 10;
 		}
 		
 		plane.health = health;

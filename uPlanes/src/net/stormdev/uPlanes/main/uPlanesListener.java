@@ -46,13 +46,11 @@ import org.bukkit.util.Vector;
 
 public class uPlanesListener implements Listener {
 	private main plugin;
-	private double defaultSpeed;
 	private double defaultHealth;
 	private double punchDamage;
 	public uPlanesListener(main instance){
 		this.plugin = instance;
 		
-		defaultSpeed = main.config.getDouble("general.planes.defaultSpeed");
 		defaultHealth = main.config.getDouble("general.planes.defaultHealth");
 		punchDamage = main.config.getDouble("general.planes.punchDamage");
 	}
@@ -71,11 +69,14 @@ public class uPlanesListener implements Listener {
 			return;
 		}
 		
+		cart.setMaxSpeed(5); //Don't crash the server...
+		
 		Location loc = vehicle.getLocation();
 		Vector travel = event.getTravelVector();
 		double y = 0.0;
-		double multiplier = (defaultSpeed*plane.mutliplier);
-		travel = travel.multiply(multiplier);
+		double multiplier = plane.mutliplier;
+		
+		travel.multiply(multiplier);
 		
 		Keypress press = event.getPressedKey();
 		
