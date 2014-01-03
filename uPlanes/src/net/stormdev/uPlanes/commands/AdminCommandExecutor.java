@@ -69,6 +69,9 @@ public class AdminCommandExecutor implements CommandExecutor {
 			    double health = 50;
 				
 			    for(int i=4;i<args.length;i++){
+			    	if(hover && i>=(args.length-1)){
+			    	continue;
+			    	}
 					name += " "+args[i];
 				}
 			    
