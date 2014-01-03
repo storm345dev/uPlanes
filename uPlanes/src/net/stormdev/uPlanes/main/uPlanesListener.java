@@ -5,6 +5,7 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 import net.stormdev.uPlanes.utils.Keypress;
+import net.stormdev.uPlanes.utils.Lang;
 import net.stormdev.uPlanes.utils.Plane;
 import net.stormdev.uPlanes.utils.PlaneDeathEvent;
 import net.stormdev.uPlanes.utils.PlaneUpdateEvent;
@@ -32,8 +33,6 @@ import org.bukkit.event.vehicle.VehicleDestroyEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.util.Vector;
-
-import com.useful.ucars.Lang;
 
 public class uPlanesListener implements Listener {
 	private main plugin;
