@@ -11,6 +11,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import net.stormdev.uPlanes.utils.Plane;
 
+import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class PlanesManager {
@@ -30,6 +33,29 @@ public class PlanesManager {
 			cacheSize();
 		}
 		return b;
+	}
+	public Plane getPlane(ItemStack item){
+		Material mat = item.getType();
+		ItemMeta im = item.getItemMeta();
+		UUID id = null;
+		
+		if(mat != Material.MINECART){
+			return null;
+		}
+		
+		if(im == null
+				|| im.getLore() == null
+				|| im.getLore().size() < 1){
+			return null;
+		}
+		
+		String rawId = im.getLore().get(0);
+		id = UUID.fromString(rawId);
+		
+		return getPlane(id);
+	}
+	public Boolean isAPlane(ItemStack item){
+		return getPlane(item) != null;
 	}
 	public Plane getPlane(UUID PlaneId){
 		Plane c = cache.get(PlaneId);
