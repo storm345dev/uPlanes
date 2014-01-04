@@ -37,6 +37,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
 import org.bukkit.event.vehicle.VehicleDestroyEvent;
+import org.bukkit.event.vehicle.VehicleExitEvent;
 import org.bukkit.event.vehicle.VehicleUpdateEvent;
 import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.Inventory;
@@ -44,6 +45,7 @@ import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.MetadataValue;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 public class uPlanesListener implements Listener {
@@ -53,6 +55,7 @@ public class uPlanesListener implements Listener {
 	private double heightLimit;
 	private boolean perms;
 	private String perm;
+	private boolean safeExit;
 	public uPlanesListener(main instance){
 		this.plugin = instance;
 		
@@ -60,7 +63,49 @@ public class uPlanesListener implements Listener {
 		heightLimit = main.config.getDouble("general.planes.heightLimit");
 		perms = main.config.getBoolean("general.planes.perms");
 		perm = main.config.getString("general.planes.flyPerm");
+		safeExit = main.config.getBoolean("general.planes.safeExit");
 	}
+	
+	 @EventHandler (priority = EventPriority.LOW) //Call early
+	    void vehicleExit(VehicleExitEvent event){
+	    	//Safe exit
+	    	if(!safeExit){
+	    		return; //Don't bother
+	    	}
+	    	Vehicle veh = event.getVehicle();
+	    	final Location loc = veh.getLocation();
+	        Block b = loc.getBlock();
+	        final Entity exited = event.getExited();
+	        if(!(exited instanceof Player)){
+	        	return;
+	        }
+	        Player player = (Player) exited;
+	        
+	        if(!b.isEmpty()
+	        		|| !b.getRelative(BlockFace.UP).isEmpty()
+	        		|| !b.getRelative(BlockFace.NORTH).isEmpty()
+	        		|| !b.getRelative(BlockFace.NORTH_EAST).isEmpty()
+	        		|| !b.getRelative(BlockFace.EAST).isEmpty()
+	        		|| !b.getRelative(BlockFace.SOUTH_EAST).isEmpty()
+	        		|| !b.getRelative(BlockFace.SOUTH).isEmpty()
+	        		|| !b.getRelative(BlockFace.SOUTH_WEST).isEmpty()
+	        	    || !b.getRelative(BlockFace.WEST).isEmpty()
+	        	    || !b.getRelative(BlockFace.NORTH_WEST).isEmpty()){
+	        	//Not allowed to exit
+	        	player.sendMessage(main.colors.getError()+Lang.get("general.noExit.msg"));
+	        	event.setCancelled(true);
+	        }
+	        else{
+	        	//Handle the exit ourselves
+	        	main.plugin.getServer().getScheduler().runTaskLater(main.plugin, new BukkitRunnable(){
+
+					public void run() {
+						exited.teleport(loc.add(0, 0.5, 0));
+						return;
+					}}, 2l); //Teleport back to car loc after exit
+	        }
+	    	return;
+	    }
 	
 	@EventHandler
 	void vehicleUpdate(VehicleUpdateEvent event){

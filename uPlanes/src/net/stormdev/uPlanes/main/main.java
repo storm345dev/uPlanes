@@ -90,6 +90,9 @@ public class main extends JavaPlugin {
 		if(!lang.contains("general.heightLimit")){
 			lang.set("general.heightLimit", "You may not fly above this height!");
 		}
+		if(!lang.contains("general.noExit.msg")){
+			lang.set("general.noExit.msg", "You may only exit in a 3x3 clear area!");
+		}
 		
 		if (new File(getDataFolder().getAbsolutePath() + File.separator
 				+ "config.yml").exists() == false
@@ -133,6 +136,9 @@ public class main extends JavaPlugin {
         	}
         	if(!config.contains("general.planes.flyPerm")){
         		config.set("general.planes.flyPerm", "uplanes.fly");
+        	}
+        	if(!config.contains("general.planes.safeExit")){
+        		config.set("general.planes.safeExit", true);
         	}
         	if (!config.contains("colorScheme.success")) {
 				config.set("colorScheme.success", "&a");
