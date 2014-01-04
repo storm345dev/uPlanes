@@ -13,6 +13,7 @@ import org.bukkit.util.Vector;
 import com.useful.ucars.ClosestFace;
 
 public class FlightControl {
+	private static double speed = 1.2;
 	public static Vector route(Location targetLoc, Location current, Vehicle vehicle){
 		Vector v = new Vector(0,0,0);
 		Entity passenger = vehicle.getPassenger();
@@ -20,12 +21,18 @@ public class FlightControl {
 			vehicle.removeMetadata("plane.destination", main.plugin);
 			return v;
 		}
+		
+		double targetHeight = 115;
+		if(targetHeight < targetLoc.getY()){
+			targetHeight = targetLoc.getY()+30;
+		}
+		
 		Player player = (Player) passenger;
 		
 		BlockFace direction = ClosestFace.getClosestFace(current.getYaw());
 		
 		// Calculate vector
-		double speed = 1.2;
+		
 		double x = targetLoc.getX() - current.getX();
 		double z = targetLoc.getZ() - current.getZ();
 		Boolean ux = true;
@@ -55,11 +62,15 @@ public class FlightControl {
 		Block under = b.getRelative(BlockFace.DOWN);
 		Block underunder = under.getRelative(BlockFace.DOWN);
 		Boolean asc = false;
+		if(current.getY()<targetHeight){
+			asc = true;
+			y = 0.6; //Go up
+		}
 		if((!b.isEmpty()
 				|| !under.isEmpty()
 				|| !underunder.isEmpty())
 				&& b.getRelative(BlockFace.UP).isEmpty()
-				&& b.getRelative(BlockFace.UP,2).isEmpty()){
+				&& b.getRelative(BlockFace.UP,2).isEmpty() && !asc){
 			asc = true;
 			y = 0.6; //Go up
 		}
@@ -75,10 +86,14 @@ public class FlightControl {
 		}
 		else if(!next2.isEmpty()){
 			asc = true;
+			x = -x * 0.25;
+			z = -z * 0.25;
 			y = 1; //Go up fast
 		}
 		else if(!next2.getRelative(direction).isEmpty()){
 			asc = true;
+			x *= 0.25;
+			z *= 0.25;
 			y = 0.6; //Go up
 		}
 		if(asc
@@ -91,7 +106,11 @@ public class FlightControl {
 		if(pz < 1 && px < 1){
 			x = 0;
 			z = 0;
-			if(current.getY() - targetLoc.getY() < 2){
+			y = -0.6; //Down
+			if(current.getY() < targetLoc.getY()){
+				y = 0.6; //Ascend
+			}
+			else if(current.getY() - targetLoc.getY() < 2){
 				//Arrived
 				player.sendMessage(main.colors.getSuccess()+Lang.get("general.cmd.destinations.arrive"));
 				vehicle.removeMetadata("plane.destination", main.plugin);
