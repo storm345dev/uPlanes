@@ -9,6 +9,8 @@ import java.util.Random;
 import java.util.logging.Level;
 
 import net.stormdev.uPlanes.commands.AdminCommandExecutor;
+import net.stormdev.uPlanes.commands.AutoPilotAdminCommandExecutor;
+import net.stormdev.uPlanes.commands.AutoPilotCommandExecutor;
 import net.stormdev.uPlanes.commands.InfoCommandExecutor;
 import net.stormdev.uPlanes.utils.Colors;
 import net.stormdev.uPlanes.utils.CustomLogger;
@@ -46,6 +48,7 @@ public class main extends JavaPlugin {
 	public uPlanesListener listener = null;
 	public PlanesManager planeManager = null;
 	public Random random = new Random();
+	public DestinationManager destinationManager = null;
 	
 	/**
 	 * Startup code
@@ -57,6 +60,8 @@ public class main extends JavaPlugin {
 				+ File.separator + "lang.yml");
 		File planesSaveFile = new File(getDataFolder().getAbsolutePath()
 				+ File.separator + "Data" + File.separator + "planes.data");
+		File destinationSaveFile = new File(getDataFolder().getAbsolutePath()
+				+ File.separator + "Data" + File.separator + "destinations.locationdata");
 		if (langFile.exists() == false
 				|| langFile.length() < 1) {
 			try {
@@ -71,9 +76,20 @@ public class main extends JavaPlugin {
 			lang = new YamlConfiguration();
 			getLogger().log(Level.WARNING, "Error creating/loading lang file! Regenerating..");
 		}
-		
+		if(!lang.contains("general.cmd.destinations.set")){
+			lang.set("general.cmd.destinations.set", "Successfully set destination to where you're standing!");
+		}
+		if(!lang.contains("general.cmd.destinations.del")){
+			lang.set("general.cmd.destinations.del", "Successfully deleted destination!");
+		}
 		if(!lang.contains("general.info.msg")){
 			lang.set("general.info.msg", "uPlanes %version%, by storm345, is working!");
+		}
+		if(!lang.contains("general.disabled.msg")){
+			lang.set("general.disabled.msg", "Feature disabled");
+		}
+		if(!lang.contains("general.playersOnly")){
+			lang.set("general.playersOnly", "Players only!");
 		}
 		if(!lang.contains("general.damage.msg")){
 			lang.set("general.damage.msg", "&c-%damage%&6 (%remainder%) - [&b%cause%&6]");
@@ -139,6 +155,9 @@ public class main extends JavaPlugin {
         	}
         	if(!config.contains("general.planes.safeExit")){
         		config.set("general.planes.safeExit", true);
+        	}
+        	if(!config.contains("general.planes.autopilot")){
+        		config.set("general.planes.autopilot", true);
         	}
         	if (!config.contains("colorScheme.success")) {
 				config.set("colorScheme.success", "&a");
@@ -221,8 +240,17 @@ public class main extends JavaPlugin {
 		
 		setupUCarsCompatibility();
 		
+		this.destinationManager = new DestinationManager(destinationSaveFile);
+		
 		getCommand("uPlanes").setExecutor(new InfoCommandExecutor());
 		getCommand("plane").setExecutor(new AdminCommandExecutor());
+		AutoPilotCommandExecutor apce = new AutoPilotCommandExecutor();
+		getCommand("destination").setExecutor(apce);
+		getCommand("destinations").setExecutor(apce);
+		AutoPilotAdminCommandExecutor apace = new AutoPilotAdminCommandExecutor();
+		getCommand("setDestination").setExecutor(apace);
+		getCommand("delDestination").setExecutor(apace);
+		
 		
 		logger.info("uPlanes v"+plugin.getDescription().getVersion()+" has been enabled!");
 	}

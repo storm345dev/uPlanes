@@ -16,3 +16,27 @@ commands:
         permission: uplanes.admin
         permission-message: You don't have access to this command
         default: op
+   destination:
+        description: This sets the autopilot destination
+        usage: /<command> <Destination>
+        permission: uplanes.autopilot
+        permission-message: You don't have access to this command
+        default: true
+   destinations:
+        description: This lists the autopilot destinations
+        usage: /<command>
+        permission: uplanes.autopilot
+        permission-message: You don't have access to this command
+        default: true
+   setDestination:
+        description: Sets a new destination point to fly to
+        usage: /<command> <Destination>
+        permission: uplanes.setdestination
+        permission-message: You don't have access to this command
+        default: op
+   delDestination:
+        description: This deletes an autopilot destination
+        usage: /<command> <Destination>
+        permission: uplanes.deldestination
+        permission-message: You don't have access to this command
+        default: true
