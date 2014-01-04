@@ -119,6 +119,13 @@ public class uPlanesListener implements Listener {
 		if(passenger == null){
 			return;
 		}
+		if(veh.hasMetadata("plane.destination")){
+			//Autopilot
+			List<MetadataValue> metas = veh.getMetadata("plane.destination");
+			Location dest = (Location) metas.get(0).value();
+			FlightControl.route(dest, loc, veh);
+			return;
+		}
 		if(!veh.hasMetadata("plane.hover")){
 			return;
 		}
