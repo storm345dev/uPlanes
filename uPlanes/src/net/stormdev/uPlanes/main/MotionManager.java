@@ -29,11 +29,12 @@ public class MotionManager {
 			return;
 		}
 		Vector plaD = player.getEyeLocation().getDirection();
-		if (f == 0) {
-			return;
-		}
 		Keypress pressed = Keypress.W;
-		Boolean forwards = true; // if true, forwards, else backwards
+		Boolean forwardMotion = true;
+		if(f==0){
+			forwardMotion = false;
+		}
+		Boolean forwards = false; // if true, forwards, else backwards
 		int side = 0; // -1=left, 0=straight, 1=right
 		Boolean turning = false;
 		if (f < 0) {
@@ -77,6 +78,10 @@ public class MotionManager {
 			pressed = Keypress.S;
 			x =  - x;
 			z =  - z;
+		}
+		if(!forwardMotion){
+			x = 0;
+			z = 0;
 		}
 		vec = new Vector(x, y, z);
 		final PlaneUpdateEvent event = new PlaneUpdateEvent(plane, vec, player, pressed);
