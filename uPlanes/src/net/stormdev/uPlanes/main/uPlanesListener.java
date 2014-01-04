@@ -173,6 +173,12 @@ public class uPlanesListener implements Listener {
 			vehicle.setMetadata("plane.hover", new StatValue(true, main.plugin));
 		}
 		
+		if(cart.hasMetadata("plane.destination")){
+			//Disable autopilot
+			cart.removeMetadata("plane.destination", main.plugin);
+			player.sendMessage(main.colors.getInfo()+Lang.get("general.cmd.destinations.cancel"));
+		}
+		
 		if(perms){
 			if(!player.hasPermission(perm)){
 				return;

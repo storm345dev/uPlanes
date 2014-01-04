@@ -82,6 +82,24 @@ public class main extends JavaPlugin {
 		if(!lang.contains("general.cmd.destinations.del")){
 			lang.set("general.cmd.destinations.del", "Successfully deleted destination!");
 		}
+		if(!lang.contains("general.cmd.destinations.notInPlane")){
+			lang.set("general.cmd.destinations.notInPlane", "Cannot engague autopilot when not in a plane!");
+		}
+		if(!lang.contains("general.cmd.destinations.go")){
+			lang.set("general.cmd.destinations.go", "Destination set! Lets go!");
+		}
+		if(!lang.contains("general.cmd.destinations.arrvie")){
+			lang.set("general.cmd.destinations.arrive", "You have arrived at your destination!");
+		}
+		if(!lang.contains("general.cmd.destinations.invalid")){
+			lang.set("general.cmd.destinations.invalid", "That destination is doesn't exist! Do /destinations for a list.");
+		}
+		if(!lang.contains("general.cmd.destinations.wrongWorld")){
+			lang.set("general.cmd.destinations.wrongWorld", "That destination is not in this dimension!");
+		}
+		if(!lang.contains("general.cmd.destinations.cancel")){
+			lang.set("general.cmd.destinations.cancel", "Disabled Autopilot");
+		}
 		if(!lang.contains("general.info.msg")){
 			lang.set("general.info.msg", "uPlanes %version%, by storm345, is working!");
 		}

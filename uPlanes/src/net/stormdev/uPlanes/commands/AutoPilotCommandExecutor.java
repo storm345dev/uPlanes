@@ -1,14 +1,20 @@
 package net.stormdev.uPlanes.commands;
 
 import java.util.List;
+import java.util.UUID;
 
 import net.stormdev.uPlanes.main.main;
 import net.stormdev.uPlanes.utils.Colors;
 import net.stormdev.uPlanes.utils.Lang;
+import net.stormdev.uPlanes.utils.Plane;
+import net.stormdev.uPlanes.utils.StatValue;
 
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 
 public class AutoPilotCommandExecutor implements CommandExecutor {
@@ -30,6 +36,10 @@ public class AutoPilotCommandExecutor implements CommandExecutor {
 		
 		if(cmd.getName().equalsIgnoreCase("destination")){
 			//Set current plane destination
+			if(player == null){
+				sender.sendMessage(main.colors.getError()+Lang.get("general.playersOnly"));
+				return true;
+			}
 			if(args.length < 1){
 				return false;
 			}
@@ -37,7 +47,35 @@ public class AutoPilotCommandExecutor implements CommandExecutor {
 			for(int i=1;i<args.length;i++){
 				name += " "+args[i];
 			}
-			//TODO
+			
+			Entity vehicle = player.getVehicle();
+			UUID id = vehicle != null ? vehicle.getUniqueId():UUID.randomUUID();
+			Plane plane = main.plugin.planeManager.getPlane(id);
+			
+			if(vehicle == null
+					|| !(vehicle instanceof Minecart)
+					|| plane == null){
+				//Not in a plane
+				sender.sendMessage(main.colors.getError()+Lang.get("general.cmd.destinations.notInPlane"));
+				return true;
+			}
+			
+			Location destination = main.plugin.destinationManager.getLocation(name, main.plugin.getServer());
+			
+			if(destination == null){
+				//Invalid destination
+				sender.sendMessage(main.colors.getError()+Lang.get("general.cmd.destinations.invalid"));
+				return true;
+			}
+			if(destination.getWorld() != player.getWorld()){
+				//Invalid destination
+				sender.sendMessage(main.colors.getError()+Lang.get("general.cmd.destinations.wrongWorld"));
+				return true;
+			}
+			vehicle.removeMetadata("plane.destination", main.plugin); //Remove any existing destinations
+			vehicle.setMetadata("plane.destination", new StatValue(destination, main.plugin)); //Set it
+			sender.sendMessage(main.colors.getSuccess()+Lang.get("general.cmd.destinations.go"));
+			return true;
 		}
 		else if(cmd.getName().equalsIgnoreCase("destinations")){
 			//Display list of destinations
@@ -50,7 +88,7 @@ public class AutoPilotCommandExecutor implements CommandExecutor {
 					msg = Colors.colorise(s);
 					continue;
 				}
-				msg += ", "+Colors.colorise(s);
+				msg += ", "+main.colors.getInfo()+Colors.colorise(s);
 			}
 			
 			sender.sendMessage(title);

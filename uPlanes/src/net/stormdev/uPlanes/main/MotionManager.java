@@ -12,6 +12,10 @@ import org.bukkit.util.Vector;
 public class MotionManager {
 
 	public static void move(Player player, float f, float s) {
+		if(f == 0 && s == 0){
+			//Not moving
+			return;
+		}
 		Vector vec = new Vector();
 		Entity ent = player.getVehicle();
 		if (ent == null) {

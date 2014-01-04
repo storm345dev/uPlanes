@@ -74,6 +74,7 @@ public class DestinationManager {
 			}
 		}
 		destinations.remove(name);
+		asyncSave();
 		return;
 	}
 	
