@@ -2,6 +2,7 @@ package net.stormdev.uPlanes.main;
 
 import net.stormdev.uPlanes.utils.Lang;
 
+import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -117,6 +118,9 @@ public class FlightControl {
 			}
 		}
 		Vector vel = new Vector(x, y, z);
+		Vector behind = vel.clone().multiply(-2);
+		Location back = current.add(behind);
+		back.getWorld().playEffect(back, Effect.SMOKE, 1);
 		vehicle.setVelocity(vel);
 		return vel;
 	}
