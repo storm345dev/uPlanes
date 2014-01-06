@@ -8,10 +8,12 @@ import java.io.OutputStream;
 import java.util.Random;
 import java.util.logging.Level;
 
+import net.milkbowl.vault.economy.Economy;
 import net.stormdev.uPlanes.commands.AdminCommandExecutor;
 import net.stormdev.uPlanes.commands.AutoPilotAdminCommandExecutor;
 import net.stormdev.uPlanes.commands.AutoPilotCommandExecutor;
 import net.stormdev.uPlanes.commands.InfoCommandExecutor;
+import net.stormdev.uPlanes.shops.PlaneShop;
 import net.stormdev.uPlanes.utils.Colors;
 import net.stormdev.uPlanes.utils.CustomLogger;
 import net.stormdev.uPlanes.utils.uCarsCompatibility;
@@ -22,6 +24,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.comphenix.protocol.PacketType;
@@ -50,6 +53,26 @@ public class main extends JavaPlugin {
 	public Random random = new Random();
 	public DestinationManager destinationManager = null;
 	
+	public PlaneShop planeShop = null;
+	public static Economy economy = null;
+	public boolean shopsEnabled = false;
+	
+	/**
+	 * Economy setup code
+	 * 
+	 * @return If an economy plugin was found or not
+	 */
+	public boolean setupEconomy() {
+		RegisteredServiceProvider<Economy> economyProvider = getServer()
+				.getServicesManager().getRegistration(
+						net.milkbowl.vault.economy.Economy.class);
+		if (economyProvider != null) {
+			economy = economyProvider.getProvider();
+		}
+		return (economy != null);
+	}
+	
+	
 	/**
 	 * Startup code
 	 */
@@ -75,6 +98,12 @@ public class main extends JavaPlugin {
 		} catch(Exception e){
 			lang = new YamlConfiguration();
 			getLogger().log(Level.WARNING, "Error creating/loading lang file! Regenerating..");
+		}
+		if(!lang.contains("general.buy.notEnoughMoney")){
+			lang.set("general.buy.notEnoughMoney", "You cannot afford that item! You only have %balance%!");
+		}
+		if(!lang.contains("general.buy.success")){
+			lang.set("general.buy.success", "Successfully bought %item% for %price%, you now have %balance%!");
 		}
 		if(!lang.contains("general.cmd.destinations.set")){
 			lang.set("general.cmd.destinations.set", "Successfully set destination to where you're standing!");
@@ -148,14 +177,15 @@ public class main extends JavaPlugin {
         	if (!config.contains("general.logger.colour")) {
 				config.set("general.logger.colour", true);
 			}
+        	if(!config.contains("general.currencySign")){
+        		config.set("general.currencySign", "$");
+        	}
+        	if(!config.contains("general.planes.price")){
+        		config.set("general.planes.price", 70.0);
+        	}
         	if (!config.contains("general.planes.heightLimit")) {
 				config.set("general.planes.heightLimit", 256.0);
 			}
-        	/*
-        	if (!config.contains("general.planes.defaultSpeed")) {
-				config.set("general.planes.defaultSpeed", 30.0);
-			}
-			*/
         	if (!config.contains("general.planes.defaultHealth")) {
 				config.set("general.planes.defaultHealth", 30.0);
 			}
@@ -176,6 +206,9 @@ public class main extends JavaPlugin {
         	}
         	if(!config.contains("general.planes.autopilot")){
         		config.set("general.planes.autopilot", true);
+        	}
+        	if(!config.contains("general.shop.enable")){
+        		config.set("general.shop.enable", true);
         	}
         	if (!config.contains("colorScheme.success")) {
 				config.set("colorScheme.success", "&a");
@@ -269,6 +302,10 @@ public class main extends JavaPlugin {
 		getCommand("setDestination").setExecutor(apace);
 		getCommand("delDestination").setExecutor(apace);
 		
+		shopsEnabled = main.config.getBoolean("general.shop.enable") ? setupEconomy():false;
+		if(shopsEnabled){
+			planeShop = new PlaneShop(this);
+		}
 		
 		logger.info("uPlanes v"+plugin.getDescription().getVersion()+" has been enabled!");
 	}
@@ -277,6 +314,9 @@ public class main extends JavaPlugin {
 	 * Shutdown code
 	 */
 	public void onDisable(){
+		if(planeShop != null){
+			planeShop.destroy();
+		}
 		logger.info("uPlanes v"+plugin.getDescription().getVersion()+" has been disabled!");
 	}
 	

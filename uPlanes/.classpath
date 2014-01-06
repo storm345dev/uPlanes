@@ -10,5 +10,6 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="C:/Users/Edward/Documents/Bukkit Servers/plugintestserver/bukkit.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Edward/Documents/Bukkit Servers/plugintestserver/plugins/ucars.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Edward/Documents/Bukkit Servers/plugintestserver/plugins/Vault.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

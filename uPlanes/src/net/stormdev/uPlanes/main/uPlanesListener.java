@@ -20,6 +20,9 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.Chest;
+import org.bukkit.block.DoubleChest;
+import org.bukkit.block.Sign;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
@@ -30,10 +33,12 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.entity.ItemDespawnEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
 import org.bukkit.event.vehicle.VehicleDestroyEvent;
@@ -65,6 +70,62 @@ public class uPlanesListener implements Listener {
 		perm = main.config.getString("general.planes.flyPerm");
 		safeExit = main.config.getBoolean("general.planes.safeExit");
 	}
+	
+	 @EventHandler
+	 void signWrite(SignChangeEvent event){
+		 String[] lines = event.getLines();
+			if(ChatColor.stripColor(lines[0]).equalsIgnoreCase("[Shop]")){
+				lines[0] = ChatColor.GREEN+"[Shop]";
+				lines[1] = ChatColor.RED + ChatColor.stripColor(lines[1]);
+				lines[2] = "Place chest";
+				lines[3] = "above";
+			}
+		return;
+	 }
+	 
+	 @EventHandler
+		public void shopOpen(InventoryOpenEvent event){
+			if(!plugin.shopsEnabled){
+				//Don't do shops
+				return;
+			}
+			if(main.economy == null){
+		        Boolean installed = plugin.setupEconomy();
+		        if(!installed){
+		        	main.logger.info(main.colors.getError()+"[Important] Unable to find an economy plugin:"
+		        			+ " shop was unable to open.");
+		        	return;
+		        }
+			}
+			Inventory inv = event.getInventory();
+			if (!(inv.getHolder() instanceof Chest || inv.getHolder() instanceof DoubleChest)){
+	            return;
+	        }
+			//They opened a chest
+			Block block = null;
+			if(inv.getHolder() instanceof Chest){
+				block = ((Chest)inv.getHolder()).getBlock();
+			}
+			else{
+				block = ((DoubleChest)inv.getHolder()).getLocation().getBlock();
+			}
+			Block underBlock = block.getRelative(BlockFace.DOWN);
+			if(!(underBlock.getState() instanceof Sign)){
+				return;
+			}
+			Sign sign = (Sign) underBlock.getState();
+			if(!(ChatColor.stripColor(sign.getLines()[0])).equalsIgnoreCase("[Shop]") || !(ChatColor.stripColor(sign.getLines()[1])).equalsIgnoreCase("planes")){
+				return;
+			}
+			//A trade sign for cars
+			//Create a trade inventory
+			Player player = (Player) event.getPlayer(); //Get the player from the event
+			event.getView().close();
+			event.setCancelled(true); //Cancel the event
+			plugin.planeShop.open(player);
+			//Made the trade booth
+			return;
+		}
 	
 	 @EventHandler (priority = EventPriority.LOW) //Call early
 	    void vehicleExit(VehicleExitEvent event){
