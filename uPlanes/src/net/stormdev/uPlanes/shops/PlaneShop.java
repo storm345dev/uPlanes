@@ -81,7 +81,7 @@ public class PlaneShop {
 		
 		String currency = main.config.getString("general.currencySign");
 		String msg = Lang.get("general.buy.success");
-		msg = msg.replaceAll(Pattern.quote("%item%"), " plane");
+		msg = msg.replaceAll(Pattern.quote("%item%"), "a plane");
 		msg = msg.replaceAll(Pattern.quote("%price%"), Matcher.quoteReplacement(currency+cost));
 		msg = msg.replaceAll(Pattern.quote("%balance%"), Matcher.quoteReplacement(currency+rem));
 		player.sendMessage(main.colors.getSuccess()+msg);
