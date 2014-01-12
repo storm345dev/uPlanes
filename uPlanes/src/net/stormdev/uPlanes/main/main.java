@@ -154,7 +154,7 @@ public class main extends JavaPlugin {
 			lang.set("general.heightLimit", "You may not fly above this height!");
 		}
 		if(!lang.contains("general.noExit.msg")){
-			lang.set("general.noExit.msg", "You may only exit in a 3x3 clear area!");
+			lang.set("general.noExit.msg", "You may only exit in a clear area!");
 		}
 		
 		if (new File(getDataFolder().getAbsolutePath() + File.separator
