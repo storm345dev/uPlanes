@@ -137,7 +137,10 @@ public class uPlanesListener implements Listener {
 	    	final Location loc = veh.getLocation();
 	        Block b = loc.getBlock();
 	        final Entity exited = event.getExited();
-	        if(!(exited instanceof Player)){
+	        if(!(exited instanceof Player) || !(veh instanceof Minecart)){
+	        	return;
+	        }
+	        if(!plugin.planeManager.isAPlane(veh.getUniqueId())){
 	        	return;
 	        }
 	        Player player = (Player) exited;
