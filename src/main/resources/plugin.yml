@@ -18,6 +18,7 @@ commands:
         default: op
    destination:
         description: This sets the autopilot destination
+        aliases: [dest, des]
         usage: /<command> <Destination>
         permission: uplanes.autopilot
         permission-message: You don't have access to this command
