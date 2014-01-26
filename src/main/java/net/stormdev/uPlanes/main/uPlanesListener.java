@@ -34,6 +34,8 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.ItemDespawnEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryAction;
@@ -69,6 +71,22 @@ public class uPlanesListener implements Listener {
 		perms = main.config.getBoolean("general.planes.perms");
 		perm = main.config.getString("general.planes.flyPerm");
 		safeExit = main.config.getBoolean("general.planes.safeExit");
+	}
+	
+	@EventHandler
+	void protectInPlane(EntityDamageEvent event){
+		Entity e = event.getEntity();
+		if(event.getCause() != DamageCause.FALL){
+			return;
+		}
+		Entity v = e.getVehicle();
+		if(v == null || !(v instanceof Minecart)){
+			return;
+		}
+		if(isAPlane((Minecart) v)){
+			event.setDamage(0d);
+			event.setCancelled(true);
+		}
 	}
 	
 	 @EventHandler
