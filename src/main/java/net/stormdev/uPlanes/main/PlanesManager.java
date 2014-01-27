@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import net.stormdev.uPlanes.utils.Plane;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -51,7 +52,7 @@ public class PlanesManager {
 		}
 		
 		String rawId = im.getLore().get(0);
-		id = UUID.fromString(rawId);
+		id = UUID.fromString(ChatColor.stripColor(rawId));
 		
 		return getPlane(id);
 	}
