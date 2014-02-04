@@ -324,7 +324,7 @@ public class uPlanesListener implements Listener {
 		}
 		
 		inHand.setAmount(inHand.getAmount()-1);
-		if(player.getGameMode() == GameMode.CREATIVE){
+		if(inHand.getAmount() < 1){
 			player.setItemInHand(new ItemStack(Material.AIR)); //Remove from their hand
 		}
 		//Now place the car
