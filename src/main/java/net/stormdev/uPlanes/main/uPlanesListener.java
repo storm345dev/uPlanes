@@ -552,6 +552,7 @@ public class uPlanesListener implements Listener {
 		if(plane == null){
 			return;
 		}
+		@SuppressWarnings("unused")
 		final ConcurrentHashMap<String, Stat> stats = plane.stats;
         if(save && slotNumber ==2){
 			//They are renaming it
