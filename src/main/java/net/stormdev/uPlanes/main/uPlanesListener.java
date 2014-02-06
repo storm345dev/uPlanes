@@ -5,6 +5,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
+import net.stormdev.uPlanes.api.AutopilotDestination;
 import net.stormdev.uPlanes.api.Keypress;
 import net.stormdev.uPlanes.api.Plane;
 import net.stormdev.uPlanes.api.Stat;
@@ -255,9 +256,29 @@ public class uPlanesListener implements Listener {
 		}
 		
 		if(cart.hasMetadata("plane.destination")){
-			//Disable autopilot
-			cart.removeMetadata("plane.destination", main.plugin);
-			player.sendMessage(main.colors.getInfo()+Lang.get("general.cmd.destinations.cancel"));
+			AutopilotDestination aData = null;
+			
+			if(vehicle.hasMetadata("plane.autopilotData")){
+				aData = (AutopilotDestination) vehicle.getMetadata("plane.autopilotData").get(0).value();
+			}
+			
+			boolean cont = false;
+			
+			if(aData != null && !aData.isAutopilotOverridenByControlInput()){
+				cont = true;
+			}
+			
+			if(!cont){
+				//Disable autopilot
+				if(aData != null){
+					aData.autoPilotCancelled();
+				}
+				else{
+					player.sendMessage(main.colors.getInfo()+Lang.get("general.cmd.destinations.cancel"));
+				}
+				cart.removeMetadata("plane.destination", main.plugin);
+				cart.removeMetadata("plane.autopilotData", main.plugin);
+			}
 		}
 		
 		if(perms){

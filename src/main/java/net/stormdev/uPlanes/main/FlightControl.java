@@ -1,5 +1,6 @@
 package net.stormdev.uPlanes.main;
 
+import net.stormdev.uPlanes.api.AutopilotDestination;
 import net.stormdev.uPlanes.utils.Lang;
 
 import org.bukkit.Effect;
@@ -18,12 +19,34 @@ public class FlightControl {
 	public static Vector route(Location targetLoc, Location current, Vehicle vehicle){
 		Vector v = new Vector(0,0,0);
 		Entity passenger = vehicle.getPassenger();
+		AutopilotDestination aData = null;
+		
+		if(vehicle.hasMetadata("plane.autopilotData")){
+			aData = (AutopilotDestination) vehicle.getMetadata("plane.autopilotData").get(0).value();
+		}
+		
 		if(!(passenger instanceof Player)){
-			vehicle.removeMetadata("plane.destination", main.plugin);
-			return v;
+			boolean cont = false;
+			if(aData != null){
+				cont = aData.flyWithoutPlayer();
+			}
+			
+			if(!cont){
+				if(aData != null){
+					aData.autoPilotCancelled();
+				}
+				vehicle.removeMetadata("plane.destination", main.plugin);
+				vehicle.removeMetadata("plane.autopilotData", main.plugin);
+				return v;
+			}
 		}
 		
 		double targetHeight = 115;
+		
+		if(aData != null && aData.useCustomCruiseAltitude()){
+			targetHeight = aData.getTargetCruiseAltitude();
+		}
+		
 		if(targetHeight < targetLoc.getY()){
 			targetHeight = targetLoc.getY()+30;
 		}
@@ -113,8 +136,15 @@ public class FlightControl {
 			}
 			else if(current.getY() - targetLoc.getY() < 2){
 				//Arrived
-				player.sendMessage(main.colors.getSuccess()+Lang.get("general.cmd.destinations.arrive"));
 				vehicle.removeMetadata("plane.destination", main.plugin);
+				
+				if(aData == null){
+					player.sendMessage(main.colors.getSuccess()+Lang.get("general.cmd.destinations.arrive"));
+				}
+				else{
+					aData.arrivedAtDestination();
+					vehicle.removeMetadata("plane.autopilotData", main.plugin);
+				}
 			}
 		}
 		Vector vel = new Vector(x, y, z);
