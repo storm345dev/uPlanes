@@ -37,7 +37,7 @@ public class uPlanesAPI {
 	}
 	
 	/**
-	 * Contains methods for creating, destroying and manipulating planes
+	 * Contains methods for managing plane autopilots
 	 * 
 	 * @return Returns the uPlaneManager instance
 	 */

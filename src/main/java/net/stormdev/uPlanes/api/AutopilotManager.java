@@ -17,6 +17,12 @@ public class AutopilotManager {
 		//Only classes in package can instantate
 	}
 	
+	/**
+	 * Start the autopilot on a plane
+	 * 
+	 * @param planeVehicle The vehicle to manipulate
+	 * @param destination The destination to fly to
+	 */
 	public void startAutopilot(Vehicle planeVehicle, AutopilotDestination destination){
 		Location dest = destination.getDestination();
 		planeVehicle.setMetadata("plane.destination", new StatValue(dest, main.plugin));

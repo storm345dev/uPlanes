@@ -273,8 +273,8 @@ public class uPlaneManager {
 	 * @param damage The amount to damage it by
 	 * @param damager The damager
 	 */
-	public void damagePlane(Minecart m, Plane plane, double damage, Player player){
-		damagePlane(m, plane, damage, player, true);
+	public void damagePlane(Minecart m, Plane plane, double damage, Player damager){
+		damagePlane(m, plane, damage, damager, true);
 	}
 	
 	/**
