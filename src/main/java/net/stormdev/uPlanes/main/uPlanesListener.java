@@ -8,9 +8,9 @@ import java.util.regex.Pattern;
 import net.stormdev.uPlanes.api.AutopilotDestination;
 import net.stormdev.uPlanes.api.Keypress;
 import net.stormdev.uPlanes.api.Plane;
+import net.stormdev.uPlanes.api.PlaneDeathEvent;
 import net.stormdev.uPlanes.api.Stat;
 import net.stormdev.uPlanes.utils.Lang;
-import net.stormdev.uPlanes.utils.PlaneDeathEvent;
 import net.stormdev.uPlanes.utils.PlaneUpdateEvent;
 import net.stormdev.uPlanes.utils.StatValue;
 
