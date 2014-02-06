@@ -3,9 +3,9 @@ package net.stormdev.uPlanes.main;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+import net.stormdev.uPlanes.api.Plane;
 import net.stormdev.uPlanes.utils.Colors;
 import net.stormdev.uPlanes.utils.Lang;
-import net.stormdev.uPlanes.utils.Plane;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;

@@ -5,13 +5,13 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.stormdev.uPlanes.api.Plane;
 import net.stormdev.uPlanes.main.PlaneGenerator;
 import net.stormdev.uPlanes.main.PlaneItemMethods;
 import net.stormdev.uPlanes.main.main;
 import net.stormdev.uPlanes.shops.IconMenu.OptionClickEvent;
 import net.stormdev.uPlanes.shops.IconMenu.OptionClickEventHandler;
 import net.stormdev.uPlanes.utils.Lang;
-import net.stormdev.uPlanes.utils.Plane;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;

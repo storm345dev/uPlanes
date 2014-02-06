@@ -3,10 +3,10 @@ package net.stormdev.uPlanes.commands;
 import java.util.List;
 import java.util.UUID;
 
+import net.stormdev.uPlanes.api.Plane;
 import net.stormdev.uPlanes.main.main;
 import net.stormdev.uPlanes.utils.Colors;
 import net.stormdev.uPlanes.utils.Lang;
-import net.stormdev.uPlanes.utils.Plane;
 import net.stormdev.uPlanes.utils.StatValue;
 
 import org.bukkit.Location;

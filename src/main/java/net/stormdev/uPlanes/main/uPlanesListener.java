@@ -5,17 +5,16 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
-import net.stormdev.uPlanes.utils.Keypress;
+import net.stormdev.uPlanes.api.Keypress;
+import net.stormdev.uPlanes.api.Plane;
+import net.stormdev.uPlanes.api.Stat;
 import net.stormdev.uPlanes.utils.Lang;
-import net.stormdev.uPlanes.utils.Plane;
 import net.stormdev.uPlanes.utils.PlaneDeathEvent;
 import net.stormdev.uPlanes.utils.PlaneUpdateEvent;
-import net.stormdev.uPlanes.utils.Stat;
 import net.stormdev.uPlanes.utils.StatValue;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Effect;
-import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;

@@ -1,9 +1,15 @@
-package net.stormdev.uPlanes.utils;
+package net.stormdev.uPlanes.api;
 
 import java.io.Serializable;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Simple serializable format for plane data
+ * 
+ * Do not manipulate this directly if avoidable, use the API
+ *
+ */
 public class Plane implements Serializable {
 	private static final long serialVersionUID = 1L;
 	public double mutliplier = 30;

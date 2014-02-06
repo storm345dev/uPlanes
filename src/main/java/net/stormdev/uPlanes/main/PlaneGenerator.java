@@ -1,6 +1,6 @@
 package net.stormdev.uPlanes.main;
 
-import net.stormdev.uPlanes.utils.Plane;
+import net.stormdev.uPlanes.api.Plane;
 
 public class PlaneGenerator {
 	public static Plane gen(){

@@ -9,6 +9,7 @@ import java.util.Random;
 import java.util.logging.Level;
 
 import net.milkbowl.vault.economy.Economy;
+import net.stormdev.uPlanes.api.uPlanesAPI;
 import net.stormdev.uPlanes.commands.AdminCommandExecutor;
 import net.stormdev.uPlanes.commands.AutoPilotAdminCommandExecutor;
 import net.stormdev.uPlanes.commands.AutoPilotCommandExecutor;
@@ -52,6 +53,7 @@ public class main extends JavaPlugin {
 	public PlanesManager planeManager = null;
 	public Random random = new Random();
 	public DestinationManager destinationManager = null;
+	public uPlanesAPI api = null;
 	
 	public PlaneShop planeShop = null;
 	public static Economy economy = null;
@@ -306,6 +308,8 @@ public class main extends JavaPlugin {
 		if(shopsEnabled){
 			planeShop = new PlaneShop(this);
 		}
+		
+		api = uPlanesAPI.getAPI(); //Setup the API
 		
 		logger.info("uPlanes v"+plugin.getDescription().getVersion()+" has been enabled!");
 	}

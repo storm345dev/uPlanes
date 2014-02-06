@@ -1,5 +1,7 @@
 package net.stormdev.uPlanes.utils;
 
+import net.stormdev.uPlanes.api.Plane;
+
 import org.bukkit.entity.Vehicle;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.vehicle.VehicleUpdateEvent;

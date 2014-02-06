@@ -1,6 +1,6 @@
 package net.stormdev.uPlanes.main;
 
-import net.stormdev.uPlanes.utils.Keypress;
+import net.stormdev.uPlanes.api.Keypress;
 import net.stormdev.uPlanes.utils.PlaneUpdateEvent;
 import net.stormdev.uPlanes.utils.StatValue;
 

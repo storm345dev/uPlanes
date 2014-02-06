@@ -2,13 +2,13 @@ package net.stormdev.uPlanes.commands;
 
 import java.util.UUID;
 
+import net.stormdev.uPlanes.api.Plane;
+import net.stormdev.uPlanes.api.Stat;
 import net.stormdev.uPlanes.main.PlaneGenerator;
 import net.stormdev.uPlanes.main.PlaneItemMethods;
 import net.stormdev.uPlanes.main.main;
 import net.stormdev.uPlanes.utils.Colors;
 import net.stormdev.uPlanes.utils.Lang;
-import net.stormdev.uPlanes.utils.Plane;
-import net.stormdev.uPlanes.utils.Stat;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;

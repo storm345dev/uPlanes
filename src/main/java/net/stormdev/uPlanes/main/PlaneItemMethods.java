@@ -3,8 +3,8 @@ package net.stormdev.uPlanes.main;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.stormdev.uPlanes.utils.Plane;
-import net.stormdev.uPlanes.utils.Stat;
+import net.stormdev.uPlanes.api.Plane;
+import net.stormdev.uPlanes.api.Stat;
 
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;

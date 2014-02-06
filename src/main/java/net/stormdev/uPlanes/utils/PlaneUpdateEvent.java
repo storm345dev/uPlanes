@@ -1,5 +1,7 @@
 package net.stormdev.uPlanes.utils;
 
+import net.stormdev.uPlanes.api.Keypress;
+
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.event.Cancellable;

@@ -9,7 +9,7 @@ import java.io.ObjectOutputStream;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.stormdev.uPlanes.utils.Plane;
+import net.stormdev.uPlanes.api.Plane;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
