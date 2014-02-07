@@ -4,6 +4,12 @@ import java.util.UUID;
 
 import org.bukkit.Location;
 
+/**
+ * A simple interface used for managing AutoPilot flights
+ * with the API.
+ * 
+ */
+ 
 public interface AutopilotDestination {
 	
 	/**
