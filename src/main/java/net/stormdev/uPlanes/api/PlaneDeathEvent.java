@@ -4,6 +4,11 @@ import org.bukkit.entity.Vehicle;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.vehicle.VehicleUpdateEvent;
 
+/**
+ * Simple event which is fired when Planes are destroyed.
+ * 
+ */
+
 public class PlaneDeathEvent extends VehicleUpdateEvent implements Cancellable {
 	private Plane plane;
 	private Boolean cancelled = false;

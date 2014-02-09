@@ -20,6 +20,12 @@ import org.bukkit.entity.Vehicle;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.MetadataValue;
 
+/**
+ * uPlaneManager is a section of the API for managing, creating
+ * and removing planes
+ * 
+ */
+
 public class uPlaneManager {
 	protected uPlaneManager(){
 		//Only classes in package can generate
