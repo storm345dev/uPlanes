@@ -2,7 +2,6 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.stormdev</groupId>
     <artifactId>uPlanes</artifactId>
-    <version>2</version>
     <name>uPlanes</name>
     <url>http://dev.bukkit.org/bukkit-plugins/uCarsTrade</url>
     <issueManagement>
@@ -130,4 +129,5 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+    <version>3</version>
 </project>
