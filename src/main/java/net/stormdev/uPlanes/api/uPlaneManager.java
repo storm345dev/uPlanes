@@ -45,6 +45,23 @@ public class uPlaneManager {
 	}
 	
 	/**
+	 * Generates a random plane
+	 * 
+	 * @return Returns the generated plane
+	 */
+	public Plane generateRandomPlane(boolean hover){
+		Plane plane = PlaneGenerator.gen();
+		
+		if(hover){
+			plane.stats.put("plane.hover", new Stat("Hover", "Yes", main.plugin, true));
+		}
+		
+		main.plugin.planeManager.setPlane(plane.id, plane);
+		
+		return plane;
+	}
+	
+	/**
 	 * Returns a plane that meets the desired specification
 	 *  
 	 * @param health The plane's health
