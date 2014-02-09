@@ -53,6 +53,7 @@ public class uPlaneManager {
 		Plane plane = PlaneGenerator.gen();
 		
 		if(hover){
+			plane.name = "Hover Plane";
 			plane.stats.put("plane.hover", new Stat("Hover", "Yes", main.plugin, true));
 		}
 		
