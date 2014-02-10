@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  */
 public class Plane implements Serializable {
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 2L;
 	public double mutliplier = 30;
 	public String name = "Plane";
 	public double health = 50;
