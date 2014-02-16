@@ -125,6 +125,7 @@ public class PlanesManager {
 		}
 		if(this.planes == null){
 			this.planes = new ConcurrentHashMap<UUID, Plane>();
+			save(); //Make sure it overrides old format	
 		}
 	}
 	private void save(){
