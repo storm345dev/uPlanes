@@ -1,6 +1,7 @@
 package net.stormdev.uPlanes.main;
 
 import net.stormdev.uPlanes.api.AutopilotDestination;
+import net.stormdev.uPlanes.utils.ClosestFace;
 import net.stormdev.uPlanes.utils.Lang;
 
 import org.bukkit.Effect;
@@ -11,8 +12,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.util.Vector;
-
-import com.useful.ucars.ClosestFace;
 
 public class FlightControl {
 	private static double speed = 1.2;
