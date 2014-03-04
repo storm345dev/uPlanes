@@ -32,6 +32,7 @@ import org.bukkit.entity.Vehicle;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.Event.Result;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -343,15 +344,37 @@ public class uPlanesListener implements Listener {
 			return; //Just a minecart
 		}
 		
+		//Now place the car
+		Block b = event.getClickedBlock();
+		Location toSpawn = b.getLocation().add(0,1.5,0);
+		Block in = toSpawn.getBlock();
+		if(!in.isEmpty() && !in.isLiquid()){
+			return;
+		}
+		
+		Minecart ent = (Minecart) toSpawn.getWorld().spawnEntity(toSpawn, EntityType.MINECART);
+		in = ent.getLocation().getBlock();
+		Block n = in.getRelative(BlockFace.NORTH);   // The directions minecraft aligns the cart to
+		Block w = in.getRelative(BlockFace.WEST);
+		Block nw = in.getRelative(BlockFace.NORTH_WEST);
+		Block ne = in.getRelative(BlockFace.NORTH_EAST);
+		Block sw = in.getRelative(BlockFace.SOUTH_WEST);
+		if((!in.isEmpty() && !in.isLiquid())
+				|| (!n.isEmpty() && !n.isLiquid())
+				|| (!w.isEmpty() && !w.isLiquid())
+				|| (!ne.isEmpty() && !ne.isLiquid())
+				|| (!nw.isEmpty() && !nw.isLiquid())
+				|| (!sw.isEmpty() && !sw.isLiquid())){
+			ent.remove();
+			event.setUseItemInHand(Result.DENY);
+			return;
+		}
+		
 		inHand.setAmount(inHand.getAmount()-1);
 		if(inHand.getAmount() < 1){
 			player.setItemInHand(new ItemStack(Material.AIR)); //Remove from their hand
 		}
-		//Now place the car
-		Block b = event.getClickedBlock();
-		Location toSpawn = b.getLocation().add(0,1.5,0);
 		
-		Minecart ent = (Minecart) toSpawn.getWorld().spawnEntity(toSpawn, EntityType.MINECART);
 		ent.setMetadata("ucars.ignore", new StatValue(true, main.plugin));
 		ent.setMetadata("plane.health", new StatValue(plane.health, main.plugin));
 		if(plane.stats.containsKey("plane.hover")){
