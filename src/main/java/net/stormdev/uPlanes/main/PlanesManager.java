@@ -52,7 +52,12 @@ public class PlanesManager {
 		}
 		
 		String rawId = im.getLore().get(0);
-		id = UUID.fromString(ChatColor.stripColor(rawId));
+		try {
+			id = UUID.fromString(ChatColor.stripColor(rawId));
+		} catch (Exception e) {
+			// Invalid
+			return null;
+		}
 		
 		return getPlane(id);
 	}
