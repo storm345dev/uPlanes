@@ -25,14 +25,15 @@ import org.bukkit.block.DoubleChest;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Vehicle;
+import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.Event.Result;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -129,10 +130,17 @@ public class uPlanesListener implements Listener {
 				block = ((DoubleChest)inv.getHolder()).getLocation().getBlock();
 			}
 			Block underBlock = block.getRelative(BlockFace.DOWN);
-			if(!(underBlock.getState() instanceof Sign)){
+			Block underunderBlock = underBlock.getRelative(BlockFace.DOWN);
+			Sign sign = null;
+			if((underBlock.getState() instanceof Sign)){
+				sign = (Sign) underBlock.getState();
+			}
+			else if((underunderBlock.getState() instanceof Sign)){
+				sign = (Sign) underunderBlock.getState();
+			}
+			else {
 				return;
 			}
-			Sign sign = (Sign) underBlock.getState();
 			if(!(ChatColor.stripColor(sign.getLines()[0])).equalsIgnoreCase("[Shop]") || !(ChatColor.stripColor(sign.getLines()[1])).equalsIgnoreCase("planes")){
 				return;
 			}
@@ -245,6 +253,13 @@ public class uPlanesListener implements Listener {
 			return;
 		}
 		
+		if(main.perms){
+			if(!player.hasPermission("uplanes.fly")){
+				player.sendMessage(main.colors.getError()+"You don't have the permission 'uplanes.fly' required to fly a plane!");
+				return;
+			}
+		}
+		
 		Minecart cart = (Minecart) vehicle;
 		Plane plane = getPlane(cart);
 		
@@ -342,6 +357,12 @@ public class uPlanesListener implements Listener {
 		Plane plane = main.plugin.planeManager.getPlane(inHand);
 		if(plane == null){
 			return; //Just a minecart
+		}
+		if(main.perms){
+			if(!player.hasPermission("uplanes.place")){
+				player.sendMessage(main.colors.getError()+"You don't have the permission 'uplanes.place' required to place a plane!");
+				return;
+			}
 		}
 		
 		//Now place the car
@@ -491,6 +512,11 @@ public class uPlanesListener implements Listener {
 		if(!(recipe.getType() == Material.MINECART)){
 			return;
 		}
+		HumanEntity e = event.getWhoClicked();
+		Player player = null;
+		if(e instanceof Player){
+			player = (Player) e;
+		}
 		Boolean hover = false;
 		String name = ChatColor.stripColor(recipe.getItemMeta().getDisplayName());
 		if(!name.equalsIgnoreCase("plane")){
@@ -505,6 +531,16 @@ public class uPlanesListener implements Listener {
 		if(hover){
 			plane.name = "Hover Plane";
 			plane.stats.put("plane.hover", new Stat("Hover", "Yes", main.plugin, true));
+		}
+		if(player != null){
+			if(main.perms){
+				if(!player.hasPermission("uplanes.craft")){
+					player.sendMessage(main.colors.getError()+"You don't have the permission 'uplanes.craft' required to craft a plane!");
+					event.setCurrentItem(new ItemStack(Material.AIR));
+					//event.setCancelled(true);
+					return;
+				}
+			}
 		}
         event.setCurrentItem(PlaneItemMethods.getItem(plane));
         main.plugin.planeManager.setPlane(plane.id, plane);

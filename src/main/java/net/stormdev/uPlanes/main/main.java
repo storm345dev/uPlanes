@@ -47,6 +47,7 @@ public class main extends JavaPlugin {
 	public static FileConfiguration config = new YamlConfiguration();
 	public static Colors colors; 
 	public static CustomLogger logger = null;
+	public static boolean perms = true;
 	
 	public ProtocolManager protocolManager = null;
 	public uPlanesListener listener = null;
@@ -179,6 +180,10 @@ public class main extends JavaPlugin {
         	if (!config.contains("general.logger.colour")) {
 				config.set("general.logger.colour", true);
 			}
+        	if(!config.contains("general.usePerms")){
+        		config.set("general.usePerms", true);
+        	}
+        	perms = config.getBoolean("general.usePerms");
         	if(!config.contains("general.currencySign")){
         		config.set("general.currencySign", "$");
         	}
