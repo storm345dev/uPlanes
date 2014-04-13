@@ -14,6 +14,7 @@ import net.stormdev.uPlanes.utils.Lang;
 import net.stormdev.uPlanes.utils.PlaneUpdateEvent;
 import net.stormdev.uPlanes.utils.StatValue;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Effect;
 import org.bukkit.Location;
@@ -29,6 +30,7 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
@@ -36,6 +38,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.ItemDespawnEvent;
@@ -54,6 +57,7 @@ import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.MetadataValue;
+import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
@@ -73,6 +77,36 @@ public class uPlanesListener implements Listener {
 		perms = main.config.getBoolean("general.planes.perms");
 		perm = main.config.getString("general.planes.flyPerm");
 		safeExit = main.config.getBoolean("general.planes.safeExit");
+	}
+	
+	@EventHandler(priority = EventPriority.LOW)
+	void projectileDamage(EntityDamageByEntityEvent event){
+		if(event.isCancelled()){
+			return;
+		}
+		Entity dmged = event.getEntity();
+		Entity dmger = event.getDamager();
+		if(dmger instanceof Player){
+			Player player = (Player) dmger;
+			if(player.getVehicle().equals(dmged)){
+				event.setDamage(0.0);
+				event.setCancelled(true);
+			}
+			return;
+		}
+		
+		if(dmger instanceof Projectile){
+			Projectile proj = (Projectile) dmger;
+			@SuppressWarnings("deprecation")
+			ProjectileSource source = proj.getShooter();
+			if(source instanceof Player){
+				Player player = (Player) source;
+				if(player.getVehicle() != null && player.getVehicle().equals(dmged)){
+					event.setDamage(0.0);
+					event.setCancelled(true);
+				}
+			}
+		}
 	}
 	
 	@EventHandler
@@ -445,8 +479,11 @@ public class uPlanesListener implements Listener {
 		return;
 	}
 	
-	@EventHandler
+	@EventHandler(priority=EventPriority.HIGHEST)
 	void vehicleDamage(VehicleDamageEvent event){
+		if(event.isCancelled()){
+			return;
+		}
 		Vehicle veh = event.getVehicle();
 		if(!(veh instanceof Minecart)){
 			return;
@@ -456,6 +493,28 @@ public class uPlanesListener implements Listener {
 		if(plane == null){
 			return;
 		}
+		
+		Entity dmger = event.getAttacker();
+		if(dmger instanceof Projectile){
+			Projectile proj = (Projectile) dmger;
+			@SuppressWarnings("deprecation")
+			ProjectileSource source = proj.getShooter();
+			if(source instanceof Player){
+				Player player = (Player) source;
+				if(player.getVehicle() != null && player.getVehicle().equals(m)){
+					event.setCancelled(true); //They are shooting their own vehicle by accident...
+					return;
+				}
+			}
+		}
+		else if(dmger instanceof Player){
+			Player player = (Player) dmger;
+			if(player.getVehicle() != null && player.getVehicle().equals(m)){
+				event.setCancelled(true); //They are shooting their own vehicle by accident...
+				return;
+			}
+		}
+		
 		double health = plane.health;
 		if(m.hasMetadata("plane.health")){
 			List<MetadataValue> ms = m.getMetadata("plane.health");
@@ -463,7 +522,7 @@ public class uPlanesListener implements Listener {
 		}
 		double damage = event.getDamage();
 		String msg = Lang.get("general.damage.msg");
-		Entity attacker = event.getAttacker();
+		Entity attacker = dmger;
 		Boolean die = false;
 		if(attacker != null && attacker instanceof Player){
 			//Plane being punched to death
