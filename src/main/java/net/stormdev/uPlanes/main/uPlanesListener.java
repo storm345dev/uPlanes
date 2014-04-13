@@ -14,7 +14,6 @@ import net.stormdev.uPlanes.utils.Lang;
 import net.stormdev.uPlanes.utils.PlaneUpdateEvent;
 import net.stormdev.uPlanes.utils.StatValue;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Effect;
 import org.bukkit.Location;
@@ -69,9 +68,13 @@ public class uPlanesListener implements Listener {
 	private boolean perms;
 	private String perm;
 	private boolean safeExit;
+	private boolean fuel;
+	private String fuelBypassPerm;
+	
 	public uPlanesListener(main instance){
 		this.plugin = instance;
-		
+		fuel = main.config.getBoolean("general.planes.fuel.enable");
+		fuelBypassPerm = main.config.getString("general.planes.fuel.bypassPerm");
 		punchDamage = main.config.getDouble("general.planes.punchDamage");
 		heightLimit = main.config.getDouble("general.planes.heightLimit");
 		perms = main.config.getBoolean("general.planes.perms");
@@ -178,7 +181,7 @@ public class uPlanesListener implements Listener {
 			if(!(ChatColor.stripColor(sign.getLines()[0])).equalsIgnoreCase("[Shop]") || !(ChatColor.stripColor(sign.getLines()[1])).equalsIgnoreCase("planes")){
 				return;
 			}
-			//A trade sign for cars
+			//A trade sign for planes
 			//Create a trade inventory
 			Player player = (Player) event.getPlayer(); //Get the player from the event
 			event.getView().close();
@@ -308,6 +311,25 @@ public class uPlanesListener implements Listener {
 					player.sendMessage(main.colors.getError()+"You don't have the permission 'uplanes.hoverplane' required to fly a plane!");
 					return;
 				}
+			}
+		}
+		
+		if (fuel
+				&& !player.hasPermission(fuelBypassPerm)) {
+			double fuel = 0;
+			if (main.fuel.containsKey(player.getName())) {
+				fuel = main.fuel.get(player.getName());
+			}
+			if (fuel < 0.1) {
+				player.sendMessage(main.colors.getError()
+						+ Lang.get("lang.fuel.empty"));
+				return;
+			}
+			int amount = 0 + (int) (Math.random() * 250);
+			if (amount == 10) {
+				fuel = fuel - 0.1;
+				fuel = (double) Math.round(fuel * 10) / 10;
+				main.fuel.put(player.getName(), fuel);
 			}
 		}
 		

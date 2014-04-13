@@ -10,6 +10,12 @@ commands:
         permission: uplanes.uplanes
         permission-message: You don't have access to this command
         default: true
+   planeFuel:
+        description: This command is for managing plane fuel
+        usage: /<command> [Buy <Amount>], [View], [Sell <Amount>]
+        permission: uplanes.fuel
+        permission-message: You don't have access to this command
+        default: true
    plane:
         description: This is an admin command to spawn in uPlanes, etc...
         usage: /<command> give [<Random>]/[<Speed> <Health> <Name>]

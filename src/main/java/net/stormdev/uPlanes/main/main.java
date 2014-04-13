@@ -1,10 +1,14 @@
 package net.stormdev.uPlanes.main;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.util.HashMap;
 import java.util.Random;
 import java.util.logging.Level;
 
@@ -13,6 +17,7 @@ import net.stormdev.uPlanes.api.uPlanesAPI;
 import net.stormdev.uPlanes.commands.AdminCommandExecutor;
 import net.stormdev.uPlanes.commands.AutoPilotAdminCommandExecutor;
 import net.stormdev.uPlanes.commands.AutoPilotCommandExecutor;
+import net.stormdev.uPlanes.commands.FuelCommandExecutor;
 import net.stormdev.uPlanes.commands.InfoCommandExecutor;
 import net.stormdev.uPlanes.shops.PlaneShop;
 import net.stormdev.uPlanes.utils.Colors;
@@ -59,6 +64,8 @@ public class main extends JavaPlugin {
 	public PlaneShop planeShop = null;
 	public static Economy economy = null;
 	public boolean shopsEnabled = false;
+	
+	public static HashMap<String, Double> fuel = new HashMap<String, Double>();
 	
 	/**
 	 * Economy setup code
@@ -159,6 +166,39 @@ public class main extends JavaPlugin {
 		if(!lang.contains("general.noExit.msg")){
 			lang.set("general.noExit.msg", "You may only exit in a clear area!");
 		}
+		if (!lang.contains("lang.fuel.empty")) {
+			lang.set("lang.fuel.empty", "You don't have any fuel left!");
+		}
+		if (!lang.contains("lang.fuel.disabled")) {
+			lang.set("lang.fuel.disabled", "Fuel is not enabled!");
+		}
+		if (!lang.contains("lang.fuel.unit")) {
+			lang.set("lang.fuel.unit", "litres");
+		}
+		if (!lang.contains("lang.fuel.isItem")) {
+			lang.set("lang.fuel.isItem",
+					"&9[Important:]&eItem fuel is enabled-The above is irrelevant!");
+		}
+		if (!lang.contains("lang.fuel.invalidAmount")) {
+			lang.set("lang.fuel.invalidAmount", "Amount invalid!");
+		}
+		if (!lang.contains("lang.fuel.noMoney")) {
+			lang.set("lang.fuel.noMoney", "You have no money!");
+		}
+		if (!lang.contains("lang.fuel.notEnoughMoney")) {
+			lang.set("lang.fuel.notEnoughMoney",
+					"That purchase costs %amount% %unit%! You only have %balance% %unit%!");
+		}
+		if (!lang.contains("lang.fuel.success")) {
+			lang.set(
+					"lang.fuel.success",
+					"Successfully purchased %quantity% of fuel for %amount% %unit%! You now have %balance% %unit% left!");
+		}
+		if (!lang.contains("lang.fuel.sellSuccess")) {
+			lang.set(
+					"lang.fuel.sellSuccess",
+					"Successfully sold %quantity% of fuel for %amount% %unit%! You now have %balance% %unit% left!");
+		}
 		
 		if (new File(getDataFolder().getAbsolutePath() + File.separator
 				+ "config.yml").exists() == false
@@ -180,10 +220,6 @@ public class main extends JavaPlugin {
         	if (!config.contains("general.logger.colour")) {
 				config.set("general.logger.colour", true);
 			}
-        	if(!config.contains("general.usePerms")){
-        		config.set("general.usePerms", true);
-        	}
-        	perms = config.getBoolean("general.usePerms");
         	if(!config.contains("general.currencySign")){
         		config.set("general.currencySign", "$");
         	}
@@ -205,6 +241,7 @@ public class main extends JavaPlugin {
         	if(!config.contains("general.planes.perms")){
         		config.set("general.planes.perms", false);
         	}
+        	perms = config.getBoolean("general.planes.perms");
         	if(!config.contains("general.planes.flyPerm")){
         		config.set("general.planes.flyPerm", "uplanes.fly");
         	}
@@ -217,6 +254,24 @@ public class main extends JavaPlugin {
         	if(!config.contains("general.shop.enable")){
         		config.set("general.shop.enable", true);
         	}
+        	if (!config.contains("general.planes.fuel.enable")) {
+				config.set("general.planes.fuel.enable", false);
+			}
+			if (!config.contains("general.planes.fuel.price")) {
+				config.set("general.planes.fuel.price", (double) 2);
+			}
+			if (!config.contains("general.planes.fuel.check")) {
+				config.set("general.planes.fuel.check", new String[]{"FEATHER"});
+			}
+			if (!config.contains("general.planes.fuel.cmdPerm")) {
+				config.set("general.planes.fuel.cmdPerm", "uplanes.uplanes");
+			}
+			if (!config.contains("general.planes.fuel.bypassPerm")) {
+				config.set("general.planes.fuel.bypassPerm", "uplanes.bypassfuel");
+			}
+			if (!config.contains("general.planes.fuel.sellFuel")) {
+				config.set("general.planes.fuel.sellFuel", true);
+			}
         	if (!config.contains("colorScheme.success")) {
 				config.set("colorScheme.success", "&a");
 			}
@@ -296,7 +351,7 @@ public class main extends JavaPlugin {
 		getServer().addRecipe(recipe);
 		getServer().addRecipe(hoverRecipe);
 		
-		setupUCarsCompatibility();
+		setupUplanesCompatibility();
 		
 		this.destinationManager = new DestinationManager(destinationSaveFile);
 		
@@ -308,10 +363,26 @@ public class main extends JavaPlugin {
 		AutoPilotAdminCommandExecutor apace = new AutoPilotAdminCommandExecutor();
 		getCommand("setDestination").setExecutor(apace);
 		getCommand("delDestination").setExecutor(apace);
+		getCommand("planeFuel").setExecutor(new FuelCommandExecutor());
 		
-		shopsEnabled = main.config.getBoolean("general.shop.enable") ? setupEconomy():false;
+		boolean economy = setupEconomy();
+		shopsEnabled = main.config.getBoolean("general.shop.enable") ? economy:false;
 		if(shopsEnabled){
 			planeShop = new PlaneShop(this);
+		}
+		fuel = new HashMap<String, Double>();
+		File fuels = new File(plugin.getDataFolder()
+				.getAbsolutePath()
+				+ File.separator
+				+ "fuel.bin");
+		if (fuels.exists() && fuels.length() > 1) {
+			fuel = loadHashMapDouble(plugin.getDataFolder()
+					.getAbsolutePath()
+					+ File.separator
+					+ "fuel.bin");
+			if (fuel == null) {
+				fuel = new HashMap<String, Double>();
+			}
 		}
 		
 		api = uPlanesAPI.getAPI(); //Setup the API
@@ -379,10 +450,46 @@ public class main extends JavaPlugin {
 		}
 		return true;
 	}
-	private void setupUCarsCompatibility(){
-		if(getServer().getPluginManager().getPlugin("uCars") == null){
+	private void setupUplanesCompatibility(){
+		if(getServer().getPluginManager().getPlugin("uplanes") == null){
 			return;
 		}
 		uCarsCompatibility.run();
+	}
+	
+	public static void saveFuel(){
+		saveHashMap(fuel, plugin.getDataFolder()
+						.getAbsolutePath()
+						+ File.separator
+						+ "fuel.bin");
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static HashMap<String, Double> loadHashMapDouble(String path) {
+		try {
+			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(
+					path));
+			Object result = ois.readObject();
+			ois.close();
+			// you can feel free to cast result to HashMap<String, Integer> if
+			// you know there's that HashMap in the file
+			return (HashMap<String, Double>) result;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public static void saveHashMap(HashMap<String, Double> map, String path) {
+		try {
+			ObjectOutputStream oos = new ObjectOutputStream(
+					new FileOutputStream(path));
+			oos.writeObject(map);
+			oos.flush();
+			oos.close();
+			// Handle I/O exceptions
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }
