@@ -269,6 +269,12 @@ public class uPlanesListener implements Listener {
 		
 		if(plane.stats.containsKey("plane.hover")){
 			vehicle.setMetadata("plane.hover", new StatValue(true, main.plugin));
+			if(main.perms){
+				if(!player.hasPermission("uplanes.hoverplane")){
+					player.sendMessage(main.colors.getError()+"You don't have the permission 'uplanes.hoverplane' required to fly a plane!");
+					return;
+				}
+			}
 		}
 		
 		if(cart.hasMetadata("plane.destination")){
