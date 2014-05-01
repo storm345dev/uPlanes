@@ -94,7 +94,7 @@ public class uPlanesListener implements Listener {
 		Entity dmger = event.getDamager();
 		if(dmger instanceof Player){
 			Player player = (Player) dmger;
-			if(player.getVehicle().equals(dmged)){
+			if(player.getVehicle() != null && player.getVehicle().equals(dmged)){
 				event.setDamage(0.0);
 				event.setCancelled(true);
 			}
