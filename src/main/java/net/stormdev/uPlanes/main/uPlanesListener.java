@@ -509,19 +509,25 @@ public class uPlanesListener implements Listener {
 	}
 	
 	@EventHandler
-	void lostPlanes(ItemDespawnEvent event){
-		Item i = event.getEntity();
-		ItemStack is = i.getItemStack();
-		if(is.getType() != Material.MINECART){
-			return;
-		}
-		ItemMeta im = is.getItemMeta();
-		if(im.getLore() == null || im.getLore().size() < 1){
-			return;
-		}
-		String id = ChatColor.stripColor(im.getLore().get(0));
-		UUID planeId = UUID.fromString(id);
-		plugin.planeManager.removePlane(planeId);
+	void lostPlanes(final ItemDespawnEvent event){
+		Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable(){
+
+			@Override
+			public void run() {
+				Item i = event.getEntity();
+				ItemStack is = i.getItemStack();
+				if(is.getType() != Material.MINECART){
+					return;
+				}
+				ItemMeta im = is.getItemMeta();
+				if(im.getLore() == null || im.getLore().size() < 1){
+					return;
+				}
+				String id = ChatColor.stripColor(im.getLore().get(0));
+				UUID planeId = UUID.fromString(id);
+				plugin.planeManager.removePlane(planeId);
+				return;
+			}});
 		return;
 	}
 	
