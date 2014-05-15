@@ -1,6 +1,6 @@
 name: uPlanes
 main: net.stormdev.uPlanes.main.main
-version: 4.0
+version: 5.0
 softdepend: [Vault, uCars, AntiCheat]
 depend: [ProtocolLib]
 commands:
