@@ -458,7 +458,7 @@ public class main extends JavaPlugin {
 		return true;
 	}
 	private void setupUplanesCompatibility(){
-		if(getServer().getPluginManager().getPlugin("uplanes") == null){
+		if(getServer().getPluginManager().getPlugin("uCars") == null){
 			return;
 		}
 		uCarsCompatibility.run();

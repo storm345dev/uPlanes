@@ -16,6 +16,8 @@ import com.useful.uCarsAPI.uCarsAPI;
 
 public class uCarsCompatibility {
 	public static void run(){
+		main.logger.info("Sorting uCars compatibility...");
+		
 		uCarsAPI api = uCarsAPI.getAPI();
 		api.hookPlugin(main.plugin); //Authenticate with the API
 		
