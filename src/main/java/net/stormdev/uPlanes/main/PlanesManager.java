@@ -93,7 +93,7 @@ public class PlanesManager {
 		asyncSave();
 	}
 	public void cacheSize(){
-		while(cache.size() > 20){ //Maximum Plane cache
+		while(cache.size() > main.plugin.cacheSize){ //Maximum Plane cache
 			cache.remove(cache.keySet().toArray()[0]); //Clear it back to size
 		}
 		return;

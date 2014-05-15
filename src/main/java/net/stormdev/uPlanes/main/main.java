@@ -64,6 +64,7 @@ public class main extends JavaPlugin {
 	public PlaneShop planeShop = null;
 	public static Economy economy = null;
 	public boolean shopsEnabled = false;
+	public int cacheSize = 20;
 	
 	public static HashMap<String, Double> fuel = new HashMap<String, Double>();
 	
@@ -254,6 +255,9 @@ public class main extends JavaPlugin {
         	if(!config.contains("general.shop.enable")){
         		config.set("general.shop.enable", true);
         	}
+        	if(!config.contains("general.planes.cacheSize")){
+        		config.set("general.planes.cacheSize", 100);
+        	}
         	if (!config.contains("general.planes.fuel.enable")) {
 				config.set("general.planes.fuel.enable", false);
 			}
@@ -295,6 +299,9 @@ public class main extends JavaPlugin {
 		} catch (IOException e1) {
 			getLogger().info("Error parsing lang file!");
 		}
+		
+		cacheSize = config.getInt("general.planes.cacheSize");
+		
 		//Load the colour scheme
 		colors = new Colors(config.getString("colorScheme.success"),
 				config.getString("colorScheme.error"),
