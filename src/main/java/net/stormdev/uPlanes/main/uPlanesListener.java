@@ -789,10 +789,22 @@ public class uPlanesListener implements Listener {
 		UUID id = vehicle.getUniqueId();
 		plane.isPlaced = false;
 		plugin.planeManager.setPlane(id, plane);
-		Location loc = vehicle.getLocation();
+		final Location loc = vehicle.getLocation();
 		Entity top = vehicle.getPassenger();
 		if(top instanceof Player){
 			top.eject();
+			if(safeExit){
+				final Player pl = (Player) top;
+				main.plugin.getServer().getScheduler().runTaskLater(main.plugin, new BukkitRunnable(){
+
+					public void run() {
+						pl.teleport(loc.clone().add(0, 0.5, 0));
+						if(Bukkit.getServer().getPluginManager().getPlugin("AntiCheat") != null){
+			    			AntiCheatAPI.unexemptPlayer(pl, CheckType.FLY);
+					 	}
+						return;
+					}}, 2l); //Teleport back to car loc after exit
+			}
 		}
 		vehicle.eject();
 		vehicle.remove();
