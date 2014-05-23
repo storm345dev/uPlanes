@@ -39,7 +39,12 @@ public class uCarsCompatibility {
 					return true;
 				}
 				String id = lore.get(0);
-				UUID uuid = UUID.fromString(id);
+				UUID uuid;
+				try {
+					uuid = UUID.fromString(id);
+				} catch (Exception e) {
+					return false;
+				}
 				if(main.plugin.planeManager.isAPlane(uuid)){
 					return false;
 				}
