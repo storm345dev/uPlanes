@@ -103,9 +103,7 @@ public class uPlaneManager {
 	 * in the plane-save-file.
 	 * 
 	 * @param plane The plane to remove
-	 * @deprecated No longer necessary
 	 */
-	@Deprecated
 	public void removePlane(Plane plane){
 		main.plugin.planeManager.noLongerPlaced(plane.getId());
 	}
@@ -117,9 +115,7 @@ public class uPlaneManager {
 	 * in the plane-save-file.
 	 * 
 	 * @param planeId The id of the plane to remove
-	 * @deprecated no longer necessary
 	 */
-	@Deprecated
 	public void removePlane(UUID planeId){
 		main.plugin.planeManager.noLongerPlaced(planeId);
 	}
