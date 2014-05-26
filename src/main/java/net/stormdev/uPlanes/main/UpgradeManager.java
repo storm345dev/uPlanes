@@ -7,6 +7,7 @@ import net.stormdev.uPlanes.api.Plane;
 import net.stormdev.uPlanes.utils.Colors;
 import net.stormdev.uPlanes.utils.Lang;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -27,6 +28,10 @@ public class UpgradeManager {
 			if(health > maxHealth){
 				health = maxHealth;
 			}
+			if(main.upgradePerms && !player.hasPermission("uplanes.upgrade.health")){
+				player.sendMessage(ChatColor.RED+"You don't have the permission 'uplanes.upgrade.health' required to upgrade your plane's health!");
+				return;
+			}
 			upgradeMsg = Colors.colorise(upgradeMsg);
 			upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%amount%"), bonus+"");
 			upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%stat%"), "health");
@@ -44,6 +49,10 @@ public class UpgradeManager {
 			if(health > maxHealth){
 				health = maxHealth;
 			}
+			if(main.upgradePerms && !player.hasPermission("uplanes.upgrade.health")){
+				player.sendMessage(ChatColor.RED+"You don't have the permission 'uplanes.upgrade.health' required to upgrade your plane's health!");
+				return;
+			}
 			upgradeMsg = Colors.colorise(upgradeMsg);
 			upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%amount%"), bonus+"");
 			upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%stat%"), "health");
@@ -55,11 +64,15 @@ public class UpgradeManager {
 		else if(upgrade.getType() == Material.REDSTONE){
 			//Health upgrade
 			double speed = plane.getSpeed();
-			double maxSpeed = 200;
+			double maxSpeed = main.maxSpeed;
 			double bonus = (1*upgrade.getAmount());
 			speed += bonus; //Add 1 to health stat per item
 			if(speed > maxSpeed){
 				speed = maxSpeed;
+			}
+			if(main.upgradePerms && !player.hasPermission("uplanes.upgrade.speed")){
+				player.sendMessage(ChatColor.RED+"You don't have the permission 'uplanes.upgrade.speed' required to upgrade your plane's speed!");
+				return;
 			}
 			upgradeMsg = Colors.colorise(upgradeMsg);
 			upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%amount%"), bonus+"");
@@ -72,11 +85,15 @@ public class UpgradeManager {
 		else if(upgrade.getType() == Material.REDSTONE_BLOCK){
 			//Health upgrade
 			double speed = plane.getSpeed();
-			double maxSpeed = 200;
+			double maxSpeed = main.maxSpeed;
 			double bonus = (9*upgrade.getAmount());
 			speed += bonus; //Add 9 to health stat per item
 			if(speed > maxSpeed){
 				speed = maxSpeed;
+			}
+			if(main.upgradePerms && !player.hasPermission("uplanes.upgrade.speed")){
+				player.sendMessage(ChatColor.RED+"You don't have the permission 'uplanes.upgrade.speed' required to upgrade your plane's speed!");
+				return;
 			}
 			upgradeMsg = Colors.colorise(upgradeMsg);
 			upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%amount%"), bonus+"");

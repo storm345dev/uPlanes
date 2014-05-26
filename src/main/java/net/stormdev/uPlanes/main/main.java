@@ -53,6 +53,8 @@ public class main extends JavaPlugin {
 	public static Colors colors; 
 	public static CustomLogger logger = null;
 	public static boolean perms = true;
+	public static boolean upgradePerms = false;
+	public static double maxSpeed = 200;
 	
 	public ProtocolManager protocolManager = null;
 	public uPlanesListener listener = null;
@@ -242,10 +244,18 @@ public class main extends JavaPlugin {
         	if(!config.contains("general.planes.perms")){
         		config.set("general.planes.perms", false);
         	}
+        	if(!config.contains("general.planes.upgradeperms")){
+        		config.set("general.planes.upgradeperms", false);
+        	}
         	perms = config.getBoolean("general.planes.perms");
+        	upgradePerms = config.getBoolean("general.planes.upgradeperms");
         	if(!config.contains("general.planes.flyPerm")){
         		config.set("general.planes.flyPerm", "uplanes.fly");
         	}
+        	if(!config.contains("general.planes.maxSpeed")){
+        		config.set("general.planes.maxSpeed", 200.0d);
+        	}
+        	maxSpeed = config.getDouble("general.planes.maxSpeed");
         	if(!config.contains("general.planes.safeExit")){
         		config.set("general.planes.safeExit", true);
         	}
