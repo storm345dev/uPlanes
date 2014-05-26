@@ -3,7 +3,6 @@ package net.stormdev.uPlanes.commands;
 import java.util.UUID;
 
 import net.stormdev.uPlanes.api.Plane;
-import net.stormdev.uPlanes.api.Stat;
 import net.stormdev.uPlanes.main.PlaneGenerator;
 import net.stormdev.uPlanes.main.PlaneItemMethods;
 import net.stormdev.uPlanes.main.main;
@@ -45,11 +44,9 @@ public class AdminCommandExecutor implements CommandExecutor {
 				plane = PlaneGenerator.gen();
 				
 				if(hover){
-					plane.name = "Hover Plane";
-					plane.stats.put("plane.hover", new Stat("Hover", "Yes", main.plugin, true));
+					plane.setName("Hover Plane");
+					plane.setHover(true);
 				}
-				
-				main.plugin.planeManager.setPlane(plane.id, plane);
 				
 				player.getInventory().addItem(PlaneItemMethods.getItem(plane));
 				sender.sendMessage(main.colors.getSuccess()+spawnMsg);
@@ -89,16 +86,14 @@ public class AdminCommandExecutor implements CommandExecutor {
 				}
 				
 				plane = new Plane();
-				plane.mutliplier = speed;
-				plane.name = Colors.colorise(name);
-				plane.health = health;
-				plane.id = UUID.randomUUID();
+				plane.setSpeed(speed);
+				plane.setName(Colors.colorise(name));
+				plane.setHealth(health);
+				plane.setId(UUID.randomUUID());
 				
 				if(hover){
-					plane.stats.put("plane.hover", new Stat("Hover", "Yes", main.plugin, true));
+					plane.setHover(true);
 				}
-				
-				main.plugin.planeManager.setPlane(plane.id, plane);
 				
 				player.getInventory().addItem(PlaneItemMethods.getItem(plane));
 				sender.sendMessage(main.colors.getSuccess()+spawnMsg);

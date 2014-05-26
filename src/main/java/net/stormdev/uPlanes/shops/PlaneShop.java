@@ -91,8 +91,6 @@ public class PlaneShop {
 		ItemStack i = PlaneItemMethods.getItem(c);
 		player.getInventory().addItem(i);
 		
-		plugin.planeManager.setPlane(c.id, c);
-		
 		return;
 	}
 	

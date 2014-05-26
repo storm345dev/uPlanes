@@ -22,9 +22,9 @@ public class PlaneGenerator {
 			speed = 10;
 		}
 		
-		plane.health = health;
-		plane.mutliplier = speed;
-		plane.name = name;
+		plane.setHealth(health);
+		plane.setSpeed(speed);
+		plane.setName(name);
 		
 		return plane;
 	}

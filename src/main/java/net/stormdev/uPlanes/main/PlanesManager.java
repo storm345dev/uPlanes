@@ -10,7 +10,9 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.stormdev.uPlanes.api.Plane;
+import net.stormdev.uPlanes.items.ItemPlaneValidation;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -25,7 +27,19 @@ public class PlanesManager {
 		this.saveFile = saveFile;
 		load();
 	}
-	public Boolean isAPlane(UUID PlaneId){
+	public Boolean isPlaneInUse(UUID PlaneId){
+		if(cache.containsKey(PlaneId)){
+			return true;
+		}
+		Boolean b = planes.containsKey(PlaneId);
+		if(b){
+			cache.put(PlaneId, planes.get(PlaneId));
+			cacheSize();
+		}
+		return b;
+	}
+	public Boolean isPlaneInUse(Plane plane){
+		UUID PlaneId = plane.getId();
 		if(cache.containsKey(PlaneId)){
 			return true;
 		}
@@ -37,29 +51,7 @@ public class PlanesManager {
 		return b;
 	}
 	public Plane getPlane(ItemStack item){
-		Material mat = item.getType();
-		ItemMeta im = item.getItemMeta();
-		UUID id = null;
-		
-		if(mat != Material.MINECART){
-			return null;
-		}
-		
-		if(im == null
-				|| im.getLore() == null
-				|| im.getLore().size() < 1){
-			return null;
-		}
-		
-		String rawId = im.getLore().get(0);
-		try {
-			id = UUID.fromString(ChatColor.stripColor(rawId));
-		} catch (Exception e) {
-			// Invalid
-			return null;
-		}
-		
-		return getPlane(id);
+		return ItemPlaneValidation.getPlane(item);
 	}
 	public Boolean isAPlane(ItemStack item){
 		return getPlane(item) != null;
@@ -71,27 +63,27 @@ public class PlanesManager {
 		}
 		return planes.get(PlaneId);
 	}
+	/*
+	@Deprecated
 	public void setPlane(UUID PlaneId, Plane Plane){
-		if(!Plane.isPlaced){
-			cache.remove(PlaneId);
-		}
-		else{
-			cache.put(PlaneId, Plane);
-		}
+		cache.put(PlaneId, Plane);
 		planes.put(PlaneId, Plane);
 		cacheSize();
 		asyncSave();
 	}
+	@Deprecated
 	public void removePlane(UUID PlaneId){
 		cache.remove(PlaneId);
 		planes.remove(PlaneId);
 		asyncSave();
 	}
+	@Deprecated
 	public void updatePlane(UUID old, Plane current){
 		removePlane(old);
-		setPlane(current.id, current);
+		setPlane(current.getId(), current);
 		asyncSave();
 	}
+	*/
 	public void cacheSize(){
 		while(cache.size() > main.plugin.cacheSize){ //Maximum Plane cache
 			cache.remove(cache.keySet().toArray()[0]); //Clear it back to size
@@ -102,7 +94,21 @@ public class PlanesManager {
 		cache.remove(PlaneId);
 	}
 	public void noLongerPlaced(UUID PlaneId){
-		removeFromCache(PlaneId);
+		cache.remove(PlaneId);
+		planes.remove(PlaneId);
+		asyncSave();
+	}
+	public void nowPlaced(Plane Plane){
+		UUID PlaneId = Plane.getId();
+		cache.put(PlaneId, Plane);
+		planes.put(PlaneId, Plane);
+		cacheSize();
+		asyncSave();
+	}
+	public void updateUsedPlane(UUID old, Plane current){
+		noLongerPlaced(old);
+		nowPlaced(current);
+		asyncSave();
 	}
 	public void asyncSave(){
 		main.plugin.getServer().getScheduler().runTaskAsynchronously(main.plugin, new BukkitRunnable(){

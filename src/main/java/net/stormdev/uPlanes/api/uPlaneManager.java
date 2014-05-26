@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+import net.stormdev.uPlanes.items.ItemPlaneValidation;
 import net.stormdev.uPlanes.main.PlaneGenerator;
 import net.stormdev.uPlanes.main.PlaneItemMethods;
 import net.stormdev.uPlanes.main.main;
@@ -39,8 +40,6 @@ public class uPlaneManager {
 	public Plane generateRandomPlane(){
 		Plane plane = PlaneGenerator.gen();
 		
-		main.plugin.planeManager.setPlane(plane.id, plane);
-		
 		return plane;
 	}
 	
@@ -53,11 +52,9 @@ public class uPlaneManager {
 		Plane plane = PlaneGenerator.gen();
 		
 		if(hover){
-			plane.name = "Hover Plane";
-			plane.stats.put("plane.hover", new Stat("Hover", "Yes", main.plugin, true));
+			plane.setName("Hover Plane");
+			plane.setHover(true);
 		}
-		
-		main.plugin.planeManager.setPlane(plane.id, plane);
 		
 		return plane;
 	}
@@ -73,16 +70,14 @@ public class uPlaneManager {
 	 */
 	public Plane generatePlane(double health, double speed, String name, boolean hover){
 		Plane plane = PlaneGenerator.gen();
-		plane.id = UUID.randomUUID();
-		plane.health = health;
-		plane.mutliplier = speed;
-		plane.name = name;
+		plane.setId(UUID.randomUUID());
+		plane.setHealth(health);
+		plane.setSpeed(speed);
+		plane.setName(name);
 		
 		if(hover){
-			plane.stats.put("plane.hover", new Stat("Hover", "Yes", main.plugin, true));
+			plane.setHover(true);
 		}
-		
-		main.plugin.planeManager.setPlane(plane.id, plane);
 		
 		return plane;
 	}
@@ -93,9 +88,12 @@ public class uPlaneManager {
 	 * being saved later to stop resource loss.
 	 * 
 	 * @param plane The plane to save in the plugin's memory of valid planes
+	 * 
+	 * @deprecated Planes are no longer stored to file, unless in use
 	 */
+	@Deprecated //No longer needed
 	public void saveOrUpdatePlane(Plane plane){
-		main.plugin.planeManager.setPlane(plane.id, plane);
+		main.plugin.planeManager.updateUsedPlane(plane.getId(), plane);
 	}
 	
 	/**
@@ -105,9 +103,11 @@ public class uPlaneManager {
 	 * in the plane-save-file.
 	 * 
 	 * @param plane The plane to remove
+	 * @deprecated No longer necessary
 	 */
+	@Deprecated
 	public void removePlane(Plane plane){
-		main.plugin.planeManager.removePlane(plane.id);
+		main.plugin.planeManager.noLongerPlaced(plane.getId());
 	}
 	
 	/**
@@ -117,9 +117,11 @@ public class uPlaneManager {
 	 * in the plane-save-file.
 	 * 
 	 * @param planeId The id of the plane to remove
+	 * @deprecated no longer necessary
 	 */
+	@Deprecated
 	public void removePlane(UUID planeId){
-		main.plugin.planeManager.removePlane(planeId);
+		main.plugin.planeManager.noLongerPlaced(planeId);
 	}
 	
 	/**
@@ -150,7 +152,7 @@ public class uPlaneManager {
 	 * the item is not a plane
 	 */
 	public Plane getPlaneFromItem(ItemStack stack){
-		Plane item = main.plugin.planeManager.getPlane(stack);
+		Plane item = ItemPlaneValidation.getPlane(stack);
 		
 		return item;
 	}
@@ -162,7 +164,7 @@ public class uPlaneManager {
 	 * @return True if a plane
 	 */
 	public boolean isAPlane(UUID entityId){
-		return main.plugin.planeManager.isAPlane(entityId);
+		return main.plugin.planeManager.isPlaneInUse(entityId);
 	}
 	
 	/**
@@ -181,9 +183,11 @@ public class uPlaneManager {
 	 * @param plane The plane to check
 	 * @return True if the plane is placed (An entity),
 	 * False if not (An itemstack)
+	 * @deprecated No longer necessary or possible, always returns true now
 	 */
+	@Deprecated
 	public boolean isPlanePlaced(Plane plane){
-		return plane.isPlaced;
+		return true;
 	}
 	
 	/**
@@ -196,15 +200,13 @@ public class uPlaneManager {
 	public Minecart placePlane(Plane plane, Location loc){
 		Minecart ent = (Minecart) loc.getWorld().spawnEntity(loc, EntityType.MINECART);
 		ent.setMetadata("ucars.ignore", new StatValue(true, main.plugin));
-		ent.setMetadata("plane.health", new StatValue(plane.health, main.plugin));
-		if(plane.stats.containsKey("plane.hover")){
+		ent.setMetadata("plane.health", new StatValue(plane.getHealth(), main.plugin));
+		if(plane.isHover()){
 			ent.setMetadata("plane.hover", new StatValue(true, main.plugin));
 		}
+		plane.setId(ent.getUniqueId());
 		
-		plane.isPlaced = true;
-		plane.id = ent.getUniqueId();
-		
-		main.plugin.planeManager.setPlane(plane.id, plane);
+		main.plugin.planeManager.nowPlaced(plane);
 		return ent;
 	}
 	
@@ -224,15 +226,13 @@ public class uPlaneManager {
 		
 		Minecart ent = (Minecart) loc.getWorld().spawnEntity(loc, EntityType.MINECART);
 		ent.setMetadata("ucars.ignore", new StatValue(true, main.plugin));
-		ent.setMetadata("plane.health", new StatValue(plane.health, main.plugin));
-		if(plane.stats.containsKey("plane.hover")){
+		ent.setMetadata("plane.health", new StatValue(plane.getHealth(), main.plugin));
+		if(plane.isHover()){
 			ent.setMetadata("plane.hover", new StatValue(true, main.plugin));
 		}
+		plane.setId(ent.getUniqueId());
 		
-		plane.isPlaced = true;
-		plane.id = ent.getUniqueId();
-		
-		main.plugin.planeManager.setPlane(plane.id, plane);
+		main.plugin.planeManager.nowPlaced(plane);
 		return ent;
 	}
 	
@@ -245,8 +245,7 @@ public class uPlaneManager {
 	 */
 	public ItemStack destroyPlane(Vehicle vehicle, Plane plane){
 		UUID id = vehicle.getUniqueId();
-		plane.isPlaced = false;
-		main.plugin.planeManager.setPlane(id, plane);
+		main.plugin.planeManager.noLongerPlaced(id);
 		
 		Entity top = vehicle.getPassenger();
 		if(top instanceof Player){
@@ -255,7 +254,7 @@ public class uPlaneManager {
 		vehicle.eject();
 		vehicle.remove();
 		
-		ItemStack i = new ItemStack(PlaneItemMethods.getItem(plane));
+		ItemStack i = plane.toItemStack();
 		
 		return i;
 	}
@@ -271,7 +270,7 @@ public class uPlaneManager {
 	 */
 	public void damagePlane(Minecart m, Plane plane, double damage, Player damager, boolean breakIt){
 		//Plane being punched to death
-		double health = plane.health;
+		double health = plane.getHealth();
 		if(m.hasMetadata("plane.health")){
 			List<MetadataValue> ms = m.getMetadata("plane.health");
 			health = (Double) ms.get(0).value();
@@ -321,7 +320,7 @@ public class uPlaneManager {
 	 * @param breakIt Whether or not to break the car if necessary
 	 */
 	public void damagePlane(Minecart m, Plane plane, double damage, boolean breakIt){
-		double health = plane.health;
+		double health = plane.getHealth();
 		if(m.hasMetadata("plane.health")){
 			List<MetadataValue> ms = m.getMetadata("plane.health");
 			health = (Double) ms.get(0).value();

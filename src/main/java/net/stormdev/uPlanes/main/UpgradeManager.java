@@ -20,7 +20,7 @@ public class UpgradeManager {
 		String upgradeMsg = Lang.get("general.upgrade.msg");
 		if(upgrade.getType() == Material.IRON_BLOCK){
 			//Health upgrade
-			double health = plane.health;
+			double health = plane.getHealth();
 			double maxHealth = main.config.getDouble("general.planes.maxHealth");
 			double bonus = (9*upgrade.getAmount());
 			health = health + bonus; //Add 9 to health stat per item
@@ -33,11 +33,11 @@ public class UpgradeManager {
 			upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%value%"), health+" (Max: "+maxHealth+")");
 			player.sendMessage(upgradeMsg);
 			upgrade.setAmount(0);
-			plane.health = health;
+			plane.setHealth(health);
 		}
 		else if(upgrade.getType() == Material.IRON_INGOT){
 			//Health upgrade
-			double health = plane.health;
+			double health = plane.getHealth();
 			double maxHealth = main.config.getDouble("general.planes.maxHealth");
 			double bonus = upgrade.getAmount();
 			health = health + bonus; //Add 1 to health stat per item
@@ -50,11 +50,11 @@ public class UpgradeManager {
 			upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%value%"), health+" (Max: "+maxHealth+")");
 			player.sendMessage(upgradeMsg);
 			upgrade.setAmount(0);
-			plane.health = health;
+			plane.setHealth(health);
 		}
 		else if(upgrade.getType() == Material.REDSTONE){
 			//Health upgrade
-			double speed = plane.mutliplier;
+			double speed = plane.getSpeed();
 			double maxSpeed = 200;
 			double bonus = (1*upgrade.getAmount());
 			speed += bonus; //Add 1 to health stat per item
@@ -67,11 +67,11 @@ public class UpgradeManager {
 			upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%value%"), speed+" (Max: "+maxSpeed+")");
 			player.sendMessage(upgradeMsg);
 			upgrade.setAmount(0);
-			plane.mutliplier = speed;
+			plane.setSpeed(speed);
 		}
 		else if(upgrade.getType() == Material.REDSTONE_BLOCK){
 			//Health upgrade
-			double speed = plane.mutliplier;
+			double speed = plane.getSpeed();
 			double maxSpeed = 200;
 			double bonus = (9*upgrade.getAmount());
 			speed += bonus; //Add 9 to health stat per item
@@ -84,13 +84,12 @@ public class UpgradeManager {
 			upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%value%"), speed+" (Max: "+maxSpeed+")");
 			player.sendMessage(upgradeMsg);
 			upgrade.setAmount(0);
-			plane.mutliplier = speed;
+			plane.setSpeed(speed);
 		}
 		//Perform actions to clear up what we've done
 		inv.clear(1);
 		if(update){
 			inv.setItem(0, PlaneItemMethods.getItem(plane));
-			main.plugin.planeManager.setPlane(id, plane);
 			player.updateInventory();
 		}
 	}

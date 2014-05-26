@@ -2,7 +2,6 @@ package net.stormdev.uPlanes.main;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 import net.gravitydevelopment.anticheat.api.AntiCheatAPI;
@@ -11,7 +10,7 @@ import net.stormdev.uPlanes.api.AutopilotDestination;
 import net.stormdev.uPlanes.api.Keypress;
 import net.stormdev.uPlanes.api.Plane;
 import net.stormdev.uPlanes.api.PlaneDeathEvent;
-import net.stormdev.uPlanes.api.Stat;
+import net.stormdev.uPlanes.items.ItemPlaneValidation;
 import net.stormdev.uPlanes.utils.Lang;
 import net.stormdev.uPlanes.utils.PlaneUpdateEvent;
 import net.stormdev.uPlanes.utils.StatValue;
@@ -29,7 +28,6 @@ import org.bukkit.block.Sign;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.HumanEntity;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -43,7 +41,7 @@ import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
-import org.bukkit.event.entity.ItemDespawnEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -83,6 +81,14 @@ public class uPlanesListener implements Listener {
 		perms = main.config.getBoolean("general.planes.perms");
 		perm = main.config.getString("general.planes.flyPerm");
 		safeExit = main.config.getBoolean("general.planes.safeExit");
+	}
+	
+	@EventHandler(priority = EventPriority.MONITOR)
+	void despawn(EntityDeathEvent event){
+		if(!plugin.planeManager.isPlaneInUse(event.getEntity().getUniqueId())){
+			return;
+		}
+		plugin.planeManager.noLongerPlaced(event.getEntity().getUniqueId());
 	}
 	
 	@EventHandler(priority = EventPriority.LOW)
@@ -204,7 +210,7 @@ public class uPlanesListener implements Listener {
 	    	        if(!(exited instanceof Player) || !(veh instanceof Minecart)){
 	    	        	return;
 	    	        }
-	    	        if(!plugin.planeManager.isAPlane(veh.getUniqueId())){
+	    	        if(!plugin.planeManager.isPlaneInUse(veh.getUniqueId())){
 	    	        	return;
 	    	        }
 	    	        Player player = (Player) exited;
@@ -218,7 +224,7 @@ public class uPlanesListener implements Listener {
 	        if(!(exited instanceof Player) || !(veh instanceof Minecart)){
 	        	return;
 	        }
-	        if(!plugin.planeManager.isAPlane(veh.getUniqueId())){
+	        if(!plugin.planeManager.isPlaneInUse(veh.getUniqueId())){
 	        	return;
 	        }
 	        Player player = (Player) exited;
@@ -328,7 +334,7 @@ public class uPlanesListener implements Listener {
 			return;
 		}
 		
-		if(plane.stats.containsKey("plane.hover")){
+		if(plane.isHover()){
 			vehicle.setMetadata("plane.hover", new StatValue(true, main.plugin));
 			if(main.perms){
 				if(!player.hasPermission("uplanes.hoverplane")){
@@ -394,7 +400,7 @@ public class uPlanesListener implements Listener {
 		Location loc = vehicle.getLocation();
 		Vector travel = event.getTravelVector();
 		double y = 0.0;
-		double multiplier = plane.mutliplier;
+		double multiplier = plane.getSpeed();
 		
 		travel.multiply(multiplier);
 	    Keypress press = event.getPressedKey();
@@ -483,15 +489,14 @@ public class uPlanesListener implements Listener {
 		}
 		
 		ent.setMetadata("ucars.ignore", new StatValue(true, main.plugin));
-		ent.setMetadata("plane.health", new StatValue(plane.health, main.plugin));
-		if(plane.stats.containsKey("plane.hover")){
+		ent.setMetadata("plane.health", new StatValue(plane.getHealth(), main.plugin));
+		if(plane.isHover()){
 			ent.setMetadata("plane.hover", new StatValue(true, main.plugin));
 		}
 		
-		plane.isPlaced = true;
-		plane.id = ent.getUniqueId();
+		plane.setId(ent.getUniqueId());
 		
-		main.plugin.planeManager.setPlane(plane.id, plane);
+		main.plugin.planeManager.nowPlaced(plane);
 		return;
 	}
 	
@@ -506,29 +511,6 @@ public class uPlanesListener implements Listener {
 			return;
 		}
 		event.setCancelled(true); //Don't allow, let health handle it
-	}
-	
-	@EventHandler
-	void lostPlanes(final ItemDespawnEvent event){
-		Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable(){
-
-			@Override
-			public void run() {
-				Item i = event.getEntity();
-				ItemStack is = i.getItemStack();
-				if(is.getType() != Material.MINECART){
-					return;
-				}
-				ItemMeta im = is.getItemMeta();
-				if(im.getLore() == null || im.getLore().size() < 1){
-					return;
-				}
-				String id = ChatColor.stripColor(im.getLore().get(0));
-				UUID planeId = UUID.fromString(id);
-				plugin.planeManager.removePlane(planeId);
-				return;
-			}});
-		return;
 	}
 	
 	@EventHandler(priority=EventPriority.HIGHEST)
@@ -567,7 +549,7 @@ public class uPlanesListener implements Listener {
 			}
 		}
 		
-		double health = plane.health;
+		double health = plane.getHealth();
 		if(m.hasMetadata("plane.health")){
 			List<MetadataValue> ms = m.getMetadata("plane.health");
 			health = (Double) ms.get(0).value();
@@ -646,8 +628,8 @@ public class uPlanesListener implements Listener {
 		}
 		Plane plane = PlaneGenerator.gen();
 		if(hover){
-			plane.name = "Hover Plane";
-			plane.stats.put("plane.hover", new Stat("Hover", "Yes", main.plugin, true));
+			plane.setName("Hover Plane");
+			plane.setHover(true);
 		}
 		if(player != null){
 			if(main.perms){
@@ -660,7 +642,6 @@ public class uPlanesListener implements Listener {
 			}
 		}
         event.setCurrentItem(PlaneItemMethods.getItem(plane));
-        main.plugin.planeManager.setPlane(plane.id, plane);
 		return;
 	}
 	
@@ -710,32 +691,20 @@ public class uPlanesListener implements Listener {
 		}
 		if(!(item.getType() == Material.MINECART) || 
 				item.getItemMeta().getLore().size() < 2){
-			return; //Not a car
+			return; //Not a plane
 		}
 		//Anvil contains a car in first slot.
 		ItemMeta meta = item.getItemMeta();
 		List<String> lore = meta.getLore();
-		final UUID id;
-		try {
-			if(lore.size() < 1){
-				return;
-			}
-			id = UUID.fromString(ChatColor.stripColor(lore.get(0)));
-		} catch (Exception e) {
-			return;
-		}
-		Plane plane = plugin.planeManager.getPlane(id);
+		Plane plane = ItemPlaneValidation.getPlane(item);
 		if(plane == null){
 			return;
 		}
-		@SuppressWarnings("unused")
-		final ConcurrentHashMap<String, Stat> stats = plane.stats;
         if(save && slotNumber ==2){
 			//They are renaming it
         	ItemStack result = event.getCurrentItem();
         	String name = ChatColor.stripColor(result.getItemMeta().getDisplayName());
-        	plane.name = name;
-        	plugin.planeManager.setPlane(id, plane);
+        	plane.setName(name);
         	player.sendMessage(main.colors.getSuccess()+"+"+main.colors.getInfo()+" Renamed plane to: '"+name+"'");
         	return;
 		}
@@ -761,7 +730,7 @@ public class uPlanesListener implements Listener {
 						return;
 					}
 					//A dirty trick to get the inventory to look correct on the client
-					UpgradeManager.applyUpgrades(upgrade, ca, updat, sav, player, i, id);
+					UpgradeManager.applyUpgrades(upgrade, ca, updat, sav, player, i, ca.getId());
 					return;
 				}}, 1l);
 			set = true;
@@ -780,15 +749,14 @@ public class uPlanesListener implements Listener {
 		if(pickup && slotNumber == 1){
 			return; //Don't bother tracking and updating, etc...
 		} 
-		UpgradeManager.applyUpgrades(upgrade, plane, update, save, player, i, id);
+		UpgradeManager.applyUpgrades(upgrade, plane, update, save, player, i, plane.getId());
 		return;
 	}
 	
 	public void killPlane(Vehicle vehicle, Plane plane){
 		//Kill plane
 		UUID id = vehicle.getUniqueId();
-		plane.isPlaced = false;
-		plugin.planeManager.setPlane(id, plane);
+		plugin.planeManager.noLongerPlaced(id);
 		final Location loc = vehicle.getLocation();
 		Entity top = vehicle.getPassenger();
 		if(top instanceof Player){
@@ -818,6 +786,6 @@ public class uPlanesListener implements Listener {
 	}
 	
 	public Boolean isAPlane(Minecart m){
-		return plugin.planeManager.isAPlane(m.getUniqueId());
+		return plugin.planeManager.isPlaneInUse(m.getUniqueId());
 	}
 }

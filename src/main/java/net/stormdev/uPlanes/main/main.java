@@ -93,7 +93,7 @@ public class main extends JavaPlugin {
 		File langFile = new File(getDataFolder().getAbsolutePath()
 				+ File.separator + "lang.yml");
 		File planesSaveFile = new File(getDataFolder().getAbsolutePath()
-				+ File.separator + "Data" + File.separator + "planes.data");
+				+ File.separator + "Data" + File.separator + "uplanes.data");
 		File destinationSaveFile = new File(getDataFolder().getAbsolutePath()
 				+ File.separator + "Data" + File.separator + "destinations.locationdata");
 		if (langFile.exists() == false

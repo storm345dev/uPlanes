@@ -24,7 +24,7 @@ public class uCarsCompatibility {
 		api.registerCarCheck(main.plugin, new CarCheck(){
 
 			public Boolean isACar(Minecart car) {
-				if(main.plugin.planeManager.isAPlane(car.getUniqueId())){
+				if(main.plugin.planeManager.isPlaneInUse(car.getUniqueId())){
 					car.setMetadata("ucars.ignore", new StatValue(true, main.plugin));
 					return false;
 				}
@@ -45,7 +45,7 @@ public class uCarsCompatibility {
 				} catch (Exception e) {
 					return false;
 				}
-				if(main.plugin.planeManager.isAPlane(uuid)){
+				if(main.plugin.planeManager.isPlaneInUse(uuid)){
 					return false;
 				}
 				return true;

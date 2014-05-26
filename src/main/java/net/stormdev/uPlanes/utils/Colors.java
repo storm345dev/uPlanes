@@ -17,6 +17,14 @@ public class Colors {
 		this.title = Colors.colorise(title);
 		this.tp = Colors.colorise(tp);
 	}
+	
+	public static String strip(String in){
+		in = ChatColor.stripColor(in);
+		in = ChatColor.translateAlternateColorCodes('&', in);
+		in = ChatColor.translateAlternateColorCodes('§', in);
+		in = ChatColor.translateAlternateColorCodes('?', in);
+		return in;
+	}
 
 	public String getSuccess() {
 		return this.success;
