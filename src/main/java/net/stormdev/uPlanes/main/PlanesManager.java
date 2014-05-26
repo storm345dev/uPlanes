@@ -12,11 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.stormdev.uPlanes.api.Plane;
 import net.stormdev.uPlanes.items.ItemPlaneValidation;
 
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class PlanesManager {
