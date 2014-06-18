@@ -14,7 +14,14 @@ public class PlaneGenerator {
 		
 		double health = main.plugin.random.nextInt(healthTopBand-healthBottomBand)+healthBottomBand;
 		int si = (defMult+50)-(defMult-50)+(defMult-50);
-		double speed = (main.plugin.random.nextInt((int)(si-main.maxSpeed)))+si;
+		if(si < 0){
+			si = 0;
+		}
+		int i = (int) (si-main.maxSpeed);
+		if(i<=0){
+			i = 1;
+		}
+		double speed = (main.plugin.random.nextInt((int)(i)))+si;
 		
 		if(health > maxHealth){
 			health = maxHealth;
