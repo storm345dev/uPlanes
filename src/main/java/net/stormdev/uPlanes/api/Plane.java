@@ -32,6 +32,9 @@ public class Plane implements Serializable {
 	}
 	
 	public Plane(double speed, String name, double health, boolean hover){
+		if(speed > main.maxSpeed){
+			speed = main.maxSpeed;
+		}
 		this.mutliplier = speed;
 		this.name = name;
 		this.health = health;
@@ -73,10 +76,16 @@ public class Plane implements Serializable {
 	}
 
 	public double getSpeed() {
+		if(this.mutliplier > main.maxSpeed){
+			this.mutliplier = main.maxSpeed;
+		}
 		return mutliplier;
 	}
 
 	public void setSpeed(double speed) {
+		if(speed > main.maxSpeed){
+			speed = main.maxSpeed;
+		}
 		this.mutliplier = speed;
 	}
 

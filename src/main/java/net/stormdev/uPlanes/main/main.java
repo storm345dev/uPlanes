@@ -76,13 +76,17 @@ public class main extends JavaPlugin {
 	 * @return If an economy plugin was found or not
 	 */
 	public boolean setupEconomy() {
-		RegisteredServiceProvider<Economy> economyProvider = getServer()
-				.getServicesManager().getRegistration(
-						net.milkbowl.vault.economy.Economy.class);
-		if (economyProvider != null) {
-			economy = economyProvider.getProvider();
+		try {
+			RegisteredServiceProvider<Economy> economyProvider = getServer()
+					.getServicesManager().getRegistration(
+							net.milkbowl.vault.economy.Economy.class);
+			if (economyProvider != null) {
+				economy = economyProvider.getProvider();
+			}
+			return (economy != null);
+		} catch (Exception e) {
+			return false;
 		}
-		return (economy != null);
 	}
 	
 	
