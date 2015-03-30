@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-import net.gravitydevelopment.anticheat.api.AntiCheatAPI;
-import net.gravitydevelopment.anticheat.check.CheckType;
 import net.stormdev.uPlanes.api.AutopilotDestination;
 import net.stormdev.uPlanes.api.Keypress;
 import net.stormdev.uPlanes.api.Plane;
@@ -205,7 +203,7 @@ public class uPlanesListener implements Listener {
 	    	//Safe exit
 		 	Vehicle veh = event.getVehicle();
 	    	if(!safeExit){
-	    		if(Bukkit.getServer().getPluginManager().getPlugin("AntiCheat") != null){
+	    		/*if(Bukkit.getServer().getPluginManager().getPlugin("AntiCheat") != null){
 	    			final Entity exited = event.getExited();
 	    	        if(!(exited instanceof Player) || !(veh instanceof Minecart)){
 	    	        	return;
@@ -215,7 +213,7 @@ public class uPlanesListener implements Listener {
 	    	        }
 	    	        Player player = (Player) exited;
 	    			AntiCheatAPI.unexemptPlayer(player, CheckType.FLY);
-			 	}
+			 	}*/
 	    		return; //Don't bother
 	    	}
 	    	final Location loc = veh.getLocation();
@@ -242,10 +240,10 @@ public class uPlanesListener implements Listener {
 
 					public void run() {
 						exited.teleport(loc.add(0, 0.5, 0));
-						if(Bukkit.getServer().getPluginManager().getPlugin("AntiCheat") != null){
+						/*if(Bukkit.getServer().getPluginManager().getPlugin("AntiCheat") != null){
 			    	        Player player = (Player) exited;
 			    			AntiCheatAPI.unexemptPlayer(player, CheckType.FLY);
-					 	}
+					 	}*/
 						return;
 					}}, 2l); //Teleport back to car loc after exit
 	        }
@@ -266,9 +264,9 @@ public class uPlanesListener implements Listener {
 		}
 		if(passenger instanceof Player){
 			Player player = (Player) passenger;
-			if(Bukkit.getServer().getPluginManager().getPlugin("AntiCheat") != null){
+			/*if(Bukkit.getServer().getPluginManager().getPlugin("AntiCheat") != null){
 				AntiCheatAPI.exemptPlayer(player, CheckType.FLY);
-			}
+			}*/
 		}
 		if(veh.hasMetadata("plane.destination")){
 			//Autopilot
@@ -767,9 +765,9 @@ public class uPlanesListener implements Listener {
 
 					public void run() {
 						pl.teleport(loc.clone().add(0, 0.5, 0));
-						if(Bukkit.getServer().getPluginManager().getPlugin("AntiCheat") != null){
+						/*if(Bukkit.getServer().getPluginManager().getPlugin("AntiCheat") != null){
 			    			AntiCheatAPI.unexemptPlayer(pl, CheckType.FLY);
-					 	}
+					 	}*/
 						return;
 					}}, 2l); //Teleport back to car loc after exit
 			}
