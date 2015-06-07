@@ -99,25 +99,19 @@ public class FlightControl {
 		}
 		
 		Block next = current.add(toGo).getBlock();
-		Block next2 = next.getRelative(direction);
 		
-		if(!next.isEmpty()){
-			asc = true;
-			x = -x * 0.25;
-			z = -z * 0.25;
-			y = 1; //Go up fast
-		}
-		else if(!next2.isEmpty()){
-			asc = true;
-			x = -x * 0.25;
-			z = -z * 0.25;
-			y = 1; //Go up fast
-		}
-		else if(!next2.getRelative(direction).isEmpty()){
-			asc = true;
-			x *= 0.25;
-			z *= 0.25;
-			y = 0.6; //Go up
+		for(int i=0;i<5;i++){
+			Block n = next;
+			if(i > 0){
+				n = next.getRelative(direction, i);
+			}
+			if(!n.isEmpty()){
+				asc = true;
+				x = -x * 0.25;
+				z = -z * 0.25;
+				y = 1; //Go up fast
+				break;
+			}
 		}
 		if(asc
 				&& (!next.getRelative(BlockFace.UP).isEmpty()
