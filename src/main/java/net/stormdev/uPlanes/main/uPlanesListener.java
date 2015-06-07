@@ -13,6 +13,7 @@ import net.stormdev.uPlanes.utils.Lang;
 import net.stormdev.uPlanes.utils.PlaneUpdateEvent;
 import net.stormdev.uPlanes.utils.StatValue;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Effect;
 import org.bukkit.Location;
@@ -643,7 +644,7 @@ public class uPlanesListener implements Listener {
 	}
 	
 	@EventHandler (priority = EventPriority.MONITOR)
-	void carUpgradeAnvil(InventoryClickEvent event){
+	void planeUpgradeAnvil(final InventoryClickEvent event){
 		if(event.getAction()==InventoryAction.CLONE_STACK){
 			ItemStack cloned = event.getCursor();
 			if(cloned.getType() == Material.MINECART || 
@@ -657,6 +658,12 @@ public class uPlanesListener implements Listener {
 		}
 		final Player player = (Player) event.getWhoClicked();
 		InventoryView view = event.getView();
+		
+		if(event.isShiftClick() && (view.getBottomInventory() instanceof AnvilInventory || view.getTopInventory() instanceof AnvilInventory)){
+			event.setCancelled(true); //Disables shift clicking stuff into anvils since it doesn't update properly with the upgrading
+			return;
+		}
+		
 		final Inventory i = event.getInventory();
 		if(!(i instanceof AnvilInventory)){
 			return;
@@ -684,6 +691,23 @@ public class uPlanesListener implements Listener {
 			return;
 		}
 		if(item == null){
+			if(!pickup && i.getItem(1) != null){ //Put down item and already an upgrade in slot 2...
+				ItemStack held = event.getCursor();
+				Plane plane = ItemPlaneValidation.getPlane(held);
+				if(plane == null){
+					return;
+				}
+				//They just placed the plane; revalidate upgrades next tick
+				Bukkit.getScheduler().runTaskLater(main.plugin, new Runnable(){
+
+					@Override
+					public void run() {
+						if(i.getItem(0) != null){
+							planeUpgradeAnvil(event);
+						}
+						return;
+					}}, 1l);
+			}
 			return;
 		}
 		if(!(item.getType() == Material.MINECART) || 
