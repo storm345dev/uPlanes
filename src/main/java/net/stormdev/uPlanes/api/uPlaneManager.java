@@ -1,5 +1,6 @@
 package net.stormdev.uPlanes.api;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -30,6 +31,57 @@ import org.bukkit.metadata.MetadataValue;
 public class uPlaneManager {
 	protected uPlaneManager(){
 		//Only classes in package can generate
+	}
+	
+	private volatile List<AccelerationModifier> accelMods = new ArrayList<AccelerationModifier>();
+	private volatile List<AccelerationModifier> decelMods = new ArrayList<AccelerationModifier>();
+	
+	/**
+	 * Sets an acceleration modifer which calculates player's different accelerations
+	 * @param mod The mod to add
+	 */
+	public void addAccelerationModifier(AccelerationModifier mod){
+		accelMods.add(mod);
+	}
+	
+	/**
+	 * Removes a registered acceleration modifer
+	 * @param mod The mod to remove
+	 */
+	public void removeAccelerationModifier(AccelerationModifier mod){
+		accelMods.remove(mod);
+	}
+	
+	/**
+	 * Sets a deceleration modifer which calculates player's different accelerations
+	 * @param mod The mod to add
+	 */
+	public void addDecelerationModifier(AccelerationModifier mod){
+		decelMods.add(mod);
+	}
+	
+	/**
+	 * Removes a registered deceleration modifer
+	 * @param mod The mod to remove
+	 */
+	public void removeDecelerationModifier(AccelerationModifier mod){
+		decelMods.remove(mod);
+	}
+
+	public double getAlteredDecelerationMod(Player player, Minecart cart, Plane plane){
+		double current = 1.0d;
+		for(AccelerationModifier am:new ArrayList<AccelerationModifier>(decelMods)){
+			current *= am.getAccelerationMultiplier(player, cart, plane);
+		}
+		return current;
+	}
+	
+	public double getAlteredAccelerationMod(Player player, Minecart cart, Plane plane){
+		double current = 1.0d;
+		for(AccelerationModifier am:new ArrayList<AccelerationModifier>(accelMods)){
+			current *= am.getAccelerationMultiplier(player, cart, plane);
+		}
+		return current;
 	}
 	
 	/**

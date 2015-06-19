@@ -1,6 +1,7 @@
 package net.stormdev.uPlanes.main;
 
 import net.stormdev.uPlanes.api.Keypress;
+import net.stormdev.uPlanes.api.Plane;
 import net.stormdev.uPlanes.utils.PlaneUpdateEvent;
 import net.stormdev.uPlanes.utils.StatValue;
 
@@ -10,12 +11,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
 public class MotionManager {
-
+	
 	public static void move(Player player, float f, float s) {
-		if(f == 0 && s == 0){
-			//Not moving
-			return;
-		}
 		Vector vec = new Vector();
 		Entity ent = player.getVehicle();
 		if (ent == null) {
@@ -28,23 +25,34 @@ public class MotionManager {
 			return;
 		}
 		Minecart plane = (Minecart) ent;
-		if(!main.plugin.listener.isAPlane(plane)){
+		Plane pln = main.plugin.listener.getPlane(plane);
+		if(pln == null){
 			//Not a plane
 			return;
 		}
-		Vector plaD = player.getEyeLocation().getDirection();
-		Keypress pressed = Keypress.W;
-		Boolean forwardMotion = true;
-		if(f==0){
-			forwardMotion = false;
+		
+		boolean decel = true;
+		if(f == 0 && s == 0){
+			if(AccelerationManager.getCurrentMultiplier(plane) == 0){
+				
+				//Not moving
+				return;
+			}
+			if(pln.isHover()){
+				AccelerationManager.setCurrentAccel(plane, 0);
+			}
 		}
-		Boolean forwards = false; // if true, forwards, else backwards
+		
+		Vector plaD = player.getEyeLocation().getDirection();
+		Keypress pressed = Keypress.NONE;
+		/*if(f==0 && pln.isHover()){
+			forwardMotion = false;
+		}*/
 		int side = 0; // -1=left, 0=straight, 1=right
 		Boolean turning = false;
-		if (f < 0) {
-			forwards = false;
-		} else {
-			forwards = true;
+		if(f > 0){
+			pressed = Keypress.W;
+			decel = false;
 		}
 		if (s > 0) {
 			side = -1;
@@ -78,17 +86,24 @@ public class MotionManager {
 		if (!isLeft) {
 			plane.removeMetadata("plane.left", main.plugin);
 		}
-		if(!forwards){
+		if(f < 0 && pln.isHover()){
 			pressed = Keypress.S;
-			x =  - x;
-			z =  - z;
 		}
-		if(!forwardMotion){
+		/*if(!forwardMotion && pln.isHover()){
 			x = 0;
 			z = 0;
-		}
+		}*/
+		
+		double accelMod = !decel ? AccelerationManager.getMultiplier(player, plane, pln) 
+				: (f == 0 ? AccelerationManager.decelerateAndGetMult(player, plane, pln) 
+						: AccelerationManager.decelerateAndGetMult(player, plane, pln));
+		
+		x *= accelMod;
+		y *= accelMod;
+		z *= accelMod;
+		
 		vec = new Vector(x, y, z);
-		final PlaneUpdateEvent event = new PlaneUpdateEvent(plane, vec, player, pressed);
+		final PlaneUpdateEvent event = new PlaneUpdateEvent(plane, vec, player, pressed, accelMod, pln);
 		main.plugin.getServer().getScheduler()
 				.runTask(main.plugin, new Runnable() {
 					public void run() {

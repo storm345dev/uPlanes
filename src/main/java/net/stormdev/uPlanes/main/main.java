@@ -55,6 +55,7 @@ public class main extends JavaPlugin {
 	public static boolean perms = true;
 	public static boolean upgradePerms = false;
 	public static double maxSpeed = 200;
+	public static boolean doAcceleration = true;
 	
 	public ProtocolManager protocolManager = null;
 	public uPlanesListener listener = null;
@@ -260,6 +261,10 @@ public class main extends JavaPlugin {
         		config.set("general.planes.maxSpeed", 200.0d);
         	}
         	maxSpeed = config.getDouble("general.planes.maxSpeed");
+        	if(!config.contains("general.planes.doAcceleration")){
+        		config.set("general.planes.doAcceleration", true);
+        	}
+        	doAcceleration = config.getBoolean("general.planes.doAcceleration");
         	if(!config.contains("general.planes.safeExit")){
         		config.set("general.planes.safeExit", true);
         	}

@@ -5,5 +5,5 @@ package net.stormdev.uPlanes.api;
  *
  */
 public enum Keypress {
-W,A,S,D,UNKNOWN
+W,A,S,D,NONE,UNKNOWN
 }

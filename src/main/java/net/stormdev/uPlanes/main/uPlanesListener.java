@@ -198,10 +198,21 @@ public class uPlanesListener implements Listener {
 			return;
 		}
 	
-	 @EventHandler (priority = EventPriority.LOW) //Call early
+	 @EventHandler (priority = EventPriority.HIGHEST) //Call late
 	    void vehicleExit(VehicleExitEvent event){
+		 	if(event.isCancelled()){
+		 		return;
+		 	}
 	    	//Safe exit
 		 	Vehicle veh = event.getVehicle();
+		 	final Entity exited = event.getExited();
+		 	if(!(exited instanceof Player) || !(veh instanceof Minecart)){
+	        	return;
+	        }
+	        if(!plugin.planeManager.isPlaneInUse(veh.getUniqueId())){
+	        	return;
+	        }
+	        veh.removeMetadata(AccelerationManager.ACCEL_META, main.plugin);
 	    	if(!safeExit){
 	    		/*if(Bukkit.getServer().getPluginManager().getPlugin("AntiCheat") != null){
 	    			final Entity exited = event.getExited();
@@ -218,13 +229,6 @@ public class uPlanesListener implements Listener {
 	    	}
 	    	final Location loc = veh.getLocation();
 	        Block b = loc.getBlock();
-	        final Entity exited = event.getExited();
-	        if(!(exited instanceof Player) || !(veh instanceof Minecart)){
-	        	return;
-	        }
-	        if(!plugin.planeManager.isPlaneInUse(veh.getUniqueId())){
-	        	return;
-	        }
 	        Player player = (Player) exited;
 	        if(exited.isDead() || player.getHealth() < 1){
 	        	return; //Allow them to exit
@@ -288,6 +292,7 @@ public class uPlanesListener implements Listener {
 			FlightControl.route(dest, loc, veh);
 			return;
 		}
+		
 		if(!veh.hasMetadata("plane.hover")){
 			return;
 		}
@@ -339,7 +344,7 @@ public class uPlanesListener implements Listener {
 		}
 		
 		Minecart cart = (Minecart) vehicle;
-		Plane plane = getPlane(cart);
+		Plane plane = event.getPlane();
 		
 		if(plane == null){ //Not a plane, just a Minecart
 			return;
@@ -416,11 +421,13 @@ public class uPlanesListener implements Listener {
 		travel.multiply(multiplier);
 	    Keypress press = event.getPressedKey();
 		
+	    float vertAmount = (float) (0.01 * multiplier * (plane.isHover() ? 1:event.getAcceleration()));
+	    
 	    switch(press){
 		case A: 
-			y = 0.6; break; //Go up
+			y = vertAmount; break; //Go up
 		case D: 
-			y = -0.6; break; //Go down
+			y = -vertAmount; break; //Go down
 		default:
 			break;
 		}
@@ -429,6 +436,10 @@ public class uPlanesListener implements Listener {
 			y = 0;
 			//Send message it's too high
 			player.sendMessage(main.colors.getError()+Lang.get("general.heightLimit"));
+		}
+		
+		if((new Vector(travel.getX(), 0, travel.getZ()).lengthSquared() < 0.8 && event.getAcceleration() < 0.8) && !plane.isHover()){
+			y = cart.getVelocity().getY(); //Need more speed to take off
 		}
 		
 		travel.setY(y);

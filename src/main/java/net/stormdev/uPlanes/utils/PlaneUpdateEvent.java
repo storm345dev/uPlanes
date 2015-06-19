@@ -1,6 +1,7 @@
 package net.stormdev.uPlanes.utils;
 
 import net.stormdev.uPlanes.api.Keypress;
+import net.stormdev.uPlanes.api.Plane;
 
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Vehicle;
@@ -14,12 +15,20 @@ public class PlaneUpdateEvent extends VehicleUpdateEvent implements Cancellable 
 	private Boolean cancelled = false;
 	private Player player;
 	private Keypress pressed;
+	private double acceleration;
+	private Plane plane;
 
-	public PlaneUpdateEvent(Vehicle vehicle, Vector toTravel, Player player, Keypress pressed) {
+	public PlaneUpdateEvent(Vehicle vehicle, Vector toTravel, Player player, Keypress pressed, double accelMod, Plane pln) {
 		super(vehicle);
 		this.toTravel = toTravel;
 		this.player = player;
 		this.pressed = pressed;
+		this.acceleration = accelMod;
+		this.plane = pln;
+	}
+	
+	public Plane getPlane(){
+		return this.plane;
 	}
 	
 	public Keypress getPressedKey(){
@@ -49,6 +58,10 @@ public class PlaneUpdateEvent extends VehicleUpdateEvent implements Cancellable 
 
 	public void setCancelled(boolean arg0) {
 		this.cancelled = arg0;
+	}
+
+	public double getAcceleration() {
+		return acceleration;
 	}
 
 }
