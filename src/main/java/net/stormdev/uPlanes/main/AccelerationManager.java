@@ -67,7 +67,7 @@ public class AccelerationManager {
 	}
 	
 	private static float getDA(Player player, Minecart cart, Plane plane){ //Get the multiplier for accelerating
-		return (float) (0.020*uPlanesAPI.getPlaneManager().getAlteredDecelerationMod(player, cart, plane)); //Our constant of 0.025 multiplied by whatever the API is asking for as a modification to the rate of acceleration
+		return (float) (0.015*uPlanesAPI.getPlaneManager().getAlteredDecelerationMod(player, cart, plane)); //Our constant of 0.025 multiplied by whatever the API is asking for as a modification to the rate of acceleration
 	}
 	
 	private static float getGA(Player player, Minecart cart, Plane plane){ //Get the multiplier for accelerating

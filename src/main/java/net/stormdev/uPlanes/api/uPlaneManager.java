@@ -343,9 +343,64 @@ public class uPlaneManager {
 	 * @param plane The plane
 	 * @param damage The amount to damage it by
 	 * @param damager The damager
+	 * @param cause The cause of the damage
+	 * @param breakIt Whether or not to break the car if necessary
+	 */
+	public void damagePlane(Minecart m, Plane plane, double damage, Player damager, String cause, boolean breakIt){
+		//Plane being punched to death
+		double health = plane.getHealth();
+		if(m.hasMetadata("plane.health")){
+			List<MetadataValue> ms = m.getMetadata("plane.health");
+			health = (Double) ms.get(0).value();
+		}
+		String msg = Lang.get("general.damage.msg");
+		msg = msg.replaceAll(Pattern.quote("%damage%"), (damage)+"HP");
+		health -= damage;
+		if(health <= 0){
+			health = 0;
+		}
+		msg = msg.replaceAll(Pattern.quote("%remainder%"), (health)+"HP");
+		msg = msg.replaceAll(Pattern.quote("%cause%"), cause);
+		((Player)damager).sendMessage(main.colors.getInfo()+msg);
+		
+		damagePlane(m, plane, damage, breakIt);
+	}
+	
+	/**
+	 * Damage the given plane
+	 * 
+	 * @param m The plane entity
+	 * @param plane The plane
+	 * @param damage The amount to damage it by
+	 * @param damager The damager
+	 * @param cause The cause of the damage
+	 */
+	public void damagePlane(Minecart m, Plane plane, double damage, Player damager, String cause){
+		damagePlane(m, plane, damage, damager, cause, true);
+	}
+	
+	/**
+	 * Damage the given plane
+	 * 
+	 * @param m The plane entity
+	 * @param plane The plane
+	 * @param damage The amount to damage it by
+	 * @param damager The damager
 	 */
 	public void damagePlane(Minecart m, Plane plane, double damage, Player damager){
 		damagePlane(m, plane, damage, damager, true);
+	}
+	
+	/**
+	 * Damage the given plane
+	 * 
+	 * @param m The plane entity
+	 * @param plane The plane
+	 * @param damage The amount to damage it by
+	 * @param cause The cause of the damage
+	 */
+	public void damagePlane(Minecart m, Plane plane, double damage, String cause){
+		damagePlane(m, plane, damage, cause, true);
 	}
 	
 	/**
@@ -366,8 +421,9 @@ public class uPlaneManager {
 	 * @param plane The plane
 	 * @param damage The amount to damage it by
 	 * @param breakIt Whether or not to break the car if necessary
+	 * @param cause The cause of the damage
 	 */
-	public void damagePlane(Minecart m, Plane plane, double damage, boolean breakIt){
+	public void damagePlane(Minecart m, Plane plane, double damage, String cause, boolean breakIt){
 		double health = plane.getHealth();
 		if(m.hasMetadata("plane.health")){
 			List<MetadataValue> ms = m.getMetadata("plane.health");
@@ -375,14 +431,14 @@ public class uPlaneManager {
 		}
 		String msg = Lang.get("general.damage.msg");
 		Boolean die = false;
-		msg = msg.replaceAll(Pattern.quote("%damage%"), damage+"HP");
+		msg = msg.replaceAll(Pattern.quote("%damage%"), (damage)+"HP");
 		health -= damage;
 		if(health <= 0){
 			die = true;
 			health = 0;
 		}
-		msg = msg.replaceAll(Pattern.quote("%remainder%"), health+"HP");
-		msg = msg.replaceAll(Pattern.quote("%cause%"), "Damage");
+		msg = msg.replaceAll(Pattern.quote("%remainder%"), (health)+"HP");
+		msg = msg.replaceAll(Pattern.quote("%cause%"), cause);
 		
 		if(m.getPassenger() != null && m.getPassenger() instanceof Player){
 			((Player)m.getPassenger()).sendMessage(main.colors.getInfo()+msg);
@@ -401,5 +457,17 @@ public class uPlaneManager {
 			}
 		}
 		return;
+	}
+	
+	/**
+	 * Damage the given plane
+	 * 
+	 * @param m The plane entity
+	 * @param plane The plane
+	 * @param damage The amount to damage it by
+	 * @param breakIt Whether or not to break the car if necessary
+	 */
+	public void damagePlane(Minecart m, Plane plane, double damage, boolean breakIt){
+		damagePlane(m, plane, damage, "Damage", breakIt);
 	}
 }

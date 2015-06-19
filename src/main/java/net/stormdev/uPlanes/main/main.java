@@ -243,6 +243,9 @@ public class main extends JavaPlugin {
         	if (!config.contains("general.planes.maxHealth")) {
 				config.set("general.planes.maxHealth", 100.0);
 			}
+        	if (!config.contains("general.planes.enableCrashing")) {
+				config.set("general.planes.enableCrashing", true);
+			}
         	if (!config.contains("general.planes.punchDamage")) {
 				config.set("general.planes.punchDamage", 15.0);
 			}

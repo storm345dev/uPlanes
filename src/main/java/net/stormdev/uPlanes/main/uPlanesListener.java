@@ -8,9 +8,12 @@ import net.stormdev.uPlanes.api.AutopilotDestination;
 import net.stormdev.uPlanes.api.Keypress;
 import net.stormdev.uPlanes.api.Plane;
 import net.stormdev.uPlanes.api.PlaneDeathEvent;
+import net.stormdev.uPlanes.api.uPlanesAPI;
 import net.stormdev.uPlanes.items.ItemPlaneValidation;
 import net.stormdev.uPlanes.utils.Lang;
 import net.stormdev.uPlanes.utils.PlaneUpdateEvent;
+import net.stormdev.uPlanes.utils.PrePlaneCrashEvent;
+import net.stormdev.uPlanes.utils.PrePlaneRoughLandingEvent;
 import net.stormdev.uPlanes.utils.StatValue;
 
 import org.bukkit.Bukkit;
@@ -23,9 +26,12 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.Chest;
 import org.bukkit.block.DoubleChest;
 import org.bukkit.block.Sign;
+import org.bukkit.entity.Damageable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.Item;
+import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -47,6 +53,7 @@ import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
 import org.bukkit.event.vehicle.VehicleDestroyEvent;
+import org.bukkit.event.vehicle.VehicleEntityCollisionEvent;
 import org.bukkit.event.vehicle.VehicleExitEvent;
 import org.bukkit.event.vehicle.VehicleUpdateEvent;
 import org.bukkit.inventory.AnvilInventory;
@@ -68,6 +75,7 @@ public class uPlanesListener implements Listener {
 	private String perm;
 	private boolean safeExit;
 	private boolean fuel;
+	private boolean crashing = false;
 	private String fuelBypassPerm;
 	
 	public uPlanesListener(main instance){
@@ -79,6 +87,53 @@ public class uPlanesListener implements Listener {
 		perms = main.config.getBoolean("general.planes.perms");
 		perm = main.config.getString("general.planes.flyPerm");
 		safeExit = main.config.getBoolean("general.planes.safeExit");
+		crashing = main.config.getBoolean("general.planes.enableCrashing");
+	}
+	
+	@EventHandler
+	void entityCrash(VehicleEntityCollisionEvent event){
+		//TODO
+		if(!crashing){
+			return;
+		}
+		Vehicle veh = event.getVehicle();
+		if(veh == null || !(veh instanceof Minecart)){
+			return;
+		}
+		Minecart m = (Minecart) veh;
+		Plane plane = getPlane(m);
+		if(plane == null){ //Not a plane
+			return;
+		}
+		
+		Entity collided = event.getEntity();
+		if(collided == null || (collided instanceof Item) || (collided instanceof ItemFrame)){
+			return;
+		}
+		if(m.getPassenger() != null && collided.equals(m.getPassenger())){
+			return;
+		}
+		double speedSq = m.getVelocity().lengthSquared();
+		if(speedSq < 0.2){ //Going v. slow
+			return;
+		}
+		
+		double damage = 20.0 * speedSq;
+		damage = Math.round(damage*10.0d)/10.0d;
+		if(damage < 1){
+			damage = 1;
+		}
+		if(damage > 15){
+			damage = 15;
+		}
+		if(collided instanceof Damageable){
+			if(collided instanceof Player){
+				((Player)collided).sendMessage(ChatColor.RED+"You collided with a plane!");
+			}
+			collided.setVelocity(m.getVelocity().clone().setY(3));
+			((Damageable) collided).damage(damage, m);
+		}
+		uPlanesAPI.getPlaneManager().damagePlane(m, plane, damage, "Crash");
 	}
 	
 	@EventHandler(priority = EventPriority.MONITOR)
@@ -358,6 +413,64 @@ public class uPlanesListener implements Listener {
 					return;
 				}
 			}
+		} else if(crashing){
+			//Check if they crashed xD
+			Block current = cart.getLocation().getBlock();
+			Block b = null;
+			if(current.isEmpty() || current.isLiquid()){
+				Location nextHorizontal = cart.getLocation().add(new Vector(cart.getVelocity().getX(), 0, cart.getVelocity().getZ()));
+				b = nextHorizontal.getBlock();
+				if(!b.isEmpty() && !b.isLiquid() && b.getType().isSolid() && !b.getType().equals(Material.CARPET)){ //Crashed into something
+					b = b.getRelative(BlockFace.UP);
+					String bt = b.getType().name().toLowerCase();
+					if((!b.isEmpty() && !b.isLiquid() && b.getType().isSolid())
+							|| (!bt.contains("step")
+									&& !bt.contains("carpet")
+									&& (!bt.contains("grass") && !b.getType().equals(Material.GRASS))
+									)){ //Crashed into definitely a wall or something bad
+						double speedSq = cart.getVelocity().lengthSquared();
+						if(speedSq > 0.2){ //Going v. slow
+							double damage = 100.0 * speedSq;
+							damage = Math.round(damage*10.0d)/10.0d;
+							if(damage < 1){
+								damage = 1;
+							}
+							if(damage > 100){
+								damage = 100;
+							}
+							
+							PrePlaneCrashEvent evt = new PrePlaneCrashEvent(cart, player, event.getAcceleration(), plane, damage);
+							Bukkit.getPluginManager().callEvent(evt);
+							
+							if(!evt.isCancelled() && evt.getDamage() > 0){
+								uPlanesAPI.getPlaneManager().damagePlane(cart, plane, evt.getDamage(), "Crash");
+							}
+						}
+					}
+				}
+			}
+			
+			
+			//TODO If crash into ground with significantly less x/z speed than needed for flight
+			
+			
+			
+			/*if(cart.getVelocity().getY() < 0.5 && new Vector(cart.getVelocity().getX(), 0, cart.getVelocity().getZ()).lengthSquared() < 0.5){ //Going down fast enough to do some damage
+				Location nextVertical = cart.getLocation().add(0, cart.getVelocity().getY(), 0);
+				b = nextVertical.getBlock();
+				if(!b.isEmpty() && !b.isLiquid() && b.getType().isSolid()){ //Crashed into something
+					double damage = 20.0 * cart.getVelocity().getY();
+					damage = Math.round(damage*10.0d)/10.0d;
+					if(damage < 1){
+						damage = 1;
+					}
+					if(damage > 15){
+						damage = 15;
+					}
+					
+					uPlanesAPI.getPlaneManager().damagePlane(cart, plane, damage, "Rough Landing");
+				}
+			}*/
 		}
 		
 		if (fuel
@@ -439,10 +552,34 @@ public class uPlanesListener implements Listener {
 		}
 		
 		if((new Vector(travel.getX(), 0, travel.getZ()).lengthSquared() < 0.8 && event.getAcceleration() < 0.8) && !plane.isHover()){
-			y = cart.getVelocity().getY(); //Need more speed to take off
+			y = cart.getVelocity().getY() * 1.015; //Need more speed to take off
 		}
 		
 		travel.setY(y);
+		
+		if(crashing){
+			if(travel.getY() < -0.3 && (new Vector(travel.getX(), 0, travel.getZ()).lengthSquared() < 0.8 && event.getAcceleration() < 0.8)){
+				Location nextVertical = cart.getLocation().add(0, cart.getVelocity().getY(), 0);
+				Block b = nextVertical.getBlock();
+				if(!b.isEmpty() && !b.isLiquid() && b.getType().isSolid()){ //Crashed into something
+					double damage = 150.0 * Math.abs(cart.getVelocity().getY());
+					damage = Math.round(damage*10.0d)/10.0d;
+					if(damage < 1){
+						damage = 1;
+					}
+					if(damage > 150){
+						damage = 150;
+					}
+					
+					PrePlaneRoughLandingEvent evt = new PrePlaneRoughLandingEvent(cart, player, event.getAcceleration(), plane, damage);
+					Bukkit.getPluginManager().callEvent(evt);
+					
+					if(!evt.isCancelled() && evt.getDamage() > 0){
+						uPlanesAPI.getPlaneManager().damagePlane(cart, plane, evt.getDamage(), "Rough Landing");
+					}
+				}
+			}
+		}
 		
 		Vector behind = travel.clone().multiply(-1); //Behind the plane
 		Location exhaust = loc.add(behind);
