@@ -551,7 +551,7 @@ public class uPlanesListener implements Listener {
 			player.sendMessage(main.colors.getError()+Lang.get("general.heightLimit"));
 		}
 		
-		if((new Vector(travel.getX(), 0, travel.getZ()).lengthSquared() < 0.8 && event.getAcceleration() < 0.8) && !plane.isHover()){
+		if((new Vector(travel.getX(), 0, travel.getZ()).lengthSquared() < 0.75 && event.getAcceleration() < 0.75) && !plane.isHover()){
 			y = cart.getVelocity().getY() * 1.015; //Need more speed to take off
 		}
 		
@@ -562,7 +562,7 @@ public class uPlanesListener implements Listener {
 				Location nextVertical = cart.getLocation().add(0, cart.getVelocity().getY(), 0);
 				Block b = nextVertical.getBlock();
 				if(!b.isEmpty() && !b.isLiquid() && b.getType().isSolid()){ //Crashed into something
-					double damage = 150.0 * Math.abs(cart.getVelocity().getY());
+					double damage = 110.0 * Math.abs(cart.getVelocity().getY());
 					damage = Math.round(damage*10.0d)/10.0d;
 					if(damage < 1){
 						damage = 1;
@@ -945,7 +945,7 @@ public class uPlanesListener implements Listener {
 			top.eject();
 			if(safeExit){
 				final Player pl = (Player) top;
-				main.plugin.getServer().getScheduler().runTaskLater(main.plugin, new BukkitRunnable(){
+				main.plugin.getServer().getScheduler().runTaskLater(main.plugin, new Runnable(){
 
 					public void run() {
 						pl.teleport(loc.clone().add(0, 0.5, 0));
@@ -958,7 +958,9 @@ public class uPlanesListener implements Listener {
 		}
 		vehicle.eject();
 		vehicle.remove();
-		loc.getWorld().dropItemNaturally(loc, new ItemStack(PlaneItemMethods.getItem(plane)));
+		if(!plane.isWrittenOff()){
+			loc.getWorld().dropItemNaturally(loc, new ItemStack(PlaneItemMethods.getItem(plane)));
+		}
 		//Remove plane and get back item
 		return;
 	}

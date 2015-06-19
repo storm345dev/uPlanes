@@ -26,6 +26,7 @@ public class Plane implements Serializable {
 	private double health = 50;
 	private boolean hover = false;
 	private UUID id = UUID.randomUUID();
+	private boolean writtenOff = false;
 	
 	public Plane(){ //An empty plane
 		
@@ -111,5 +112,13 @@ public class Plane implements Serializable {
 
 	public void setHover(boolean hover) {
 		this.hover = hover;
+	}
+
+	public boolean isWrittenOff() {
+		return writtenOff;
+	}
+
+	public void setWrittenOff(boolean writtenOff) {
+		this.writtenOff = writtenOff;
 	}
 }
