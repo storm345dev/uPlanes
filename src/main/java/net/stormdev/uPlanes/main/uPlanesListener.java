@@ -63,7 +63,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.projectiles.ProjectileSource;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 public class uPlanesListener implements Listener {
@@ -130,7 +129,7 @@ public class uPlanesListener implements Listener {
 			if(collided instanceof Player){
 				((Player)collided).sendMessage(ChatColor.RED+"You collided with a plane!");
 			}
-			collided.setVelocity(m.getVelocity().clone().setY(3));
+			collided.setVelocity(m.getVelocity().clone().setY(1.5));
 			((Damageable) collided).damage(damage, m);
 		}
 		uPlanesAPI.getPlaneManager().damagePlane(m, plane, damage, "Crash");
