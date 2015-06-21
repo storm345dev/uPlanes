@@ -56,6 +56,7 @@ public class main extends JavaPlugin {
 	public static boolean upgradePerms = false;
 	public static double maxSpeed = 200;
 	public static boolean doAcceleration = true;
+	public static boolean doTurningCircles = true;
 	
 	public ProtocolManager protocolManager = null;
 	public uPlanesListener listener = null;
@@ -268,6 +269,10 @@ public class main extends JavaPlugin {
         		config.set("general.planes.doAcceleration", true);
         	}
         	doAcceleration = config.getBoolean("general.planes.doAcceleration");
+        	if(!config.contains("general.planes.doTurningCircles")){
+        		config.set("general.planes.doTurningCircles", true);
+        	}
+        	doTurningCircles = config.getBoolean("general.planes.doTurningCircles");
         	if(!config.contains("general.planes.safeExit")){
         		config.set("general.planes.safeExit", true);
         	}

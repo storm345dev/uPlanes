@@ -2,6 +2,7 @@ package net.stormdev.uPlanes.main;
 
 import net.stormdev.uPlanes.api.Keypress;
 import net.stormdev.uPlanes.api.Plane;
+import net.stormdev.uPlanes.api.uPlanesAPI;
 import net.stormdev.uPlanes.utils.PlaneUpdateEvent;
 import net.stormdev.uPlanes.utils.StatValue;
 
@@ -10,7 +11,28 @@ import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
+import com.useful.ucars.CarDirection;
+import com.useful.ucars.ControlInput;
+
 public class MotionManager {
+	
+	public static Vector rotateXZVector3dDegrees(Vector original, double degrees){
+		double[] out = rotateVector2dRadians(original.getX(), original.getZ(), Math.toRadians(degrees));
+		original.setX(out[0]);
+		original.setZ(out[1]);
+		return original;
+	}
+	
+	public static double[] rotateVector2dDegrees(double x, double y, double degrees){
+		return rotateVector2dRadians(x, y, Math.toRadians(degrees));
+	}
+	
+	public static double[] rotateVector2dRadians(double x, double y, double radians){
+	    double[] result = new double[2];
+	    result[0] = x * Math.cos(radians) - y * Math.sin(radians);
+	    result[1] = x * Math.sin(radians) + y * Math.cos(radians);
+	    return result;
+	}
 	
 	public static void move(Player player, float f, float s) {
 		Vector vec = new Vector();
@@ -43,7 +65,42 @@ public class MotionManager {
 			}
 		}
 		
-		Vector plaD = player.getEyeLocation().getDirection();
+		Vector playD = player.getEyeLocation().getDirection();
+		Vector planeDirection = null;
+		
+		if(!main.doTurningCircles){
+			planeDirection = playD;
+		}
+		else {
+			try {
+				planeDirection = (Vector) plane.getMetadata("plane.direction").get(0).value();
+			} catch (Exception e) {
+				planeDirection = playD; //Start plane off facing the way the player is
+			}
+			
+			double rotMod = uPlanesAPI.getPlaneManager().getAlteredRotationAmountPerTick(player, plane, pln);
+			
+			float pYaw = (float) Math.toDegrees(Math.atan2(playD.getX() , -playD.getZ())); //Calculate yaw from 'player direction' vector
+			float vYaw = (float) Math.toDegrees(Math.atan2(planeDirection.getX() , -planeDirection.getZ())); //Calculate yaw from 'carDirection' vector
+			float yawDiff = pYaw - vYaw;
+			if(yawDiff <= -180){
+				yawDiff += 360;
+			}
+			else if(yawDiff > 180){
+				yawDiff -= 360;
+			}
+			if(yawDiff < -rotMod){
+				yawDiff = (float) -rotMod;
+			}
+			else if(yawDiff > rotMod){
+				yawDiff = (float) rotMod;
+			}
+			planeDirection = rotateXZVector3dDegrees(planeDirection, ControlInput.getCurrentDriveDir(player).equals(CarDirection.BACKWARDS) ? -yawDiff : yawDiff);
+			
+			plane.removeMetadata("plane.direction", main.plugin);
+			plane.setMetadata("plane.direction", new StatValue(true, main.plugin));
+		}
+		
 		Keypress pressed = Keypress.NONE;
 		/*if(f==0 && pln.isHover()){
 			forwardMotion = false;
@@ -78,8 +135,8 @@ public class MotionManager {
 				plane.setMetadata("plane.right", new StatValue(true, main.plugin));
 			}
 		}
-		double x = plaD.getX() / d;
-		double z = plaD.getZ() / d;
+		double x = planeDirection.getX() / d;
+		double z = planeDirection.getZ() / d;
 		if (!isRight) {
 			plane.removeMetadata("plane.right", main.plugin);
 		}

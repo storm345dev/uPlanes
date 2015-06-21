@@ -35,6 +35,31 @@ public class uPlaneManager {
 	
 	private volatile List<AccelerationModifier> accelMods = new ArrayList<AccelerationModifier>();
 	private volatile List<AccelerationModifier> decelMods = new ArrayList<AccelerationModifier>();
+	private volatile List<PlaneTurningModifier> rotMods = new ArrayList<PlaneTurningModifier>();
+	
+	/**
+	 * Sets a turning modifier which can change how fast planes turn
+	 * @param mod The mod to add
+	 */
+	public void addTurningModifier(PlaneTurningModifier mod){
+		rotMods.add(mod);
+	}
+	
+	/**
+	 * Removes a registered turning modifer
+	 * @param mod The mod to remove
+	 */
+	public void removeTurningModifier(PlaneTurningModifier mod){
+		rotMods.remove(mod);
+	}
+	
+	public double getAlteredRotationAmountPerTick(Player player, Minecart cart, Plane plane){
+		double current = plane.getTurnAmountPerTick();
+		for(PlaneTurningModifier am:new ArrayList<PlaneTurningModifier>(rotMods)){
+			current *= am.getTurnAmountPerTick(cart, current);
+		}
+		return current;
+	}
 	
 	/**
 	 * Sets an acceleration modifer which calculates player's different accelerations

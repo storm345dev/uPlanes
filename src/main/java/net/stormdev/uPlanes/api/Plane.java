@@ -20,10 +20,13 @@ import org.bukkit.inventory.meta.ItemMeta;
  *
  */
 public class Plane implements Serializable {
+	private static final double DEFAULT_TURN_AMOUNT = 2;
+	
 	private static final long serialVersionUID = 2L;
 	private double mutliplier = 30;
 	private String name = "Plane";
 	private double health = 50;
+	private double turnAmount = DEFAULT_TURN_AMOUNT;
 	private boolean hover = false;
 	private UUID id = UUID.randomUUID();
 	private boolean writtenOff = false;
@@ -120,5 +123,12 @@ public class Plane implements Serializable {
 
 	public void setWrittenOff(boolean writtenOff) {
 		this.writtenOff = writtenOff;
+	}
+
+	public double getTurnAmountPerTick() {
+		if(turnAmount <= 0){
+			turnAmount = DEFAULT_TURN_AMOUNT;
+		}
+		return turnAmount;
 	}
 }
