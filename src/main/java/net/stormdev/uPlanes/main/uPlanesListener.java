@@ -651,6 +651,15 @@ public class uPlanesListener implements Listener {
 		}
 		
 		Minecart ent = (Minecart) toSpawn.getWorld().spawnEntity(toSpawn, EntityType.MINECART);
+		float yaw = player.getLocation().getYaw()+90;
+		if(yaw < 0){
+			yaw = 360 + yaw;
+		}
+		else if(yaw >= 360){
+			yaw = yaw - 360;
+		}
+		CartOrientationUtil.setYaw(ent, yaw);
+		
 		in = ent.getLocation().getBlock();
 		Block n = in.getRelative(BlockFace.NORTH);   // The directions minecraft aligns the cart to
 		Block w = in.getRelative(BlockFace.WEST);
