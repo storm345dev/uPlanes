@@ -10,6 +10,7 @@ import net.stormdev.uPlanes.api.Plane;
 import net.stormdev.uPlanes.api.PlaneDeathEvent;
 import net.stormdev.uPlanes.api.uPlanesAPI;
 import net.stormdev.uPlanes.items.ItemPlaneValidation;
+import net.stormdev.uPlanes.utils.CartOrientationUtil;
 import net.stormdev.uPlanes.utils.Lang;
 import net.stormdev.uPlanes.utils.PlaneUpdateEvent;
 import net.stormdev.uPlanes.utils.PrePlaneCrashEvent;
@@ -69,7 +70,7 @@ public class uPlanesListener implements Listener {
 	private main plugin;
 	
 	private double punchDamage;
-	private double heightLimit;
+	public static double heightLimit;
 	private boolean perms;
 	private String perm;
 	private boolean safeExit;
@@ -91,7 +92,6 @@ public class uPlanesListener implements Listener {
 	
 	@EventHandler
 	void entityCrash(VehicleEntityCollisionEvent event){
-		//TODO
 		if(!crashing){
 			return;
 		}
@@ -129,7 +129,9 @@ public class uPlanesListener implements Listener {
 			if(collided instanceof Player){
 				((Player)collided).sendMessage(ChatColor.RED+"You collided with a plane!");
 			}
-			collided.setVelocity(m.getVelocity().clone().setY(1.5));
+			if(!plane.isHover()){
+				collided.setVelocity(m.getVelocity().clone().setY(0.5));
+			}
 			((Damageable) collided).damage(damage, m);
 		}
 		uPlanesAPI.getPlaneManager().damagePlane(m, plane, damage, "Crash");
@@ -291,10 +293,12 @@ public class uPlanesListener implements Listener {
 	        //Handle the exit ourselves
 	        loc.setYaw(player.getLocation().getYaw());
 	        loc.setPitch(player.getLocation().getPitch());
+	        final Vector vel = veh.getVelocity();
 	    	main.plugin.getServer().getScheduler().runTaskLater(main.plugin, new Runnable(){
 
 				public void run() {
 					exited.teleport(loc.add(0, 0.5, 0));
+					exited.setVelocity(vel);
 					return;
 				}}, 2l); //Teleport back to car loc after exit
 	        /*
@@ -347,7 +351,17 @@ public class uPlanesListener implements Listener {
 			return;
 		}
 		
-		if(!veh.hasMetadata("plane.hover")){
+		Plane pln = getPlane(car);
+		if(pln == null){
+			return;
+		}
+		
+		if(!pln.isHover()){
+			CartOrientationUtil.setPitch(car, pln.getCurrentPitch());
+			if(veh.getVelocity().getX() > 0 || veh.getVelocity().getZ() > 0){
+				float cYaw = (float) Math.toDegrees(Math.atan2(veh.getVelocity().getX() , -veh.getVelocity().getZ())) - 90;
+				CartOrientationUtil.setYaw(car, cYaw);
+			}
 			return;
 		}
 		//Hover
@@ -527,13 +541,11 @@ public class uPlanesListener implements Listener {
 		
 		Location loc = vehicle.getLocation();
 		Vector travel = event.getTravelVector();
-		double y = 0.0;
 		double multiplier = plane.getSpeed();
 		
 		travel.multiply(multiplier);
-	    Keypress press = event.getPressedKey();
 		
-	    float vertAmount = (float) (0.01 * multiplier * (plane.isHover() ? 1:event.getAcceleration()));
+	    /*float vertAmount = (float) (0.01 * multiplier * (plane.isHover() ? 1:event.getAcceleration()));
 	    
 	    switch(press){
 		case A: 
@@ -542,22 +554,32 @@ public class uPlanesListener implements Listener {
 			y = -vertAmount; break; //Go down
 		default:
 			break;
-		}
+		}*/
 		
 		if(loc.getY() >= heightLimit){
-			y = 0;
+			travel.setY(-1);
+			float pitch = plane.getCurrentPitch();
+			pitch += 20;
+			if(pitch > 90){
+				pitch = 90;
+			}
+			plane.setCurrentPitch(pitch);
 			//Send message it's too high
 			player.sendMessage(main.colors.getError()+Lang.get("general.heightLimit"));
 		}
 		
-		if((new Vector(travel.getX(), 0, travel.getZ()).lengthSquared() < 0.75 && event.getAcceleration() < 0.75) && !plane.isHover()){
-			y = cart.getVelocity().getY() * 1.015; //Need more speed to take off
+		if((new Vector(travel.getX(), 0, travel.getZ()).lengthSquared() < 0.75 && event.getAcceleration() < 0.75) && !plane.isHover() && travel.getY() < 0.1){
+			travel.setY(cart.getVelocity().getY() * 1.015); //Need more speed to maintain flight!
+			/*float pitch = plane.getCurrentPitch();
+			pitch += 1;
+			if(pitch > 90){
+				pitch = 90;
+			}
+			plane.setCurrentPitch(pitch);*/
 		}
 		
-		travel.setY(y);
-		
-		if(crashing){
-			if(travel.getY() < -0.3 && (new Vector(travel.getX(), 0, travel.getZ()).lengthSquared() < 0.8 && event.getAcceleration() < 0.8)){
+		if(crashing && !plane.isHover()){
+			if((travel.getY() < -0.3 && plane.getCurrentPitch() > 20) || ((travel.getY() < -0.3 && new Vector(travel.getX(), 0, travel.getZ()).lengthSquared() < 0.8 && event.getAcceleration() < 0.8))){
 				Location nextVertical = cart.getLocation().add(0, cart.getVelocity().getY(), 0);
 				Block b = nextVertical.getBlock();
 				if(!b.isEmpty() && !b.isLiquid() && b.getType().isSolid()){ //Crashed into something
@@ -566,18 +588,23 @@ public class uPlanesListener implements Listener {
 					if(damage < 1){
 						damage = 1;
 					}
-					if(damage > 150){
-						damage = 150;
+					if(damage > 200){
+						damage = 200;
 					}
 					
 					PrePlaneRoughLandingEvent evt = new PrePlaneRoughLandingEvent(cart, player, event.getAcceleration(), plane, damage);
 					Bukkit.getPluginManager().callEvent(evt);
 					
 					if(!evt.isCancelled() && evt.getDamage() > 0){
+						player.damage(20*(damage/200.0));
 						uPlanesAPI.getPlaneManager().damagePlane(cart, plane, evt.getDamage(), "Rough Landing");
 					}
 				}
 			}
+		}
+		
+		if(plane.isHover() && !event.wasKeypressed(Keypress.A) && !event.wasKeypressed(Keypress.D)){
+			travel.setY(cart.getVelocity().getY());
 		}
 		
 		Vector behind = travel.clone().multiply(-1); //Behind the plane
@@ -942,12 +969,15 @@ public class uPlanesListener implements Listener {
 		Entity top = vehicle.getPassenger();
 		if(top instanceof Player){
 			top.eject();
+			top.setVelocity(vehicle.getVelocity());
 			if(safeExit){
 				final Player pl = (Player) top;
+				final Vector vel = vehicle.getVelocity();
 				main.plugin.getServer().getScheduler().runTaskLater(main.plugin, new Runnable(){
 
 					public void run() {
 						pl.teleport(loc.clone().add(0, 0.5, 0));
+						pl.setVelocity(vel);
 						/*if(Bukkit.getServer().getPluginManager().getPlugin("AntiCheat") != null){
 			    			AntiCheatAPI.unexemptPlayer(pl, CheckType.FLY);
 					 	}*/

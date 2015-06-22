@@ -67,15 +67,27 @@ public class AccelerationManager {
 	}
 	
 	private static float getDA(Player player, Minecart cart, Plane plane){ //Get the multiplier for accelerating
-		return (float) (0.015*uPlanesAPI.getPlaneManager().getAlteredDecelerationMod(player, cart, plane)); //Our constant of 0.025 multiplied by whatever the API is asking for as a modification to the rate of acceleration
+		return (float) (0.030*uPlanesAPI.getPlaneManager().getAlteredDecelerationMod(player, cart, plane)); //Our constant of 0.025 multiplied by whatever the API is asking for as a modification to the rate of acceleration
 	}
 	
 	private static float getGA(Player player, Minecart cart, Plane plane){ //Get the multiplier for accelerating
-		return (float) (0.010*uPlanesAPI.getPlaneManager().getAlteredDecelerationMod(player, cart, plane)); //Our constant of 0.025 multiplied by whatever the API is asking for as a modification to the rate of acceleration
+		return (float) (0.020*uPlanesAPI.getPlaneManager().getAlteredDecelerationMod(player, cart, plane)); //Our constant of 0.025 multiplied by whatever the API is asking for as a modification to the rate of acceleration
 	}
 	
 	public static long getTimeSinceLastKeypress(Minecart cart){
 		return System.currentTimeMillis()-getMeta(cart).getTime();
+	}
+	
+	public static double stall(Player player, Minecart cart, Plane plane){
+		if(!main.doAcceleration){
+			return 0d;
+		}
+		
+		double accel = getCurrentAccel(cart);
+		accel *= 0.25;
+		
+		setCurrentAccel(cart, accel);
+		return accel;
 	}
 	
 	public static double decelerateAndGetMult(Player player, Minecart cart, Plane plane){

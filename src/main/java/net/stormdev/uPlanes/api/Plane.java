@@ -20,28 +20,33 @@ import org.bukkit.inventory.meta.ItemMeta;
  *
  */
 public class Plane implements Serializable {
-	private static final double DEFAULT_TURN_AMOUNT = 2;
+	public static final double DEFAULT_TURN_AMOUNT = 2;
 	
 	private static final long serialVersionUID = 2L;
 	private double mutliplier = 30;
 	private String name = "Plane";
 	private double health = 50;
 	private double turnAmount = DEFAULT_TURN_AMOUNT;
+	private double accelMod = 1;
 	private boolean hover = false;
 	private UUID id = UUID.randomUUID();
 	private boolean writtenOff = false;
+	private transient float currentPitch = 0;
 	
 	public Plane(){ //An empty plane
-		
+		setCurrentPitch(0);
 	}
 	
-	public Plane(double speed, String name, double health, boolean hover){
+	public Plane(double speed, String name, double health, double accelMod, double turnAmountPerTick, boolean hover){
+		setCurrentPitch(0);
 		if(speed > main.maxSpeed){
 			speed = main.maxSpeed;
 		}
 		this.mutliplier = speed;
 		this.name = name;
 		this.health = health;
+		this.accelMod = accelMod;
+		this.turnAmount = turnAmountPerTick;
 		this.hover = hover;
 	}
 	
@@ -61,6 +66,8 @@ public class Plane implements Serializable {
 		lore.add(ChatColor.GRAY+"plane");
 		lore.add(main.colors.getTitle()+"[Speed:] "+main.colors.getInfo()+mutliplier);
 		lore.add(main.colors.getTitle()+"[Health:] "+main.colors.getInfo()+health);
+		lore.add(main.colors.getTitle()+"[Acceleration:] "+main.colors.getInfo()+accelMod*10.0d);
+		lore.add(main.colors.getTitle()+"[Handling:] "+main.colors.getInfo()+turnAmount*10.0d);
 		if(hover){
 			lore.add(main.colors.getTitle()+"[Hover:] "+main.colors.getInfo()+getHandleString(hover));
 		}
@@ -124,11 +131,31 @@ public class Plane implements Serializable {
 	public void setWrittenOff(boolean writtenOff) {
 		this.writtenOff = writtenOff;
 	}
+	
+	public void setTurnAmountPerTick(double d){
+		this.turnAmount = d;
+	}
 
 	public double getTurnAmountPerTick() {
 		if(turnAmount <= 0){
 			turnAmount = DEFAULT_TURN_AMOUNT;
 		}
 		return turnAmount;
+	}
+
+	public float getCurrentPitch() {
+		return currentPitch;
+	}
+
+	public void setCurrentPitch(float currentPitch) {
+		this.currentPitch = currentPitch;
+	}
+
+	public double getAccelMod() {
+		return accelMod;
+	}
+
+	public void setAccelMod(double accelMod) {
+		this.accelMod = accelMod;
 	}
 }

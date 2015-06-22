@@ -1,5 +1,7 @@
 package net.stormdev.uPlanes.utils;
 
+import java.util.List;
+
 import net.stormdev.uPlanes.api.Keypress;
 import net.stormdev.uPlanes.api.Plane;
 
@@ -14,11 +16,11 @@ public class PlaneUpdateEvent extends VehicleUpdateEvent implements Cancellable 
 	private Boolean changePlayerYaw = false;
 	private Boolean cancelled = false;
 	private Player player;
-	private Keypress pressed;
+	private List<Keypress> pressed;
 	private double acceleration;
 	private Plane plane;
 
-	public PlaneUpdateEvent(Vehicle vehicle, Vector toTravel, Player player, Keypress pressed, double accelMod, Plane pln) {
+	public PlaneUpdateEvent(Vehicle vehicle, Vector toTravel, Player player, List<Keypress> pressed, double accelMod, Plane pln) {
 		super(vehicle);
 		this.toTravel = toTravel;
 		this.player = player;
@@ -31,8 +33,12 @@ public class PlaneUpdateEvent extends VehicleUpdateEvent implements Cancellable 
 		return this.plane;
 	}
 	
-	public Keypress getPressedKey(){
+	public List<Keypress> getPressedKeys(){
 		return pressed;
+	}
+	
+	public boolean wasKeypressed(Keypress press){
+		return pressed.contains(press);
 	}
 
 	public Player getPlayer() {

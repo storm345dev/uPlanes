@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 import net.stormdev.uPlanes.api.Plane;
 import net.stormdev.uPlanes.utils.Colors;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -81,19 +82,49 @@ public class ItemPlaneValidation {
 		}
 		
 		i++;
-		if(i >= lore.size()){
-			return new Plane(speed, name, health, hover);
+		if(i >= lore.size()){ //Old item type
+			return new Plane(speed, name, health, 1, Plane.DEFAULT_TURN_AMOUNT, hover);
 		}
 		else {
 			line = Colors.strip(lore.get(i)).toLowerCase(); //[Hover:] Yes
-			if(!line.contains("hover")){
-				return null;
+			if(!line.contains("hover")){ //NEW style items
+				if(!line.contains("acceleration")){ //It's invalid
+					return null;
+				}
+				try {
+					String accelRaw = line.replaceFirst(Pattern.quote("[acceleration:] "), "").trim();
+					double accelMod = Double.parseDouble(accelRaw) / 10.0d;
+					
+					i++;
+					line = Colors.strip(lore.get(i)).toLowerCase(); //[Handling:] <amt>
+					if(!line.contains("handling")){ //It's invalid
+						return null;
+					}
+					
+					String hRaw = line.replaceAll(Pattern.quote("[handling:] "), "").trim();
+					double turnAmount = Double.parseDouble(hRaw) / 10.0d;
+					
+					i++;
+					if(i >= lore.size()){ //Not hover
+						return new Plane(speed, name, health, accelMod, turnAmount, false);
+					}
+					
+					line = Colors.strip(lore.get(i)).toLowerCase(); //[Hover:] Yes
+					String hoverRaw = line.replaceFirst(Pattern.quote("[hover:] "), "").trim();
+					if(hoverRaw.equalsIgnoreCase("Yes")){
+						hover = true;
+					}
+					return new Plane(speed, name, health, accelMod, turnAmount, hover);
+				} catch (Exception e) {
+					return null; //Invalid item!
+				}
 			}
+			//Old style items
 			String handlingRaw = line.replaceFirst(Pattern.quote("[hover:] "), "").trim();
 			if(handlingRaw.equalsIgnoreCase("Yes")){
 				hover = true;
 			}
 		}
-		return new Plane(speed, name, health, hover);
+		return new Plane(speed, name, health, 1, Plane.DEFAULT_TURN_AMOUNT, hover);
 	}
 }

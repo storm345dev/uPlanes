@@ -323,6 +323,7 @@ public class uPlaneManager {
 		Entity top = vehicle.getPassenger();
 		if(top instanceof Player){
 			top.eject();
+			top.setVelocity(vehicle.getVelocity());
 		}
 		vehicle.eject();
 		vehicle.remove();

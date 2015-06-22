@@ -1,11 +1,16 @@
 package net.stormdev.uPlanes.main;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import net.stormdev.uPlanes.api.Keypress;
 import net.stormdev.uPlanes.api.Plane;
 import net.stormdev.uPlanes.api.uPlanesAPI;
 import net.stormdev.uPlanes.utils.PlaneUpdateEvent;
 import net.stormdev.uPlanes.utils.StatValue;
 
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
@@ -55,13 +60,14 @@ public class MotionManager {
 		
 		boolean decel = true;
 		if(f == 0 && s == 0){
-			if(AccelerationManager.getCurrentMultiplier(plane) == 0){
+			/*if(AccelerationManager.getCurrentMultiplier(plane) == 0){
 				
 				//Not moving
 				return;
-			}
+			}*/
 			if(pln.isHover()){
 				AccelerationManager.setCurrentAccel(plane, 0);
+				return;
 			}
 		}
 		
@@ -69,13 +75,13 @@ public class MotionManager {
 		Vector planeDirection = null;
 		
 		if(!main.doTurningCircles){
-			planeDirection = playD;
+			planeDirection = playD.clone().setY(0).normalize();
 		}
 		else {
 			try {
 				planeDirection = (Vector) plane.getMetadata("plane.direction").get(0).value();
 			} catch (Exception e) {
-				planeDirection = playD; //Start plane off facing the way the player is
+				planeDirection = playD.clone().setY(0).normalize(); //Start plane off facing the way the player is
 			}
 			
 			double rotMod = uPlanesAPI.getPlaneManager().getAlteredRotationAmountPerTick(player, plane, pln);
@@ -101,14 +107,15 @@ public class MotionManager {
 			plane.setMetadata("plane.direction", new StatValue(true, main.plugin));
 		}
 		
-		Keypress pressed = Keypress.NONE;
+		List<Keypress> pressedKeys = new ArrayList<Keypress>();
+		Keypress speedModKey = Keypress.NONE;
 		/*if(f==0 && pln.isHover()){
 			forwardMotion = false;
 		}*/
 		int side = 0; // -1=left, 0=straight, 1=right
 		Boolean turning = false;
 		if(f > 0){
-			pressed = Keypress.W;
+			speedModKey = Keypress.W;
 			decel = false;
 		}
 		if (s > 0) {
@@ -123,18 +130,31 @@ public class MotionManager {
 		double d = 27; // A number that happens to get realistic motion
 		Boolean isRight = false;
 		Boolean isLeft = false;
+		
+		double accelMod = !decel ? AccelerationManager.getMultiplier(player, plane, pln) 
+				: (f == 0 ? AccelerationManager.decelerateAndGetMult(player, plane, pln) 
+						: AccelerationManager.decelerateAndGetMult(player, plane, pln));
+		
+		float hoverAmount = (float) (0.0001 * pln.getSpeed());
+		
 		if (turning) {
 			if (side < 0) {// do left action
 				isLeft = true;
-				pressed = Keypress.A;
+				pressedKeys.add(Keypress.A);
 				plane.setMetadata("plane.left", new StatValue(true, main.plugin));
-				
+				if(pln.isHover()){
+					y = hoverAmount;
+				}
 			} else if (side > 0) {// do right action
 				isRight = true;
-				pressed = Keypress.D;
+				pressedKeys.add(Keypress.D);
 				plane.setMetadata("plane.right", new StatValue(true, main.plugin));
+				if(pln.isHover()){
+					y = -hoverAmount;
+				}
 			}
 		}
+		
 		double x = planeDirection.getX() / d;
 		double z = planeDirection.getZ() / d;
 		if (!isRight) {
@@ -144,23 +164,100 @@ public class MotionManager {
 			plane.removeMetadata("plane.left", main.plugin);
 		}
 		if(f < 0 && pln.isHover()){
-			pressed = Keypress.S;
+			speedModKey = Keypress.S;
 		}
 		/*if(!forwardMotion && pln.isHover()){
 			x = 0;
 			z = 0;
 		}*/
 		
-		double accelMod = !decel ? AccelerationManager.getMultiplier(player, plane, pln) 
-				: (f == 0 ? AccelerationManager.decelerateAndGetMult(player, plane, pln) 
-						: AccelerationManager.decelerateAndGetMult(player, plane, pln));
-		
 		x *= accelMod;
-		y *= accelMod;
-		z *= accelMod;
+		z *= accelMod;	
+		
+		boolean hasFlightSpeed = (new Vector(x, 0, z).lengthSquared() > 0.75 || accelMod > 0.75);
+		
+		if(!pln.isHover()){ //Calculate y
+			if(plane.isOnGround()){
+				if(!hasFlightSpeed){
+					pln.setCurrentPitch(0);
+				}
+				if(pln.getCurrentPitch() > 0){ //Trying to pitch DOWN
+					pln.setCurrentPitch(0);
+				}
+			}
+			if(hasFlightSpeed || !plane.isOnGround()){ //At the right speed to take off
+				Keypress vertModKey = Keypress.NONE;
+				if(pressedKeys.contains(Keypress.A)){
+					vertModKey = Keypress.A;
+				}
+				else if(pressedKeys.contains(Keypress.D)){
+					vertModKey = Keypress.D;
+				}
+				
+				if(vertModKey != Keypress.NONE){
+					float pitch = pln.getCurrentPitch();
+					float change = (float) pln.getTurnAmountPerTick();
+					pitch += vertModKey.equals(Keypress.D) ? change : -change;
+					if(pitch > 89){
+						pitch = 89;
+					}
+					if(pitch < -89){
+						pitch = -89;
+					}
+					pln.setCurrentPitch(pitch);
+				}
+			}
+			
+			//use tan
+			double adjacentLength = new Vector(x, 0, z).length();
+			y = -Math.tan(Math.toRadians(pln.getCurrentPitch())) * adjacentLength;
+			
+			double aPitch = -pln.getCurrentPitch();
+			double yMult = 1 - (aPitch / (aPitch > 0 ? 70.0d : 300.0d)); //If they're going up too steep then go slower
+			if(yMult < 0){
+				yMult = 0;
+			}
+			/*if(yMult > 1.225){ //45 degrees
+				double xzMult = 1.225-yMult;
+				yMult = 1.225;
+				x *= xzMult;
+				z *= xzMult;
+			}*/
+			y *= yMult;
+			if(aPitch > 40 && y < 0.012){ //Pitching up too much! Make them stall!
+				accelMod = AccelerationManager.stall(player, plane, pln);
+				//player.sendMessage(ChatColor.RED+"STALL");
+			}
+			x *= yMult;
+			z *= yMult;
+			
+			if(!hasFlightSpeed){
+				if(y > 0){
+					y = 0; //Don't go upwards
+				}
+				/*y = plane.getVelocity().getY(); //FALL
+				if(y > 0){
+					if(y > 0.5){
+						y = 0.5;
+					}
+					y *= 1.25;
+				}*/
+			}
+		}
+		
+		double resY = plane.getLocation().getY() + y;
+		if(resY > plane.getLocation().getWorld().getMaxHeight()
+				|| resY > uPlanesListener.heightLimit){
+			y = 0; //Go up no further
+		}
 		
 		vec = new Vector(x, y, z);
-		final PlaneUpdateEvent event = new PlaneUpdateEvent(plane, vec, player, pressed, accelMod, pln);
+		
+		if(!speedModKey.equals(Keypress.NONE)){
+			pressedKeys.add(speedModKey);
+		}
+		
+		final PlaneUpdateEvent event = new PlaneUpdateEvent(plane, vec, player, pressedKeys, accelMod, pln);
 		main.plugin.getServer().getScheduler()
 				.runTask(main.plugin, new Runnable() {
 					public void run() {

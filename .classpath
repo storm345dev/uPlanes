@@ -24,7 +24,6 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="C:/Users/Edward/Documents/Bukkit Servers/MTATestServer/plugins/ProtocolLib.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Edward/Documents/Bukkit Servers/MTATestServer/plugins/Vault.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Edward/Documents/Bukkit Servers/MTATestServer/plugins/NoCheatPlus.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Edward/Documents/Bukkit Servers/MTATestServer/plugins/uCars.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
