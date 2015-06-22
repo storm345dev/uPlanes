@@ -224,7 +224,7 @@ public class MotionManager {
 				z *= xzMult;
 			}*/
 			y *= yMult;
-			if(aPitch > 40 && y < 0.012){ //Pitching up too much! Make them stall!
+			if(aPitch > 60 && y < 0.012){ //Pitching up too much! Make them stall!
 				accelMod = AccelerationManager.stall(player, plane, pln);
 				//player.sendMessage(ChatColor.RED+"STALL");
 			}

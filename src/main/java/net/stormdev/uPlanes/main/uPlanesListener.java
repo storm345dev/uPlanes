@@ -433,7 +433,7 @@ public class uPlanesListener implements Listener {
 			if(current.isEmpty() || current.isLiquid()){
 				Location nextHorizontal = cart.getLocation().add(new Vector(cart.getVelocity().getX(), 0, cart.getVelocity().getZ()));
 				b = nextHorizontal.getBlock();
-				if(!b.isEmpty() && !b.isLiquid() && b.getType().isSolid() && !b.getType().equals(Material.CARPET)){ //Crashed into something
+				if(!b.isEmpty() && !b.isLiquid() && b.getType().isSolid() && !b.getType().equals(Material.CARPET) && !b.getType().equals(Material.BARRIER)){ //Crashed into something
 					b = b.getRelative(BlockFace.UP);
 					String bt = b.getType().name().toLowerCase();
 					if((!b.isEmpty() && !b.isLiquid() && b.getType().isSolid())
@@ -579,7 +579,7 @@ public class uPlanesListener implements Listener {
 		}
 		
 		if(crashing && !plane.isHover()){
-			if((travel.getY() < -0.3 && plane.getCurrentPitch() > 20) || ((travel.getY() < -0.3 && new Vector(travel.getX(), 0, travel.getZ()).lengthSquared() < 0.8 && event.getAcceleration() < 0.8))){
+			if((travel.getY() < -0.3 && plane.getCurrentPitch() > 25) || ((travel.getY() < -0.3 && new Vector(travel.getX(), 0, travel.getZ()).lengthSquared() < 0.8 && event.getAcceleration() < 0.8))){
 				Location nextVertical = cart.getLocation().add(0, cart.getVelocity().getY(), 0);
 				Block b = nextVertical.getBlock();
 				if(!b.isEmpty() && !b.isLiquid() && b.getType().isSolid()){ //Crashed into something
