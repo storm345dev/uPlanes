@@ -97,7 +97,7 @@ public class AccelerationManager {
 		
 		double current = getCurrentAccel(cart);
 		float diff = (float) (1-current); //The difference between 1 (full speed) and the rate we want to accelerate by
-		current -= (getDA(player, cart, plane)*diff); //Increase the speed by 'a' multiplied by the difference; eg. accelerates faster the slower the vehicle moves (Looks quite realistic)
+		current -= (plane.getAccelMod()*getDA(player, cart, plane)*diff); //Increase the speed by 'a' multiplied by the difference; eg. accelerates faster the slower the vehicle moves (Looks quite realistic)
 		if(current <= 0.05){ //Close enough to 0
 			current = 0;
 		}
@@ -139,7 +139,7 @@ public class AccelerationManager {
 			return current;
 		}
 		float diff = (float) (1-current); //The difference between 1 (full speed) and the rate we want to accelerate by
-		current += (getA(player, cart, plane)*diff); //Increase the speed by 'a' multiplied by the difference; eg. accelerates faster the slower the vehicle moves (Looks quite realistic)
+		current += (plane.getAccelMod()*getA(player, cart, plane)*diff); //Increase the speed by 'a' multiplied by the difference; eg. accelerates faster the slower the vehicle moves (Looks quite realistic)
 		setCurrentAccel(cart, current);
 		return current;
 	}
