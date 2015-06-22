@@ -19,6 +19,7 @@ import net.stormdev.uPlanes.commands.AutoPilotAdminCommandExecutor;
 import net.stormdev.uPlanes.commands.AutoPilotCommandExecutor;
 import net.stormdev.uPlanes.commands.FuelCommandExecutor;
 import net.stormdev.uPlanes.commands.InfoCommandExecutor;
+import net.stormdev.uPlanes.presets.PresetManager;
 import net.stormdev.uPlanes.shops.PlaneShop;
 import net.stormdev.uPlanes.utils.Colors;
 import net.stormdev.uPlanes.utils.CustomLogger;
@@ -69,6 +70,7 @@ public class main extends JavaPlugin {
 	public static Economy economy = null;
 	public boolean shopsEnabled = false;
 	public int cacheSize = 20;
+	public PresetManager presets = null;
 	
 	public static HashMap<String, Double> fuel = new HashMap<String, Double>();
 	
@@ -320,6 +322,7 @@ public class main extends JavaPlugin {
 			}
         } catch(Exception e){
         }
+		this.presets = new PresetManager();
 		saveConfig();
 		try {
 			lang.save(langFile);

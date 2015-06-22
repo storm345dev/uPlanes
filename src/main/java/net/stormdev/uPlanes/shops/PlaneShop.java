@@ -9,17 +9,19 @@ import net.stormdev.uPlanes.api.Plane;
 import net.stormdev.uPlanes.main.PlaneGenerator;
 import net.stormdev.uPlanes.main.PlaneItemMethods;
 import net.stormdev.uPlanes.main.main;
-import net.stormdev.uPlanes.shops.IconMenu.OptionClickEvent;
-import net.stormdev.uPlanes.shops.IconMenu.OptionClickEventHandler;
+import net.stormdev.uPlanes.presets.PlanePreset;
+import net.stormdev.uPlanes.presets.PresetManager;
+import net.stormdev.uPlanes.shops.PagedMenu.MenuDetails;
 import net.stormdev.uPlanes.utils.Lang;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 public class PlaneShop {
 	private double value;
-	private IconMenu menu = null;
+	private PagedMenu menu = null;
 	private main plugin;
 	public PlaneShop(main plugin){
 		this.plugin = plugin;
@@ -30,36 +32,36 @@ public class PlaneShop {
 	}
 	
 	public void destroy(){
-		menu.destroy();
+		//Not needed
 	}
 
-	public IconMenu getShopWindow(){
+	public PagedMenu getShopWindow(){
 		if(menu == null){
 			setupMenu(plugin);
 		}
 		return menu;
 	}
 	
-	public void onClick(OptionClickEvent event){
+	/*public void onClick(OptionClickEvent event){
 		event.setWillClose(false);
 		event.setWillDestroy(false);
 		
 		int slot = event.getPosition();
 		
-		if(slot == 4){
+		if(!PresetManager.usePresets && slot == 4){
 			//Buy a car
 			event.setWillClose(true);
 			buyPlane(event.getPlayer());
 		}
 		return;
-	}
+	}*/
 	
 	public void open(Player player){
 		getShopWindow().open(player);
 		return;
 	}
 	
-	public void buyPlane(Player player){
+	public void buyPlane(Player player, double cost, Plane plane){
 		if(main.economy == null){
 			main.plugin.setupEconomy();
 			if(main.economy == null){
@@ -68,7 +70,6 @@ public class PlaneShop {
 			}
 		}
 		double bal = main.economy.getBalance(player.getName());
-		double cost = value;
 		if(cost < 1){
 			return;
 		}
@@ -86,26 +87,95 @@ public class PlaneShop {
 		msg = msg.replaceAll(Pattern.quote("%balance%"), Matcher.quoteReplacement(currency+rem));
 		player.sendMessage(main.colors.getSuccess()+msg);
 		
-		//Give them the car
-		Plane c = PlaneGenerator.gen();
-		ItemStack i = PlaneItemMethods.getItem(c);
+		//Give them the plane
+		ItemStack i = PlaneItemMethods.getItem(plane);
 		player.getInventory().addItem(i);
 		
 		return;
 	}
 	
 	public void setupMenu(main plugin){
-		String currency = main.config.getString("general.currencySign");
+		final String currency = main.config.getString("general.currencySign");
 		
-		this.menu = new IconMenu("Plane Shop", 9, new OptionClickEventHandler(){
+		this.menu = new PagedMenu(new MenuDetails(){
+
+			@Override
+			public List<MenuItem> getDisplayItems(Player player) {
+				List<MenuItem> res = new ArrayList<MenuItem>();
+				if(!PresetManager.usePresets){
+					res.add(new MenuItem(){
+
+						@Override
+						public ItemStack getDisplayItem() {
+							return new ItemStack(Material.MINECART);
+						}
+
+						@Override
+						public String getColouredTitle() {
+							return ChatColor.WHITE+"Buy a random plane";
+						}
+
+						@Override
+						public String[] getColouredLore() {
+							return new String[]{main.colors.getInfo()+currency+value};
+						}
+
+						@Override
+						public void onClick(Player player) {
+							buyPlane(player, value, PlaneGenerator.gen());
+						}});
+				}
+				else {
+					for(final PlanePreset pp:main.plugin.presets.getPresets()){
+						res.add(new MenuItem(){
+
+							@Override
+							public ItemStack getDisplayItem() {
+								return new ItemStack(Material.MINECART);
+							}
+
+							@Override
+							public String getColouredTitle() {
+								return ChatColor.WHITE+pp.getName();
+							}
+
+							@Override
+							public String[] getColouredLore() {
+								return pp.getSellLore();
+							}
+
+							@Override
+							public void onClick(Player player) {
+								buyPlane(player, pp.getCost(), pp.toPlane());
+							}});
+					}
+				}
+				return res;
+			}
+
+			@Override
+			public String getColouredMenuTitle(Player player) {
+				return ChatColor.BLUE+"Plane Shop";
+			}
+
+			@Override
+			public int getPageSize() {
+				return 18;
+			}
+
+			@Override
+			public String noDisplayItemMessage() {
+				return ChatColor.RED+"There are no planes available to purchase!";
+			}});
+		/*this.menu = new IconMenu("Plane Shop", 9, new OptionClickEventHandler(){
 
 			public void onOptionClick(OptionClickEvent event) {
 				onClick(event);
 				return;
-			}}, plugin);
-		List<String> info = new ArrayList<String>();
+			}}, plugin);*/
+		/*List<String> info = new ArrayList<String>();
 		info.add(main.colors.getTitle()+"[Price:] "+main.colors.getInfo()+currency+value);
-		this.menu.setOption(4, new ItemStack(Material.MINECART), main.colors.getTitle()+"Buy Random Plane", info);
+		this.menu.setOption(4, new ItemStack(Material.MINECART), main.colors.getTitle()+"Buy Random Plane", info);*/
 	}
 	
 }

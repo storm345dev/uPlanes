@@ -1,9 +1,14 @@
 package net.stormdev.uPlanes.main;
 
 import net.stormdev.uPlanes.api.Plane;
+import net.stormdev.uPlanes.presets.PresetManager;
 
 public class PlaneGenerator {
 	public static Plane gen(){
+		if(PresetManager.usePresets){
+			return main.plugin.presets.getRandomPreset().toPlane();
+		}
+		
 		Plane plane = new Plane();
 		double maxHealth = main.config.getDouble("general.planes.maxHealth");
 		double defHealth = main.config.getDouble("general.planes.defaultHealth");
