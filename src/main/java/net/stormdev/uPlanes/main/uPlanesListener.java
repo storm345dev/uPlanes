@@ -109,7 +109,7 @@ public class uPlanesListener implements Listener {
 		if(collided == null || (collided instanceof Item) || (collided instanceof ItemFrame)){
 			return;
 		}
-		if(m.getPassenger() != null && collided.equals(m.getPassenger())){
+		if(m.getPassenger() == null || (m.getPassenger() != null && collided.equals(m.getPassenger()))){
 			return;
 		}
 		double speedSq = m.getVelocity().lengthSquared();
