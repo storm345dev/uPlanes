@@ -10,6 +10,8 @@ import net.stormdev.uPlanes.api.Plane;
 import net.stormdev.uPlanes.api.PlaneDeathEvent;
 import net.stormdev.uPlanes.api.uPlanesAPI;
 import net.stormdev.uPlanes.items.ItemPlaneValidation;
+import net.stormdev.uPlanes.presets.PlanePreset;
+import net.stormdev.uPlanes.presets.PresetManager;
 import net.stormdev.uPlanes.utils.CartOrientationUtil;
 import net.stormdev.uPlanes.utils.Lang;
 import net.stormdev.uPlanes.utils.PlaneUpdateEvent;
@@ -651,6 +653,13 @@ public class uPlanesListener implements Listener {
 		}
 		
 		Minecart ent = (Minecart) toSpawn.getWorld().spawnEntity(toSpawn, EntityType.MINECART);
+		
+		PlanePreset pp = plane.getPreset();
+		if(pp != null && pp.hasDisplayBlock()){
+			ent.setDisplayBlock(pp.getDisplayBlock());
+			ent.setDisplayBlockOffset(pp.getDisplayOffset());
+		}
+		
 		float yaw = player.getLocation().getYaw()+90;
 		if(yaw < 0){
 			yaw = 360 + yaw;
@@ -918,12 +927,18 @@ public class uPlanesListener implements Listener {
 			return;
 		}
         if(save && slotNumber ==2){
-			//They are renaming it
-        	ItemStack result = event.getCurrentItem();
-        	String name = ChatColor.stripColor(result.getItemMeta().getDisplayName());
-        	plane.setName(name);
-        	player.sendMessage(main.colors.getSuccess()+"+"+main.colors.getInfo()+" Renamed plane to: '"+name+"'");
-        	return;
+        	if(!PresetManager.usePresets || !PresetManager.disableItemRenaming){
+        		//They are renaming it
+            	ItemStack result = event.getCurrentItem();
+            	String name = ChatColor.stripColor(result.getItemMeta().getDisplayName());
+            	plane.setName(name);
+            	player.sendMessage(main.colors.getSuccess()+"+"+main.colors.getInfo()+" Renamed plane to: '"+name+"'");
+            	return;
+        	}
+        	//Display item naming
+        	event.getCurrentItem().getItemMeta().setDisplayName(plane.getName());
+        	event.setCancelled(true);
+			return;
 		}
 		InventoryAction a = event.getAction();
 		ItemStack upgrade = null;

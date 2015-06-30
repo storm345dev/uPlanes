@@ -5,12 +5,15 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
+import net.stormdev.uPlanes.main.ItemStackFromId;
 import net.stormdev.uPlanes.main.main;
 
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.material.MaterialData;
 
 public class PresetManager {
 	public static boolean usePresets = false;
+	public static boolean disableItemRenaming = false;
 	private List<PlanePreset> presets = new ArrayList<PlanePreset>();
 	private Random random = new Random();
 	
@@ -30,7 +33,11 @@ public class PresetManager {
 		if(!main.config.contains("general.planes.presets.enable")){
 			main.config.set("general.planes.presets.enable", true);
 		}
+		if(!main.config.contains("general.planes.presets.disableItemRename")){
+			main.config.set("general.planes.presets.disableItemRename", true);
+		}
 		usePresets = main.config.getBoolean("general.planes.presets.enable");
+		disableItemRenaming = main.config.getBoolean("general.planes.presets.disableItemRename");
 		ConfigurationSection presets = main.config.getConfigurationSection("general.planes.presets.types");
 		if(presets == null){ //Write defaults
 			presets = main.config.createSection("general.planes.presets.types");
@@ -82,7 +89,20 @@ public class PresetManager {
 					throw new Exception("INVALID plane preset "+id);
 				}
 				
-				PlanePreset pp = new PlanePreset(id, speed, name, health, accelMod, turnAmountPerTick, hover, cost);
+				MaterialData displayBlock = null;
+				int displayOffset = 0;
+				if(sect.contains("display")){
+					try {
+						displayBlock = ItemStackFromId.get(sect.getString("display")).getData();
+					} catch (Exception e) {
+						//Invalid config
+					}
+				}
+				if(sect.contains("displayOffset")){
+					displayOffset = sect.getInt("displayOffset");
+				}
+				
+				PlanePreset pp = new PlanePreset(id, speed, name, health, accelMod, turnAmountPerTick, hover, cost, displayBlock, displayOffset);
 				this.presets.add(pp);
 			} catch (Exception e) {
 				//Error loading this preset!

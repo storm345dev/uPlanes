@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.UUID;
 
 import net.stormdev.uPlanes.main.main;
+import net.stormdev.uPlanes.presets.PlanePreset;
+import net.stormdev.uPlanes.presets.PresetManager;
 import net.stormdev.uPlanes.utils.Colors;
 
 import org.bukkit.ChatColor;
@@ -57,6 +59,24 @@ public class Plane implements Serializable {
 		else {
 			return "No";
 		}
+	}
+	
+	public boolean isFromPreset(){
+		return getPreset() != null;
+	}
+	
+	public PlanePreset getPreset(){
+		if(!PresetManager.usePresets){
+			return null;
+		}
+		
+		List<PlanePreset> pps = main.plugin.presets.getPresets();
+		for(PlanePreset pp:new ArrayList<PlanePreset>(pps)){
+			if(pp.getName().equals(getName())){
+				return pp;
+			}
+		}
+		return null;
 	}
 	
 	public ItemStack toItemStack(){

@@ -12,6 +12,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.material.MaterialData;
 
 /**
  * Simple serializable format for plane data
@@ -30,8 +31,10 @@ public class PlanePreset implements Serializable {
 	private double accelMod = 1;
 	private boolean hover = false;
 	private double cost = 0;
+	private MaterialData displayBlock;
+	private int displayOffset = 0;
 	
-	public PlanePreset(String presetID, double speed, String name, double health, double accelMod, double turnAmountPerTick, boolean hover, double cost){
+	public PlanePreset(String presetID, double speed, String name, double health, double accelMod, double turnAmountPerTick, boolean hover, double cost, MaterialData displayBlock, int offset){
 		this.setPresetID(presetID);
 		if(speed > main.maxSpeed){
 			speed = main.maxSpeed;
@@ -43,6 +46,8 @@ public class PlanePreset implements Serializable {
 		this.turnAmount = turnAmountPerTick;
 		this.hover = hover;
 		this.setCost(cost);
+		this.setDisplayBlock(displayBlock);
+		this.setDisplayOffset(offset);
 	}
 	
 	private String getHandleString(boolean b){
@@ -158,5 +163,25 @@ public class PlanePreset implements Serializable {
 			lore.add(main.colors.getTitle()+"[Hover:] "+main.colors.getInfo()+getHandleString(hover));
 		}
 		return lore.toArray(new String[]{});
+	}
+	
+	public boolean hasDisplayBlock(){
+		return this.displayBlock != null;
+	}
+
+	public MaterialData getDisplayBlock() {
+		return displayBlock;
+	}
+
+	public void setDisplayBlock(MaterialData displayBlock) {
+		this.displayBlock = displayBlock;
+	}
+
+	public int getDisplayOffset() {
+		return displayOffset;
+	}
+
+	public void setDisplayOffset(int displayOffset) {
+		this.displayOffset = displayOffset;
 	}
 }

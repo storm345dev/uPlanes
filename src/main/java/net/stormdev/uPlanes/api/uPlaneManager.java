@@ -9,6 +9,7 @@ import net.stormdev.uPlanes.items.ItemPlaneValidation;
 import net.stormdev.uPlanes.main.PlaneGenerator;
 import net.stormdev.uPlanes.main.PlaneItemMethods;
 import net.stormdev.uPlanes.main.main;
+import net.stormdev.uPlanes.presets.PlanePreset;
 import net.stormdev.uPlanes.utils.Lang;
 import net.stormdev.uPlanes.utils.StatValue;
 
@@ -278,6 +279,11 @@ public class uPlaneManager {
 			ent.setMetadata("plane.hover", new StatValue(true, main.plugin));
 		}
 		plane.setId(ent.getUniqueId());
+		PlanePreset pp = plane.getPreset();
+		if(pp != null && pp.hasDisplayBlock()){
+			ent.setDisplayBlock(pp.getDisplayBlock());
+			ent.setDisplayBlockOffset(pp.getDisplayOffset());
+		}
 		
 		main.plugin.planeManager.nowPlaced(plane);
 		return ent;
@@ -304,6 +310,12 @@ public class uPlaneManager {
 			ent.setMetadata("plane.hover", new StatValue(true, main.plugin));
 		}
 		plane.setId(ent.getUniqueId());
+		
+		PlanePreset pp = plane.getPreset();
+		if(pp != null && pp.hasDisplayBlock()){
+			ent.setDisplayBlock(pp.getDisplayBlock());
+			ent.setDisplayBlockOffset(pp.getDisplayOffset());
+		}
 		
 		main.plugin.planeManager.nowPlaced(plane);
 		return ent;
