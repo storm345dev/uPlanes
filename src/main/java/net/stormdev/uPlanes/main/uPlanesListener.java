@@ -157,7 +157,7 @@ public class uPlanesListener implements Listener {
 		if(dmger instanceof Player){
 			Player player = (Player) dmger;
 			if(player.getVehicle() != null && player.getVehicle().equals(dmged)){
-				event.setDamage(0.0);
+				event.setDamage(-0.5);
 				event.setCancelled(true);
 			}
 			return;
@@ -170,7 +170,7 @@ public class uPlanesListener implements Listener {
 			if(source instanceof Player){
 				Player player = (Player) source;
 				if(player.getVehicle() != null && player.getVehicle().equals(dmged)){
-					event.setDamage(0.0);
+					event.setDamage(-0.5);
 					event.setCancelled(true);
 				}
 			}
@@ -188,7 +188,7 @@ public class uPlanesListener implements Listener {
 			return;
 		}
 		if(isAPlane((Minecart) v)){
-			event.setDamage(0d);
+			event.setDamage(-2.5);
 			event.setCancelled(true);
 		}
 	}
@@ -791,7 +791,7 @@ public class uPlanesListener implements Listener {
 		m.removeMetadata("plane.health", main.plugin);
 		m.setMetadata("plane.health", new StatValue(health, main.plugin)); //Update the health on the vehicle
 		
-		event.setDamage(0.0);
+		event.setDamage(-5.5);
 		event.setCancelled(true);
 		if(die || health < 0.1){
 			//Kill the plane
