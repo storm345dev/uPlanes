@@ -34,8 +34,11 @@ public class uCarsCompatibility {
 
 			public boolean isACar(ItemStack carStack) {
 				ItemMeta im = carStack.getItemMeta();
+				if (im == null) {
+					return true;
+				}
 				List<String> lore = im.getLore();
-				if(im == null || lore == null || lore.size() < 1){
+				if(lore == null || lore.size() < 1){
 					return true;
 				}
 				String id = lore.get(0);
