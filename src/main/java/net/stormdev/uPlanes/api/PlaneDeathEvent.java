@@ -11,7 +11,7 @@ import org.bukkit.event.vehicle.VehicleUpdateEvent;
 
 public class PlaneDeathEvent extends VehicleUpdateEvent implements Cancellable {
 	private Plane plane;
-	private Boolean cancelled = false;
+	private boolean cancelled = false;
 
 	public PlaneDeathEvent(Vehicle vehicle, Plane plane) {
 		super(vehicle);

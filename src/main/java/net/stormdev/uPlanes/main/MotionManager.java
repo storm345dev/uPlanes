@@ -113,7 +113,7 @@ public class MotionManager {
 			forwardMotion = false;
 		}*/
 		int side = 0; // -1=left, 0=straight, 1=right
-		Boolean turning = false;
+		boolean turning = false;
 		if(f > 0){
 			speedModKey = Keypress.W;
 			decel = false;
@@ -128,8 +128,8 @@ public class MotionManager {
 		}
 		double y = -0.0; // Don't succumb to gravity
 		double d = 27; // A number that happens to get realistic motion
-		Boolean isRight = false;
-		Boolean isLeft = false;
+		boolean isRight = false;
+		boolean isLeft = false;
 		
 		double accelMod = !decel ? AccelerationManager.getMultiplier(player, plane, pln) 
 				: (f == 0 ? AccelerationManager.decelerateAndGetMult(player, plane, pln) 

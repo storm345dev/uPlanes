@@ -1,19 +1,13 @@
 package net.stormdev.uPlanes.main;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-
 import net.stormdev.uPlanes.api.Plane;
 import net.stormdev.uPlanes.items.ItemPlaneValidation;
-
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
+
+import java.io.*;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class PlanesManager {
 	private ConcurrentHashMap<UUID, Plane> planes = new ConcurrentHashMap<UUID, Plane>();
@@ -23,23 +17,23 @@ public class PlanesManager {
 		this.saveFile = saveFile;
 		load();
 	}
-	public Boolean isPlaneInUse(UUID PlaneId){
+	public boolean isPlaneInUse(UUID PlaneId){
 		if(cache.containsKey(PlaneId)){
 			return true;
 		}
-		Boolean b = planes.containsKey(PlaneId);
+		boolean b = planes.containsKey(PlaneId);
 		if(b){
 			cache.put(PlaneId, planes.get(PlaneId));
 			cacheSize();
 		}
 		return b;
 	}
-	public Boolean isPlaneInUse(Plane plane){
+	public boolean isPlaneInUse(Plane plane){
 		UUID PlaneId = plane.getId();
 		if(cache.containsKey(PlaneId)){
 			return true;
 		}
-		Boolean b = planes.containsKey(PlaneId);
+		boolean b = planes.containsKey(PlaneId);
 		if(b){
 			cache.put(PlaneId, planes.get(PlaneId));
 			cacheSize();
@@ -49,7 +43,7 @@ public class PlanesManager {
 	public Plane getPlane(ItemStack item){
 		return ItemPlaneValidation.getPlane(item);
 	}
-	public Boolean isAPlane(ItemStack item){
+	public boolean isAPlane(ItemStack item){
 		return getPlane(item) != null;
 	}
 	public Plane getPlane(UUID PlaneId){

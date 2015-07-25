@@ -1,11 +1,6 @@
 package net.stormdev.uPlanes.shops;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-
 import net.stormdev.uPlanes.utils.StatValue;
-
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -19,6 +14,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
 public class IconMenu implements Listener {
 
 	private String name;
@@ -28,7 +27,7 @@ public class IconMenu implements Listener {
 
 	private String[] optionNames;
 	private ItemStack[] optionIcons;
-	private Boolean enabled = true;
+	private boolean enabled = true;
 	private String metaData;
 	private boolean destroyOnClose = false;
 

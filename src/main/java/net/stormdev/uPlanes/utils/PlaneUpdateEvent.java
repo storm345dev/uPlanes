@@ -1,20 +1,19 @@
 package net.stormdev.uPlanes.utils;
 
-import java.util.List;
-
 import net.stormdev.uPlanes.api.Keypress;
 import net.stormdev.uPlanes.api.Plane;
-
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.vehicle.VehicleUpdateEvent;
 import org.bukkit.util.Vector;
 
+import java.util.List;
+
 public class PlaneUpdateEvent extends VehicleUpdateEvent implements Cancellable {
 	private Vector toTravel;
-	private Boolean changePlayerYaw = false;
-	private Boolean cancelled = false;
+	private boolean changePlayerYaw = false;
+	private boolean cancelled = false;
 	private Player player;
 	private List<Keypress> pressed;
 	private double acceleration;
@@ -51,10 +50,9 @@ public class PlaneUpdateEvent extends VehicleUpdateEvent implements Cancellable 
 
 	public void setChangePlayerYaw(Boolean change) {
 		this.changePlayerYaw = change;
-		return;
 	}
 
-	public Boolean getChangePlayerYaw() {
+	public boolean getChangePlayerYaw() {
 		return this.changePlayerYaw;
 	}
 

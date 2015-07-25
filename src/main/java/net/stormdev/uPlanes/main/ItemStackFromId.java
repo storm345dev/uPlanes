@@ -1,9 +1,9 @@
 package net.stormdev.uPlanes.main;
 
-import java.util.List;
-
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.List;
 
 public class ItemStackFromId {
 	public static ItemStack get(String raw) {
@@ -15,7 +15,7 @@ public class ItemStackFromId {
 			return new ItemStack(Material.STONE);
 		}
 		short data = 0;
-		Boolean hasdata = false;
+		boolean hasdata = false;
 		if (parts.length > 1) {
 			hasdata = true;
 			data = Short.parseShort(parts[1]);
@@ -27,17 +27,17 @@ public class ItemStackFromId {
 		return item;
 	}
 
-	public static Boolean equals(String rawid, String materialName, int tdata) {
+	public static boolean equals(String rawid, String materialName, int tdata) {
 		String[] parts = rawid.split(":");
 		String m = parts[0];
 		int data = 0;
-		Boolean hasdata = false;
+		boolean hasdata = false;
 		if (parts.length > 1) {
 			hasdata = true;
 			data = Integer.parseInt(parts[1]);
 		}
 		if (materialName.equalsIgnoreCase(m)) {
-			Boolean valid = true;
+			boolean valid = true;
 			if (hasdata) {
 				if (!(tdata == data)) {
 					valid = false;
@@ -50,7 +50,7 @@ public class ItemStackFromId {
 		return false;
 	}
 	
-	public static Boolean equals(List<String> rawids, String materialName, int tdata) {
+	public static boolean equals(List<String> rawids, String materialName, int tdata) {
 		boolean match = false;
 		for(String id:rawids){
 			if(match || equals(id, materialName, tdata)){

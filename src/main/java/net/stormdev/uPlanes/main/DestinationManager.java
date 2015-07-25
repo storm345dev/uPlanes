@@ -1,22 +1,16 @@
 package net.stormdev.uPlanes.main;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-
 import net.stormdev.uPlanes.utils.Colors;
 import net.stormdev.uPlanes.utils.SerializableLocation;
-
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.scheduler.BukkitRunnable;
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DestinationManager {
 	private ConcurrentHashMap<String, SerializableLocation> destinations =
@@ -36,7 +30,7 @@ public class DestinationManager {
 		return l;
 	}
 	
-	public Boolean locationExists(String destination){
+	public boolean locationExists(String destination){
 		return destinations.containsKey(getCorrectName(destination));
 	}
 	
