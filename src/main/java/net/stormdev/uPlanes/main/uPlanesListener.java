@@ -335,6 +335,12 @@ public class uPlanesListener implements Listener {
 		}
 		Minecart car = (Minecart) veh;
 		Location loc = car.getLocation();
+		
+		if(veh.hasMetadata("plane.frozen")){
+			veh.setVelocity(new Vector(0,0.04,0));
+			return;
+		}
+		
 		Entity passenger = car.getPassenger();
 		if(passenger == null){
 			return;
@@ -537,6 +543,11 @@ public class uPlanesListener implements Listener {
 			if(!player.hasPermission(perm)){
 				return;
 			}
+		}
+		
+		if(cart.hasMetadata("plane.frozen")){
+			cart.setVelocity(new Vector(0,0.04,0));
+			return;
 		}
 		
 		cart.setMaxSpeed(5); //Don't crash the server...

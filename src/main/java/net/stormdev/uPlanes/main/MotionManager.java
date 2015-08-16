@@ -58,6 +58,10 @@ public class MotionManager {
 			return;
 		}
 		
+		if(plane.hasMetadata("plane.frozen")){
+			return;
+		}
+		
 		boolean decel = true;
 		if(f == 0 && s == 0){
 			/*if(AccelerationManager.getCurrentMultiplier(plane) == 0){

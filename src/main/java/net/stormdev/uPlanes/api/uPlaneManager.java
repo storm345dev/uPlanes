@@ -502,6 +502,20 @@ public class uPlaneManager {
 	 * 
 	 * @param m The plane entity
 	 * @param plane The plane
+	 */
+	public void healPlane(Minecart m, Plane plane){
+		double health = plane.getHealth();
+		
+		m.removeMetadata("plane.health", main.plugin);
+		m.setMetadata("plane.health", new StatValue(health, main.plugin)); //Update the health on the vehicle
+		return;
+	}
+	
+	/**
+	 * Damage the given plane
+	 * 
+	 * @param m The plane entity
+	 * @param plane The plane
 	 * @param damage The amount to damage it by
 	 * @param breakIt Whether or not to break the car if necessary
 	 */

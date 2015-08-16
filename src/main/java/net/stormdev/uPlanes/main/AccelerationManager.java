@@ -33,6 +33,10 @@ public class AccelerationManager {
 		}
 	}
 	
+	public static void lastAccelTimeNow(Minecart cart){
+		getMeta(cart).setTime(System.currentTimeMillis());
+	}
+	
 	private static AccelMeta getMeta(Minecart cart){
 		if(!cart.hasMetadata(ACCEL_META)){
 			AccelMeta am = new AccelMeta(0);
