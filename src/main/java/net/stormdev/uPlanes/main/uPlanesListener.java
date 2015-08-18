@@ -197,8 +197,8 @@ public class uPlanesListener implements Listener {
 	 void signWrite(SignChangeEvent event){
 		 String[] lines = event.getLines();
 			if(ChatColor.stripColor(lines[0]).equalsIgnoreCase("[Shop]")){
-				lines[0] = ChatColor.GREEN+"[Shop]";
-				lines[1] = ChatColor.RED + ChatColor.stripColor(lines[1]);
+				lines[0] = ChatColor.GREEN+"[Shop]".trim();
+				lines[1] = ChatColor.RED + ChatColor.stripColor(lines[1].trim());
 				lines[2] = "Place chest";
 				lines[3] = "above";
 			}
@@ -243,7 +243,7 @@ public class uPlanesListener implements Listener {
 			else {
 				return;
 			}
-			if(!(ChatColor.stripColor(sign.getLines()[0])).equalsIgnoreCase("[Shop]") || !(ChatColor.stripColor(sign.getLines()[1])).equalsIgnoreCase("planes")){
+			if(!(ChatColor.stripColor(sign.getLines()[0].trim())).equalsIgnoreCase("[Shop]") || !(ChatColor.stripColor(sign.getLines()[1].trim())).equalsIgnoreCase("planes")){
 				return;
 			}
 			//A trade sign for planes
