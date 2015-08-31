@@ -1,8 +1,8 @@
 package net.stormdev.uPlanes.api;
 
-import java.io.Serializable;
-
 import org.bukkit.plugin.Plugin;
+
+import java.io.Serializable;
 
 /**
  * A simple plane stat class used for adding data to the plane
@@ -13,7 +13,7 @@ public class Stat implements Serializable {
 	private static final long serialVersionUID = -7275161546527988371L;
 	private Object val = null;
 	private String statName = "";
-	private Boolean display = false;
+	private boolean display = false;
 	public Stat(String statName, Object val, Plugin plugin, Boolean display){
 		this.val = val;
 		this.statName = statName;
@@ -25,7 +25,7 @@ public class Stat implements Serializable {
 	public String getStatName(){
 		return statName;
 	}
-	public Boolean shouldDisplay(){
+	public boolean shouldDisplay(){
 		return display;
 	}
 }

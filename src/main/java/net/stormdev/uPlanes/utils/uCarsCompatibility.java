@@ -23,7 +23,7 @@ public class uCarsCompatibility {
 		
 		api.registerCarCheck(main.plugin, new CarCheck(){
 
-			public Boolean isACar(Minecart car) {
+			public boolean isACar(Minecart car) {
 				if(main.plugin.planeManager.isPlaneInUse(car.getUniqueId())){
 					car.setMetadata("ucars.ignore", new StatValue(true, main.plugin));
 					return false;
@@ -32,10 +32,13 @@ public class uCarsCompatibility {
 			}});
 		api.registerItemCarCheck(main.plugin, new ItemCarCheck(){
 
-			public Boolean isACar(ItemStack carStack) {
+			public boolean isACar(ItemStack carStack) {
 				ItemMeta im = carStack.getItemMeta();
+				if (im == null) {
+					return true;
+				}
 				List<String> lore = im.getLore();
-				if(im == null || lore == null || lore.size() < 1){
+				if(lore == null || lore.size() < 1){
 					return true;
 				}
 				String id = lore.get(0);

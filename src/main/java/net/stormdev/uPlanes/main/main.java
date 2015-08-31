@@ -1,30 +1,19 @@
 package net.stormdev.uPlanes.main;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.util.HashMap;
-import java.util.Random;
-import java.util.logging.Level;
-
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
+import com.comphenix.protocol.events.PacketAdapter;
+import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.events.PacketEvent;
 import net.milkbowl.vault.economy.Economy;
 import net.stormdev.uPlanes.api.uPlanesAPI;
-import net.stormdev.uPlanes.commands.AdminCommandExecutor;
-import net.stormdev.uPlanes.commands.AutoPilotAdminCommandExecutor;
-import net.stormdev.uPlanes.commands.AutoPilotCommandExecutor;
-import net.stormdev.uPlanes.commands.FuelCommandExecutor;
-import net.stormdev.uPlanes.commands.InfoCommandExecutor;
+import net.stormdev.uPlanes.commands.*;
 import net.stormdev.uPlanes.presets.PresetManager;
 import net.stormdev.uPlanes.shops.PlaneShop;
 import net.stormdev.uPlanes.utils.Colors;
 import net.stormdev.uPlanes.utils.CustomLogger;
 import net.stormdev.uPlanes.utils.uCarsCompatibility;
-
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -34,12 +23,10 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.ProtocolManager;
-import com.comphenix.protocol.events.PacketAdapter;
-import com.comphenix.protocol.events.PacketContainer;
-import com.comphenix.protocol.events.PacketEvent;
+import java.io.*;
+import java.util.HashMap;
+import java.util.Random;
+import java.util.logging.Level;
 
 /**
  * Entry point class for the application
@@ -106,20 +93,19 @@ public class main extends JavaPlugin {
 				+ File.separator + "Data" + File.separator + "uplanes.data");
 		File destinationSaveFile = new File(getDataFolder().getAbsolutePath()
 				+ File.separator + "Data" + File.separator + "destinations.locationdata");
-		if (langFile.exists() == false
-				|| langFile.length() < 1) {
+		if (!langFile.exists() || langFile.length() < 1) {
 			try {
 				langFile.createNewFile();
 			} catch (IOException e) {
 			}
-			
 		}
 		try {
 			lang.load(langFile);
-		} catch(Exception e){
+		} catch(Exception e) {
 			lang = new YamlConfiguration();
 			getLogger().log(Level.WARNING, "Error creating/loading lang file! Regenerating..");
 		}
+
 		if(!lang.contains("general.buy.notEnoughMoney")){
 			lang.set("general.buy.notEnoughMoney", "You cannot afford that item! You only have %balance%!");
 		}
@@ -211,13 +197,10 @@ public class main extends JavaPlugin {
 					"Successfully sold %quantity% of fuel for %amount% %unit%! You now have %balance% %unit% left!");
 		}
 		
-		if (new File(getDataFolder().getAbsolutePath() + File.separator
-				+ "config.yml").exists() == false
-				|| new File(getDataFolder().getAbsolutePath() + File.separator
-						+ "config.yml").length() < 1) {
+		if (!new File(getDataFolder(), "config.yml").exists()
+				|| new File(getDataFolder(), "config.yml").length() < 1) {
 			getDataFolder().mkdirs();
-			File configFile = new File(getDataFolder().getAbsolutePath()
-					+ File.separator + "config.yml");
+			File configFile = new File(getDataFolder(), "config.yml");
 			try {
 				configFile.createNewFile();
 			} catch (IOException e) {
@@ -376,7 +359,7 @@ public class main extends JavaPlugin {
 		hplane.setItemMeta(him);
 		
 		ShapedRecipe hoverRecipe = new ShapedRecipe(hplane);
-		hoverRecipe.shape("012","345","678");
+		hoverRecipe.shape("012", "345", "678");
 		hoverRecipe.setIngredient('0', Material.REDSTONE);
 		hoverRecipe.setIngredient('1', Material.LEVER);
 		hoverRecipe.setIngredient('2', Material.REDSTONE);
@@ -403,15 +386,12 @@ public class main extends JavaPlugin {
 		getCommand("planeFuel").setExecutor(new FuelCommandExecutor());
 		
 		boolean economy = setupEconomy();
-		shopsEnabled = main.config.getBoolean("general.shop.enable") ? economy:false;
+		shopsEnabled = main.config.getBoolean("general.shop.enable") && economy;
 		if(shopsEnabled){
 			planeShop = new PlaneShop(this);
 		}
 		fuel = new HashMap<String, Double>();
-		File fuels = new File(plugin.getDataFolder()
-				.getAbsolutePath()
-				+ File.separator
-				+ "fuel.bin");
+		File fuels = new File(plugin.getDataFolder(), "fuel.bin");
 		if (fuels.exists() && fuels.length() > 1) {
 			fuel = loadHashMapDouble(plugin.getDataFolder()
 					.getAbsolutePath()
@@ -462,7 +442,7 @@ public class main extends JavaPlugin {
 	/**
 	 * Code to setup use of ProtocolLib
 	 */
-	private Boolean setupProtocol() {
+	private boolean setupProtocol() {
 		try {
 			this.protocolManager = ProtocolLibrary.getProtocolManager();
 			/*
@@ -471,16 +451,16 @@ public class main extends JavaPlugin {
 			 * ListenerPriority.NORMAL, 0x1b) {
 			 */
 			
-			((ProtocolManager) this.protocolManager).addPacketListener(
-					  new PacketAdapter(this, PacketType.Play.Client.STEER_VEHICLE) {
-						  @Override
-						  public void onPacketReceiving(PacketEvent event) {
-								PacketContainer packet = event.getPacket();
-								float sideways = packet.getFloat().read(0);
-								float forwards = packet.getFloat().read(1);
-								MotionManager.move(event.getPlayer(), forwards,
-										sideways);
-						  }
+			this.protocolManager.addPacketListener(
+					new PacketAdapter(this, PacketType.Play.Client.STEER_VEHICLE) {
+						@Override
+						public void onPacketReceiving(PacketEvent event) {
+							PacketContainer packet = event.getPacket();
+							float sideways = packet.getFloat().read(0);
+							float forwards = packet.getFloat().read(1);
+							MotionManager.move(event.getPlayer(), forwards,
+									sideways);
+						}
 					});
 		} catch (Exception e) {
 			return false;

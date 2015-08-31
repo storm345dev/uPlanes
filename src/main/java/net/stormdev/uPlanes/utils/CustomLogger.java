@@ -1,15 +1,14 @@
 package net.stormdev.uPlanes.utils;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import net.stormdev.uPlanes.main.main;
-
 import org.bukkit.ChatColor;
 import org.bukkit.command.ConsoleCommandSender;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public class CustomLogger {
-	public Boolean coloured = true;
+	public boolean coloured = true;
 	ConsoleCommandSender console = null;
 	Logger logger = null;
 	public CustomLogger(ConsoleCommandSender console, Logger logger){
@@ -21,7 +20,7 @@ public class CustomLogger {
 		this.console = console;
 		this.logger = logger;
 	}
-	public void setColoured(Boolean coloured){
+	public void setColoured(boolean coloured){
 		this.coloured = coloured;
 	}
 	public String getMsg(String raw){

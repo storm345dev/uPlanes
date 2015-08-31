@@ -359,7 +359,7 @@ public class uPlaneManager {
 		double health = plane.getHealth();
 		if(m.hasMetadata("plane.health")){
 			List<MetadataValue> ms = m.getMetadata("plane.health");
-			health = (Double) ms.get(0).value();
+			health = (double) ms.get(0).value();
 		}
 		String msg = Lang.get("general.damage.msg");
 		msg = msg.replaceAll(Pattern.quote("%damage%"), damage+"HP");
@@ -389,7 +389,7 @@ public class uPlaneManager {
 		double health = plane.getHealth();
 		if(m.hasMetadata("plane.health")){
 			List<MetadataValue> ms = m.getMetadata("plane.health");
-			health = (Double) ms.get(0).value();
+			health = (double) ms.get(0).value();
 		}
 		String msg = Lang.get("general.damage.msg");
 		msg = msg.replaceAll(Pattern.quote("%damage%"), (damage)+"HP");
@@ -465,7 +465,7 @@ public class uPlaneManager {
 		double health = plane.getHealth();
 		if(m.hasMetadata("plane.health")){
 			List<MetadataValue> ms = m.getMetadata("plane.health");
-			health = (Double) ms.get(0).value();
+			health = (double) ms.get(0).value();
 		}
 		String msg = Lang.get("general.damage.msg");
 		Boolean die = false;

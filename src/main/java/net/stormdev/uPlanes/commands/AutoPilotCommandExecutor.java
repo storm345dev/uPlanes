@@ -1,14 +1,10 @@
 package net.stormdev.uPlanes.commands;
 
-import java.util.List;
-import java.util.UUID;
-
 import net.stormdev.uPlanes.api.Plane;
 import net.stormdev.uPlanes.main.main;
 import net.stormdev.uPlanes.utils.Colors;
 import net.stormdev.uPlanes.utils.Lang;
 import net.stormdev.uPlanes.utils.StatValue;
-
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -17,8 +13,11 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 
+import java.util.List;
+import java.util.UUID;
+
 public class AutoPilotCommandExecutor implements CommandExecutor {
-	private Boolean autoPilotEnabled;
+	private boolean autoPilotEnabled;
 	public AutoPilotCommandExecutor(){
 		this.autoPilotEnabled = main.config.getBoolean("general.planes.autopilot");
 	}

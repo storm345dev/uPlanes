@@ -1,44 +1,13 @@
 package net.stormdev.uPlanes.main;
 
-import java.util.List;
-import java.util.UUID;
-import java.util.regex.Pattern;
-
-import net.stormdev.uPlanes.api.AutopilotDestination;
-import net.stormdev.uPlanes.api.Keypress;
-import net.stormdev.uPlanes.api.Plane;
-import net.stormdev.uPlanes.api.PlaneDeathEvent;
-import net.stormdev.uPlanes.api.uPlanesAPI;
+import net.stormdev.uPlanes.api.*;
 import net.stormdev.uPlanes.items.ItemPlaneValidation;
 import net.stormdev.uPlanes.presets.PlanePreset;
 import net.stormdev.uPlanes.presets.PresetManager;
-import net.stormdev.uPlanes.utils.CartOrientationUtil;
-import net.stormdev.uPlanes.utils.Lang;
-import net.stormdev.uPlanes.utils.PlaneUpdateEvent;
-import net.stormdev.uPlanes.utils.PrePlaneCrashEvent;
-import net.stormdev.uPlanes.utils.PrePlaneRoughLandingEvent;
-import net.stormdev.uPlanes.utils.StatValue;
-
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Effect;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.block.Chest;
-import org.bukkit.block.DoubleChest;
-import org.bukkit.block.Sign;
-import org.bukkit.entity.Damageable;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.HumanEntity;
-import org.bukkit.entity.Item;
-import org.bukkit.entity.ItemFrame;
-import org.bukkit.entity.Minecart;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
-import org.bukkit.entity.Vehicle;
+import net.stormdev.uPlanes.utils.*;
+import org.bukkit.*;
+import org.bukkit.block.*;
+import org.bukkit.entity.*;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -54,11 +23,7 @@ import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.vehicle.VehicleDamageEvent;
-import org.bukkit.event.vehicle.VehicleDestroyEvent;
-import org.bukkit.event.vehicle.VehicleEntityCollisionEvent;
-import org.bukkit.event.vehicle.VehicleExitEvent;
-import org.bukkit.event.vehicle.VehicleUpdateEvent;
+import org.bukkit.event.vehicle.*;
 import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
@@ -67,6 +32,10 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.util.Vector;
+
+import java.util.List;
+import java.util.UUID;
+import java.util.regex.Pattern;
 
 public class uPlanesListener implements Listener {
 	private main plugin;
@@ -212,7 +181,7 @@ public class uPlanesListener implements Listener {
 				return;
 			}
 			if(main.economy == null){
-		        Boolean installed = plugin.setupEconomy();
+		        boolean installed = plugin.setupEconomy();
 		        if(!installed){
 		        	main.logger.info(main.colors.getError()+"[Important] Unable to find an economy plugin:"
 		        			+ " shop was unable to open.");
@@ -766,12 +735,12 @@ public class uPlanesListener implements Listener {
 		double health = plane.getHealth();
 		if(m.hasMetadata("plane.health")){
 			List<MetadataValue> ms = m.getMetadata("plane.health");
-			health = (Double) ms.get(0).value();
+			health = (double) ms.get(0).value();
 		}
 		double damage = event.getDamage();
 		String msg = Lang.get("general.damage.msg");
 		Entity attacker = dmger;
-		Boolean die = false;
+		boolean die = false;
 		if(attacker != null && attacker instanceof Player){
 			//Plane being punched to death
 			damage = punchDamage;
@@ -830,7 +799,7 @@ public class uPlanesListener implements Listener {
 		if(e instanceof Player){
 			player = (Player) e;
 		}
-		Boolean hover = false;
+		boolean hover = false;
 		String name = ChatColor.stripColor(recipe.getItemMeta().getDisplayName());
 		if(!name.equalsIgnoreCase("plane")){
 			if(name.equalsIgnoreCase("hover plane")){
@@ -890,9 +859,9 @@ public class uPlanesListener implements Listener {
 			return;
 		}
 		//AnvilInventory i = (AnvilInventory) inv;
-		Boolean update = true;
-		Boolean save = false;
-		Boolean pickup = false;
+		boolean update = true;
+		boolean save = false;
+		boolean pickup = false;
 		if(event.getAction() == InventoryAction.PICKUP_ALL || event.getAction() == InventoryAction.PICKUP_HALF || event.getAction() == InventoryAction.PICKUP_ONE || event.getAction() == InventoryAction.PICKUP_SOME){
 			update = false;
 			pickup = true;
@@ -953,10 +922,10 @@ public class uPlanesListener implements Listener {
 		}
 		InventoryAction a = event.getAction();
 		ItemStack upgrade = null;
-		Boolean set = false;
+		boolean set = false;
 		final ItemStack up = upgrade;
-		final Boolean updat = update;
-		final Boolean sav = save;
+		final boolean updat = update;
+		final boolean sav = save;
 		final Plane ca = plane;
 		if(slotNumber == 1 && (a==InventoryAction.PLACE_ALL || a==InventoryAction.PLACE_ONE || a==InventoryAction.PLACE_SOME) && event.getCursor().getType()!=Material.AIR){
 			//upgrade = event.getCursor().clone();
@@ -1033,7 +1002,7 @@ public class uPlanesListener implements Listener {
 		return plugin.planeManager.getPlane(m.getUniqueId());
 	}
 	
-	public Boolean isAPlane(Minecart m){
+	public boolean isAPlane(Minecart m){
 		return plugin.planeManager.isPlaneInUse(m.getUniqueId());
 	}
 }

@@ -58,7 +58,7 @@ public class FlightControl {
 		
 		double x = targetLoc.getX() - current.getX();
 		double z = targetLoc.getZ() - current.getZ();
-		Boolean ux = true;
+		boolean ux = true;
 		double px = Math.abs(x);
 		double pz = Math.abs(z);
 		if (px > pz) {
@@ -84,7 +84,7 @@ public class FlightControl {
 		Block left = b.getRelative(DirectionUtil.getLeftOf(direction));
 		Block under = b.getRelative(BlockFace.DOWN);
 		Block underunder = under.getRelative(BlockFace.DOWN);
-		Boolean asc = false;
+		boolean asc = false;
 		if(current.getY()<targetHeight){
 			asc = true;
 			y = 0.6; //Go up

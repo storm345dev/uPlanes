@@ -10,8 +10,8 @@ import org.bukkit.event.HandlerList;
 
 public class PrePlaneRoughLandingEvent extends Event implements Cancellable {
 	private static final HandlerList handlers = new HandlerList();
-	private Boolean changePlayerYaw = false;
-	private Boolean cancelled = false;
+	private boolean changePlayerYaw = false;
+	private boolean cancelled = false;
 	private Player player;
 	private double acceleration;
 	private Minecart vehicle;
@@ -43,7 +43,7 @@ public class PrePlaneRoughLandingEvent extends Event implements Cancellable {
 		return;
 	}
 
-	public Boolean getChangePlayerYaw() {
+	public boolean getChangePlayerYaw() {
 		return this.changePlayerYaw;
 	}
 
