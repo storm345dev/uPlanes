@@ -2,8 +2,8 @@ package net.stormdev.uPlanes.utils;
 
 import net.stormdev.uPlanes.api.Plane;
 
-import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Vehicle;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
@@ -14,19 +14,19 @@ public class PrePlaneCrashEvent extends Event implements Cancellable {
 	private Boolean cancelled = false;
 	private Player player;
 	private double acceleration;
-	private Minecart vehicle;
+	private Vehicle vehicle;
 	private Plane plane;
 	private double damage;
 
-	public PrePlaneCrashEvent(Minecart vehicle, Player player, double accelMod, Plane pln, double damage) {
-	    this.vehicle = vehicle;
+	public PrePlaneCrashEvent(Vehicle cart, Player player, double accelMod, Plane pln, double damage) {
+	    this.vehicle = cart;
 		this.player = player;
 		this.acceleration = accelMod;
 		this.plane = pln;
 		this.setDamage(damage);
 	}
 	
-	public Minecart getVehicle(){
+	public Vehicle getVehicle(){
 		return this.vehicle;
 	}
 	

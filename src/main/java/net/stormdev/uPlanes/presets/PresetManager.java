@@ -90,7 +90,7 @@ public class PresetManager {
 				}
 				
 				MaterialData displayBlock = null;
-				int displayOffset = 0;
+				double displayOffset = 0;
 				if(sect.contains("display")){
 					try {
 						displayBlock = ItemStackFromId.get(sect.getString("display")).getData();
@@ -99,7 +99,7 @@ public class PresetManager {
 					}
 				}
 				if(sect.contains("displayOffset")){
-					displayOffset = sect.getInt("displayOffset");
+					displayOffset = sect.getDouble("displayOffset");
 				}
 				
 				PlanePreset pp = new PlanePreset(id, speed, name, health, accelMod, turnAmountPerTick, hover, cost, displayBlock, displayOffset);

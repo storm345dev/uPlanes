@@ -3,10 +3,21 @@ package net.stormdev.uPlanes.utils;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-import org.bukkit.entity.Minecart;
+import net.stormdev.uPlanes.hover.HoverCart;
+import net.stormdev.uPlanes.hover.HoverCartEntity;
 
-public class CartOrientationUtil {
-	public static void setPitch(Minecart cart, float pitch){
+import org.bukkit.entity.Minecart;
+import org.bukkit.entity.Vehicle;
+
+public class CartOrientationUtil { //TODO Convert yaw to eular angle
+	public static void setPitch(Vehicle cart, float pitch){
+		if(!(cart instanceof Minecart)){
+			HoverCart hc = HoverCartEntity.getCart(cart);
+			if(hc != null){
+				hc.setPitch(pitch);
+			}
+			return;
+		}
 		try {
 			Class<?> cmr = cart.getClass();
 			Method getHandle = cmr.getMethod("getHandle");
@@ -20,7 +31,24 @@ public class CartOrientationUtil {
 		}
 	}
 	
-	public static void setYaw(Minecart cart, float yaw){
+	public static void setRoll(Vehicle cart, float roll){
+		if(!(cart instanceof Minecart)){
+			HoverCart hc = HoverCartEntity.getCart(cart);
+			if(hc != null){
+				hc.setRoll(roll);
+			}
+			return;
+		}
+	}
+	
+	public static void setYaw(Vehicle cart, float yaw){
+		if(!(cart instanceof Minecart)){
+			HoverCart hc = HoverCartEntity.getCart(cart);
+			if(hc != null){
+				hc.setYaw(yaw);
+			}
+			return;
+		}
 		try {
 			Class<?> cmr = cart.getClass();
 			Method getHandle = cmr.getMethod("getHandle");

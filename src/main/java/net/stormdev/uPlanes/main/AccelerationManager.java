@@ -4,8 +4,8 @@ import net.stormdev.uPlanes.api.Plane;
 import net.stormdev.uPlanes.api.uPlanesAPI;
 import net.stormdev.uPlanes.utils.StatValue;
 
-import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Vehicle;
 
 public class AccelerationManager {
 	public static final String ACCEL_META = "uPlanes.accel";
@@ -33,11 +33,11 @@ public class AccelerationManager {
 		}
 	}
 	
-	public static void lastAccelTimeNow(Minecart cart){
+	public static void lastAccelTimeNow(Vehicle cart){
 		getMeta(cart).setTime(System.currentTimeMillis());
 	}
 	
-	private static AccelMeta getMeta(Minecart cart){
+	private static AccelMeta getMeta(Vehicle cart){
 		if(!cart.hasMetadata(ACCEL_META)){
 			AccelMeta am = new AccelMeta(0);
 			cart.setMetadata(ACCEL_META, new StatValue(am, main.plugin));
@@ -53,7 +53,7 @@ public class AccelerationManager {
 		}
 	}
 	
-	private static double getCurrentAccel(Minecart cart){
+	private static double getCurrentAccel(Vehicle cart){
 		AccelMeta am = getMeta(cart);
 		/*if(System.currentTimeMillis() - am.getTime() > 500){
 			am.setCurrent(0);
@@ -62,27 +62,27 @@ public class AccelerationManager {
 		return am.getCurrent();
 	}
 	
-	public static void setCurrentAccel(Minecart cart, double accel){
+	public static void setCurrentAccel(Vehicle cart, double accel){
 		getMeta(cart).setCurrent(accel);
 	}
 	
-	private static float getA(Player player, Minecart cart, Plane plane){ //Get the multiplier for accelerating
+	private static float getA(Player player, Vehicle cart, Plane plane){ //Get the multiplier for accelerating
 		return (float) (0.020*uPlanesAPI.getPlaneManager().getAlteredAccelerationMod(player, cart, plane)); //Our constant of 0.025 multiplied by whatever the API is asking for as a modification to the rate of acceleration
 	}
 	
-	private static float getDA(Player player, Minecart cart, Plane plane){ //Get the multiplier for accelerating
+	private static float getDA(Player player, Vehicle cart, Plane plane){ //Get the multiplier for accelerating
 		return (float) (0.030*uPlanesAPI.getPlaneManager().getAlteredDecelerationMod(player, cart, plane)); //Our constant of 0.025 multiplied by whatever the API is asking for as a modification to the rate of acceleration
 	}
 	
-	private static float getGA(Player player, Minecart cart, Plane plane){ //Get the multiplier for accelerating
+	private static float getGA(Player player, Vehicle cart, Plane plane){ //Get the multiplier for accelerating
 		return (float) (0.020*uPlanesAPI.getPlaneManager().getAlteredDecelerationMod(player, cart, plane)); //Our constant of 0.025 multiplied by whatever the API is asking for as a modification to the rate of acceleration
 	}
 	
-	public static long getTimeSinceLastKeypress(Minecart cart){
+	public static long getTimeSinceLastKeypress(Vehicle cart){
 		return System.currentTimeMillis()-getMeta(cart).getTime();
 	}
 	
-	public static double stall(Player player, Minecart cart, Plane plane){
+	public static double stall(Player player, Vehicle cart, Plane plane){
 		if(!main.doAcceleration){
 			return 0d;
 		}
@@ -94,7 +94,7 @@ public class AccelerationManager {
 		return accel;
 	}
 	
-	public static double decelerateAndGetMult(Player player, Minecart cart, Plane plane){
+	public static double decelerateAndGetMult(Player player, Vehicle cart, Plane plane){
 		if(!main.doAcceleration){
 			return 0d;
 		}
@@ -112,7 +112,7 @@ public class AccelerationManager {
 		return current;
 	}
 	
-	public static double glideAndGetMult(Player player, Minecart cart, Plane plane){
+	public static double glideAndGetMult(Player player, Vehicle cart, Plane plane){
 		if(!main.doAcceleration){
 			return 0d;
 		}
@@ -130,7 +130,7 @@ public class AccelerationManager {
 		return current;
 	}
 	
-	public static double getCurrentMultiplier(Minecart cart){
+	public static double getCurrentMultiplier(Vehicle cart){
 		if(!main.doAcceleration){
 			return 1.0d;
 		}
@@ -138,7 +138,7 @@ public class AccelerationManager {
 		return getCurrentAccel(cart);
 	}
 	
-	public static double getMultiplier(Player player, Minecart cart, Plane plane){
+	public static double getMultiplier(Player player, Vehicle cart, Plane plane){
 		if(!main.doAcceleration){
 			return 1.0d;
 		}

@@ -10,7 +10,6 @@ import net.stormdev.uPlanes.api.Plane;
 import net.stormdev.uPlanes.api.PlaneDeathEvent;
 import net.stormdev.uPlanes.api.uPlanesAPI;
 import net.stormdev.uPlanes.items.ItemPlaneValidation;
-import net.stormdev.uPlanes.presets.PlanePreset;
 import net.stormdev.uPlanes.presets.PresetManager;
 import net.stormdev.uPlanes.utils.CartOrientationUtil;
 import net.stormdev.uPlanes.utils.Lang;
@@ -31,7 +30,6 @@ import org.bukkit.block.DoubleChest;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Damageable;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.ItemFrame;
@@ -97,11 +95,10 @@ public class uPlanesListener implements Listener {
 		if(!crashing){
 			return;
 		}
-		Vehicle veh = event.getVehicle();
-		if(veh == null || !(veh instanceof Minecart)){
+		Vehicle m = event.getVehicle();
+		if(m == null){
 			return;
 		}
-		Minecart m = (Minecart) veh;
 		Plane plane = getPlane(m);
 		if(plane == null){ //Not a plane
 			return;
@@ -184,10 +181,10 @@ public class uPlanesListener implements Listener {
 			return;
 		}
 		Entity v = e.getVehicle();
-		if(v == null || !(v instanceof Minecart)){
+		if(v == null || !(v instanceof Vehicle)){
 			return;
 		}
-		if(isAPlane((Minecart) v)){
+		if(isAPlane(((Vehicle)v))){
 			event.setDamage(-2.5);
 			event.setCancelled(true);
 		}
@@ -264,7 +261,7 @@ public class uPlanesListener implements Listener {
 	    	//Safe exit
 		 	Vehicle veh = event.getVehicle();
 		 	final Entity exited = event.getExited();
-		 	if(!(exited instanceof Player) || !(veh instanceof Minecart)){
+		 	if(!(exited instanceof Player) || !(veh instanceof Vehicle)){
 	        	return;
 	        }
 	        if(!plugin.planeManager.isPlaneInUse(veh.getUniqueId())){
@@ -329,15 +326,11 @@ public class uPlanesListener implements Listener {
 	
 	@EventHandler
 	void vehicleUpdate(VehicleUpdateEvent event){
-		Vehicle veh = event.getVehicle();
-		if(!(veh instanceof Minecart)){
-			return;
-		}
-		Minecart car = (Minecart) veh;
+		Vehicle car = event.getVehicle();
 		Location loc = car.getLocation();
 		
-		if(veh.hasMetadata("plane.frozen")){
-			veh.setVelocity(new Vector(0,0.04,0));
+		if(car.hasMetadata("plane.frozen")){
+			car.setVelocity(new Vector(0,0.04,0));
 			return;
 		}
 		
@@ -351,11 +344,11 @@ public class uPlanesListener implements Listener {
 				AntiCheatAPI.exemptPlayer(player, CheckType.FLY);
 			}*/
 		}
-		if(veh.hasMetadata("plane.destination")){
+		if(car.hasMetadata("plane.destination")){
 			//Autopilot
-			List<MetadataValue> metas = veh.getMetadata("plane.destination");
+			List<MetadataValue> metas = car.getMetadata("plane.destination");
 			Location dest = (Location) metas.get(0).value();
-			FlightControl.route(dest, loc, veh);
+			FlightControl.route(dest, loc, car);
 			return;
 		}
 		
@@ -366,14 +359,15 @@ public class uPlanesListener implements Listener {
 		
 		if(!pln.isHover()){
 			CartOrientationUtil.setPitch(car, pln.getCurrentPitch());
-			if(veh.getVelocity().getX() > 0 || veh.getVelocity().getZ() > 0){
-				float cYaw = (float) Math.toDegrees(Math.atan2(veh.getVelocity().getX() , -veh.getVelocity().getZ())) - 90;
+			/*if(Math.abs(car.getVelocity().getX()) > 0 || Math.abs(car.getVelocity().getZ()) > 0){
+				float cYaw = (float) Math.toDegrees(Math.atan2(car.getVelocity().getX() , -car.getVelocity().getZ())) - 90;
 				CartOrientationUtil.setYaw(car, cYaw);
-			}
+			}*/
 			return;
 		}
+		
 		//Hover
-		if(veh.hasMetadata("plane.left") || veh.hasMetadata("plane.right")){
+		if(car.hasMetadata("plane.left") || car.hasMetadata("plane.right")){
 			//Going up or down
 			return; //Ignore it
 		}
@@ -405,10 +399,10 @@ public class uPlanesListener implements Listener {
 	
 	@EventHandler
 	void planeFlightControl(PlaneUpdateEvent event){
-		Vehicle vehicle = event.getVehicle();
+		Vehicle cart = event.getVehicle();
 		Player player = event.getPlayer();
 		
-		if(!(vehicle instanceof Minecart)){
+		if(!(cart instanceof Vehicle)){
 			return;
 		}
 		
@@ -419,7 +413,6 @@ public class uPlanesListener implements Listener {
 			}
 		}
 		
-		Minecart cart = (Minecart) vehicle;
 		Plane plane = event.getPlane();
 		
 		if(plane == null){ //Not a plane, just a Minecart
@@ -427,7 +420,7 @@ public class uPlanesListener implements Listener {
 		}
 		
 		if(plane.isHover()){
-			vehicle.setMetadata("plane.hover", new StatValue(true, main.plugin));
+			cart.setMetadata("plane.hover", new StatValue(true, main.plugin));
 			if(main.perms){
 				if(!player.hasPermission("uplanes.hoverplane")){
 					player.sendMessage(main.colors.getError()+"You don't have the permission 'uplanes.hoverplane' required to fly a plane!");
@@ -516,8 +509,8 @@ public class uPlanesListener implements Listener {
 		if(cart.hasMetadata("plane.destination")){
 			AutopilotDestination aData = null;
 			
-			if(vehicle.hasMetadata("plane.autopilotData")){
-				aData = (AutopilotDestination) vehicle.getMetadata("plane.autopilotData").get(0).value();
+			if(cart.hasMetadata("plane.autopilotData")){
+				aData = (AutopilotDestination) cart.getMetadata("plane.autopilotData").get(0).value();
 			}
 			
 			boolean cont = false;
@@ -550,9 +543,11 @@ public class uPlanesListener implements Listener {
 			return;
 		}
 		
-		cart.setMaxSpeed(5); //Don't crash the server...
+		if(cart instanceof Minecart){
+			((Minecart)cart).setMaxSpeed(5); //Don't crash the server...
+		}
 		
-		Location loc = vehicle.getLocation();
+		Location loc = cart.getLocation();
 		Vector travel = event.getTravelVector();
 		double multiplier = plane.getSpeed();
 		
@@ -624,7 +619,7 @@ public class uPlanesListener implements Listener {
 		Location exhaust = loc.add(behind);
 		exhaust.getWorld().playEffect(exhaust, Effect.SMOKE, 1);
 		
-		vehicle.setVelocity(travel);
+		cart.setVelocity(travel);
 		return;
 	}
 	
@@ -638,13 +633,13 @@ public class uPlanesListener implements Listener {
 			return; //Worldguard says no
 		}
 		
-		Player player = event.getPlayer();
-		ItemStack inHand = player.getItemInHand();
+		final Player player = event.getPlayer();
+		final ItemStack inHand = player.getItemInHand();
 		
 		if(inHand.getType() != Material.MINECART){
 			return;
 		}
-		Plane plane = main.plugin.planeManager.getPlane(inHand);
+		final Plane plane = main.plugin.planeManager.getPlane(inHand);
 		if(plane == null){
 			return; //Just a minecart
 		}
@@ -657,71 +652,59 @@ public class uPlanesListener implements Listener {
 		
 		//Now place the car
 		Block b = event.getClickedBlock();
-		Location toSpawn = b.getLocation().add(0,1.5,0);
+		final Location toSpawn = b.getLocation().add(0,1.5,0);
 		Block in = toSpawn.getBlock();
 		if(!in.isEmpty() && !in.isLiquid()){
 			return;
 		}
 		
-		Minecart ent = (Minecart) toSpawn.getWorld().spawnEntity(toSpawn, EntityType.MINECART);
+		event.setUseItemInHand(Result.DENY);
+		event.setCancelled(true);
 		
-		PlanePreset pp = plane.getPreset();
-		if(pp != null && pp.hasDisplayBlock()){
-			ent.setDisplayBlock(pp.getDisplayBlock());
-			ent.setDisplayBlockOffset(pp.getDisplayOffset());
-		}
-		
-		float yaw = player.getLocation().getYaw()+90;
-		if(yaw < 0){
-			yaw = 360 + yaw;
-		}
-		else if(yaw >= 360){
-			yaw = yaw - 360;
-		}
-		CartOrientationUtil.setYaw(ent, yaw);
-		
-		in = ent.getLocation().getBlock();
-		Block n = in.getRelative(BlockFace.NORTH);   // The directions minecraft aligns the cart to
-		Block w = in.getRelative(BlockFace.WEST);
-		Block nw = in.getRelative(BlockFace.NORTH_WEST);
-		Block ne = in.getRelative(BlockFace.NORTH_EAST);
-		Block sw = in.getRelative(BlockFace.SOUTH_WEST);
-		if((!in.isEmpty() && !in.isLiquid())
-				|| (!n.isEmpty() && !n.isLiquid())
-				|| (!w.isEmpty() && !w.isLiquid())
-				|| (!ne.isEmpty() && !ne.isLiquid())
-				|| (!nw.isEmpty() && !nw.isLiquid())
-				|| (!sw.isEmpty() && !sw.isLiquid())){
-			ent.remove();
-			event.setUseItemInHand(Result.DENY);
-			return;
-		}
-		
-		inHand.setAmount(inHand.getAmount()-1);
-		if(inHand.getAmount() < 1){
-			player.setItemInHand(new ItemStack(Material.AIR)); //Remove from their hand
-		}
-		
-		ent.setMetadata("ucars.ignore", new StatValue(true, main.plugin));
-		ent.setMetadata("plane.health", new StatValue(plane.getHealth(), main.plugin));
-		if(plane.isHover()){
-			ent.setMetadata("plane.hover", new StatValue(true, main.plugin));
-		}
-		
-		plane.setId(ent.getUniqueId());
-		
-		main.plugin.planeManager.nowPlaced(plane);
+		Bukkit.getScheduler().runTask(main.plugin, new Runnable(){
+
+			@Override
+			public void run() {
+				Vehicle ent = uPlanesAPI.getPlaneManager().placePlane(plane, toSpawn);
+				
+				float yaw = player.getLocation().getYaw()+90;
+				if(yaw < 0){
+					yaw = 360 + yaw;
+				}
+				else if(yaw >= 360){
+					yaw = yaw - 360;
+				}
+				CartOrientationUtil.setYaw(ent, yaw);
+				
+				Block in = ent.getLocation().getBlock();
+				Block n = in.getRelative(BlockFace.NORTH);   // The directions minecraft aligns the cart to
+				Block w = in.getRelative(BlockFace.WEST);
+				Block nw = in.getRelative(BlockFace.NORTH_WEST);
+				Block ne = in.getRelative(BlockFace.NORTH_EAST);
+				Block sw = in.getRelative(BlockFace.SOUTH_WEST);
+				if((!in.isEmpty() && !in.isLiquid())
+						|| (!n.isEmpty() && !n.isLiquid())
+						|| (!w.isEmpty() && !w.isLiquid())
+						|| (!ne.isEmpty() && !ne.isLiquid())
+						|| (!nw.isEmpty() && !nw.isLiquid())
+						|| (!sw.isEmpty() && !sw.isLiquid())){
+					ent.remove();
+					return;
+				}
+				
+				inHand.setAmount(inHand.getAmount()-1);
+				if(inHand.getAmount() < 1){
+					player.setItemInHand(new ItemStack(Material.AIR)); //Remove from their hand
+				}
+				return;
+			}});
 		return;
 	}
 	
 	@EventHandler
 	void vehicleDestroy(VehicleDestroyEvent event){
 		Vehicle v = event.getVehicle();
-		if(!(v instanceof Minecart)){
-			return;
-		}
-		Minecart m = (Minecart) v;
-		if(!isAPlane(m)){
+		if(!isAPlane(v)){
 			return;
 		}
 		event.setCancelled(true); //Don't allow, let health handle it
@@ -732,11 +715,7 @@ public class uPlanesListener implements Listener {
 		if(event.isCancelled()){
 			return;
 		}
-		Vehicle veh = event.getVehicle();
-		if(!(veh instanceof Minecart)){
-			return;
-		}
-		Minecart m = (Minecart) veh;
+		Vehicle m = event.getVehicle();
 		Plane plane = getPlane(m);
 		if(plane == null){
 			return;
@@ -1029,11 +1008,11 @@ public class uPlanesListener implements Listener {
 		return;
 	}
 	
-	public Plane getPlane(Minecart m){
+	public Plane getPlane(Vehicle m){
 		return plugin.planeManager.getPlane(m.getUniqueId());
 	}
 	
-	public Boolean isAPlane(Minecart m){
+	public Boolean isAPlane(Vehicle m){
 		return plugin.planeManager.isPlaneInUse(m.getUniqueId());
 	}
 }

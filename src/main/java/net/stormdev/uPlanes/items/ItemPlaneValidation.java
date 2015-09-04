@@ -7,7 +7,6 @@ import java.util.regex.Pattern;
 import net.stormdev.uPlanes.api.Plane;
 import net.stormdev.uPlanes.utils.Colors;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;

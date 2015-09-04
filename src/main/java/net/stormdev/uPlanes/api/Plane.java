@@ -34,11 +34,64 @@ public class Plane implements Serializable {
 	private UUID id = UUID.randomUUID();
 	private boolean writtenOff = false;
 	private transient float currentPitch = 0;
+	private transient float roll = 0; //TODO
+	private transient RollTarget rollTarget = RollTarget.NONE;
+	
+	public static enum RollTarget {
+		LEFT(25), NONE(0), RIGHT(-25);
+		
+		private float amt;
+		private RollTarget(float amt){
+			this.amt = amt;
+		}
+		
+		public float getTargetAngle(){
+			return this.amt;
+		}
+	}
 	
 	public Plane(){ //An empty plane
 		setCurrentPitch(0);
+		setRoll(0);
 	}
 	
+	public void setRoll(int i) {
+		this.rollTarget = RollTarget.NONE;
+		this.roll = i;
+	}
+	
+	public RollTarget getRollTarget(){
+		return this.rollTarget;
+	}
+	
+	public void updateRoll(){
+		RollTarget t = this.rollTarget;
+		if(t == null){
+			t = RollTarget.NONE;
+		}
+		if(this.roll == t.getTargetAngle()){
+			return;
+		}
+		
+		float diff = t.getTargetAngle() - this.roll;
+		if(diff > this.turnAmount){
+			diff = (float) this.turnAmount;
+		}
+		if(diff < -this.turnAmount){
+			diff = (float) -this.turnAmount;
+		}
+		
+		this.roll += diff;
+	}
+	
+	public void setRollTarget(RollTarget target){
+		this.rollTarget = target;
+	}
+	
+	public float getRoll(){
+		return this.roll;
+	}
+
 	public Plane(double speed, String name, double health, double accelMod, double turnAmountPerTick, boolean hover){
 		setCurrentPitch(0);
 		if(speed > main.maxSpeed){

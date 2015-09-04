@@ -1,6 +1,6 @@
 package net.stormdev.uPlanes.api;
 
-import org.bukkit.entity.Minecart;
+import org.bukkit.entity.Vehicle;
 
 public interface PlaneTurningModifier {
 	/**
@@ -9,5 +9,5 @@ public interface PlaneTurningModifier {
 	 * @param original The amount already calculated by uPlanes
 	 * @return the turn amount per tick in degrees (positive)
 	 */
-	public double getTurnAmountPerTick(Minecart cart, double original);
+	public double getTurnAmountPerTick(Vehicle cart, double original);
 }

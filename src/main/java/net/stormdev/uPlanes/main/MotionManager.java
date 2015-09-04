@@ -6,18 +6,16 @@ import java.util.List;
 import net.stormdev.uPlanes.api.Keypress;
 import net.stormdev.uPlanes.api.Plane;
 import net.stormdev.uPlanes.api.uPlanesAPI;
+import net.stormdev.uPlanes.api.Plane.RollTarget;
+import net.stormdev.uPlanes.utils.CartOrientationUtil;
 import net.stormdev.uPlanes.utils.PlaneUpdateEvent;
 import net.stormdev.uPlanes.utils.StatValue;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Vehicle;
 import org.bukkit.util.Vector;
-
-import com.useful.ucars.CarDirection;
-import com.useful.ucars.ControlInput;
 
 public class MotionManager {
 	
@@ -45,13 +43,13 @@ public class MotionManager {
 		if (ent == null) {
 			return;
 		}
-		while (!(ent instanceof Minecart) && ent.getVehicle() != null) {
+		while (!(ent instanceof Vehicle) && ent.getVehicle() != null) {
 			ent = ent.getVehicle();
 		}
-		if (!(ent instanceof Minecart)) {
+		if (!(ent instanceof Vehicle)) {
 			return;
 		}
-		Minecart plane = (Minecart) ent;
+		Vehicle plane = (Vehicle) ent;
 		Plane pln = main.plugin.listener.getPlane(plane);
 		if(pln == null){
 			//Not a plane
@@ -79,7 +77,11 @@ public class MotionManager {
 		Vector planeDirection = null;
 		
 		if(!main.doTurningCircles){
-			planeDirection = playD.clone().setY(0).normalize();
+			if(AccelerationManager.getCurrentMultiplier(plane) >= 0.2 || pln.isHover()){
+				planeDirection = playD.clone().setY(0).normalize();
+				float vYaw = (float) Math.toDegrees(Math.atan2(planeDirection.getX() , -planeDirection.getZ()));
+				CartOrientationUtil.setYaw(plane, vYaw-90);
+			}
 		}
 		else {
 			try {
@@ -99,16 +101,29 @@ public class MotionManager {
 			else if(yawDiff > 180){
 				yawDiff -= 360;
 			}
+			
+			boolean roll = Math.abs(yawDiff) > 30;
+			if(!roll){
+				pln.setRollTarget(RollTarget.NONE);
+			}
+			
 			if(yawDiff < -rotMod){
+				pln.setRollTarget(RollTarget.LEFT);
 				yawDiff = (float) -rotMod;
 			}
 			else if(yawDiff > rotMod){
+				pln.setRollTarget(RollTarget.RIGHT);
 				yawDiff = (float) rotMod;
 			}
-			planeDirection = rotateXZVector3dDegrees(planeDirection, ControlInput.getCurrentDriveDir(player).equals(CarDirection.BACKWARDS) ? -yawDiff : yawDiff);
 			
+			if(AccelerationManager.getCurrentMultiplier(plane) >= 0.2 || pln.isHover()){
+				pln.updateRoll();
+				CartOrientationUtil.setRoll(plane, pln.getRoll());
+				planeDirection = rotateXZVector3dDegrees(planeDirection, yawDiff);
+				CartOrientationUtil.setYaw(plane, vYaw-90);
+			}
 			plane.removeMetadata("plane.direction", main.plugin);
-			plane.setMetadata("plane.direction", new StatValue(true, main.plugin));
+			plane.setMetadata("plane.direction", new StatValue(planeDirection.clone().normalize(), main.plugin));
 		}
 		
 		List<Keypress> pressedKeys = new ArrayList<Keypress>();

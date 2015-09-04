@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+import net.stormdev.uPlanes.hover.HoverCart;
+import net.stormdev.uPlanes.hover.HoverCartEntity;
 import net.stormdev.uPlanes.items.ItemPlaneValidation;
 import net.stormdev.uPlanes.main.PlaneGenerator;
 import net.stormdev.uPlanes.main.PlaneItemMethods;
@@ -17,7 +19,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.inventory.ItemStack;
@@ -54,7 +55,7 @@ public class uPlaneManager {
 		rotMods.remove(mod);
 	}
 	
-	public double getAlteredRotationAmountPerTick(Player player, Minecart cart, Plane plane){
+	public double getAlteredRotationAmountPerTick(Player player, Vehicle cart, Plane plane){
 		double current = plane.getTurnAmountPerTick();
 		for(PlaneTurningModifier am:new ArrayList<PlaneTurningModifier>(rotMods)){
 			current *= am.getTurnAmountPerTick(cart, current);
@@ -94,7 +95,7 @@ public class uPlaneManager {
 		decelMods.remove(mod);
 	}
 
-	public double getAlteredDecelerationMod(Player player, Minecart cart, Plane plane){
+	public double getAlteredDecelerationMod(Player player, Vehicle cart, Plane plane){
 		double current = 1.0d;
 		for(AccelerationModifier am:new ArrayList<AccelerationModifier>(decelMods)){
 			current *= am.getAccelerationMultiplier(player, cart, plane);
@@ -102,10 +103,14 @@ public class uPlaneManager {
 		return current;
 	}
 	
-	public double getAlteredAccelerationMod(Player player, Minecart cart, Plane plane){
+	public double getAlteredAccelerationMod(Player player, Vehicle cart, Plane plane){
 		double current = 1.0d;
 		for(AccelerationModifier am:new ArrayList<AccelerationModifier>(accelMods)){
-			current *= am.getAccelerationMultiplier(player, cart, plane);
+			try {
+				current *= am.getAccelerationMultiplier(player, cart, plane);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 		return current;
 	}
@@ -271,19 +276,27 @@ public class uPlaneManager {
 	 * @param loc The location to place it at
 	 * @return Returns the placed entity
 	 */
-	public Minecart placePlane(Plane plane, Location loc){
-		Minecart ent = (Minecart) loc.getWorld().spawnEntity(loc, EntityType.MINECART);
+	public Vehicle placePlane(Plane plane, Location loc){
+		PlanePreset pp = plane.getPreset();
+		Vehicle ent;
+		if(pp == null || !pp.hasDisplayBlock()){
+			ent = (Vehicle) loc.getWorld().spawnEntity(loc, EntityType.MINECART);
+		}
+		else {
+			HoverCartEntity hce = new HoverCartEntity(loc.clone().add(0, 0.3, 0));
+			HoverCart hc = hce.spawn();
+			ent = hc;
+			hc.setDisplay(new ItemStack(pp.getDisplayBlock().getItemType(), 1, pp.getDisplayBlock().getData()), pp.getDisplayOffset());
+		}
+		
 		ent.setMetadata("ucars.ignore", new StatValue(true, main.plugin));
 		ent.setMetadata("plane.health", new StatValue(plane.getHealth(), main.plugin));
 		if(plane.isHover()){
 			ent.setMetadata("plane.hover", new StatValue(true, main.plugin));
+			plane.setHover(true);
 		}
 		plane.setId(ent.getUniqueId());
-		PlanePreset pp = plane.getPreset();
-		if(pp != null && pp.hasDisplayBlock()){
-			ent.setDisplayBlock(pp.getDisplayBlock());
-			ent.setDisplayBlockOffset(pp.getDisplayOffset());
-		}
+		plane.setRoll(0);
 		
 		main.plugin.planeManager.nowPlaced(plane);
 		return ent;
@@ -297,28 +310,13 @@ public class uPlaneManager {
 	 * @param planeStack The itemstack associated with the plane
 	 * @return Returns the placed entity
 	 */
-	public Minecart placePlane(Plane plane, Location loc, ItemStack planeStack){
+	public Vehicle placePlane(Plane plane, Location loc, ItemStack planeStack){
 		planeStack.setAmount(planeStack.getAmount()-1);
 		if(planeStack.getAmount() <= 0){
 			planeStack.setType(Material.AIR);
 		}
 		
-		Minecart ent = (Minecart) loc.getWorld().spawnEntity(loc, EntityType.MINECART);
-		ent.setMetadata("ucars.ignore", new StatValue(true, main.plugin));
-		ent.setMetadata("plane.health", new StatValue(plane.getHealth(), main.plugin));
-		if(plane.isHover()){
-			ent.setMetadata("plane.hover", new StatValue(true, main.plugin));
-		}
-		plane.setId(ent.getUniqueId());
-		
-		PlanePreset pp = plane.getPreset();
-		if(pp != null && pp.hasDisplayBlock()){
-			ent.setDisplayBlock(pp.getDisplayBlock());
-			ent.setDisplayBlockOffset(pp.getDisplayOffset());
-		}
-		
-		main.plugin.planeManager.nowPlaced(plane);
-		return ent;
+		return placePlane(plane, loc);
 	}
 	
 	/**
@@ -354,7 +352,7 @@ public class uPlaneManager {
 	 * @param damager The damager
 	 * @param breakIt Whether or not to break the car if necessary
 	 */
-	public void damagePlane(Minecart m, Plane plane, double damage, Player damager, boolean breakIt){
+	public void damagePlane(Vehicle m, Plane plane, double damage, Player damager, boolean breakIt){
 		//Plane being punched to death
 		double health = plane.getHealth();
 		if(m.hasMetadata("plane.health")){
@@ -384,7 +382,7 @@ public class uPlaneManager {
 	 * @param cause The cause of the damage
 	 * @param breakIt Whether or not to break the car if necessary
 	 */
-	public void damagePlane(Minecart m, Plane plane, double damage, Player damager, String cause, boolean breakIt){
+	public void damagePlane(Vehicle m, Plane plane, double damage, Player damager, String cause, boolean breakIt){
 		//Plane being punched to death
 		double health = plane.getHealth();
 		if(m.hasMetadata("plane.health")){
@@ -413,7 +411,7 @@ public class uPlaneManager {
 	 * @param damager The damager
 	 * @param cause The cause of the damage
 	 */
-	public void damagePlane(Minecart m, Plane plane, double damage, Player damager, String cause){
+	public void damagePlane(Vehicle m, Plane plane, double damage, Player damager, String cause){
 		damagePlane(m, plane, damage, damager, cause, true);
 	}
 	
@@ -425,7 +423,7 @@ public class uPlaneManager {
 	 * @param damage The amount to damage it by
 	 * @param damager The damager
 	 */
-	public void damagePlane(Minecart m, Plane plane, double damage, Player damager){
+	public void damagePlane(Vehicle m, Plane plane, double damage, Player damager){
 		damagePlane(m, plane, damage, damager, true);
 	}
 	
@@ -437,7 +435,7 @@ public class uPlaneManager {
 	 * @param damage The amount to damage it by
 	 * @param cause The cause of the damage
 	 */
-	public void damagePlane(Minecart m, Plane plane, double damage, String cause){
+	public void damagePlane(Vehicle m, Plane plane, double damage, String cause){
 		damagePlane(m, plane, damage, cause, true);
 	}
 	
@@ -448,7 +446,7 @@ public class uPlaneManager {
 	 * @param plane The plane
 	 * @param damage The amount to damage it by
 	 */
-	public void damagePlane(Minecart m, Plane plane, double damage){
+	public void damagePlane(Vehicle m, Plane plane, double damage){
 		damagePlane(m, plane, damage, true);
 	}
 	
@@ -461,7 +459,7 @@ public class uPlaneManager {
 	 * @param breakIt Whether or not to break the car if necessary
 	 * @param cause The cause of the damage
 	 */
-	public void damagePlane(Minecart m, Plane plane, double damage, String cause, boolean breakIt){
+	public void damagePlane(Vehicle m, Plane plane, double damage, String cause, boolean breakIt){
 		double health = plane.getHealth();
 		if(m.hasMetadata("plane.health")){
 			List<MetadataValue> ms = m.getMetadata("plane.health");
@@ -503,7 +501,7 @@ public class uPlaneManager {
 	 * @param m The plane entity
 	 * @param plane The plane
 	 */
-	public void healPlane(Minecart m, Plane plane){
+	public void healPlane(Vehicle m, Plane plane){
 		double health = plane.getHealth();
 		
 		m.removeMetadata("plane.health", main.plugin);
@@ -519,7 +517,7 @@ public class uPlaneManager {
 	 * @param damage The amount to damage it by
 	 * @param breakIt Whether or not to break the car if necessary
 	 */
-	public void damagePlane(Minecart m, Plane plane, double damage, boolean breakIt){
+	public void damagePlane(Vehicle m, Plane plane, double damage, boolean breakIt){
 		damagePlane(m, plane, damage, "Damage", breakIt);
 	}
 }

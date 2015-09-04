@@ -32,9 +32,9 @@ public class PlanePreset implements Serializable {
 	private boolean hover = false;
 	private double cost = 0;
 	private MaterialData displayBlock;
-	private int displayOffset = 0;
+	private double displayOffset = 0;
 	
-	public PlanePreset(String presetID, double speed, String name, double health, double accelMod, double turnAmountPerTick, boolean hover, double cost, MaterialData displayBlock, int offset){
+	public PlanePreset(String presetID, double speed, String name, double health, double accelMod, double turnAmountPerTick, boolean hover, double cost, MaterialData displayBlock, double offset){
 		this.setPresetID(presetID);
 		if(speed > main.maxSpeed){
 			speed = main.maxSpeed;
@@ -177,11 +177,11 @@ public class PlanePreset implements Serializable {
 		this.displayBlock = displayBlock;
 	}
 
-	public int getDisplayOffset() {
+	public double getDisplayOffset() {
 		return displayOffset;
 	}
 
-	public void setDisplayOffset(int displayOffset) {
+	public void setDisplayOffset(double displayOffset) {
 		this.displayOffset = displayOffset;
 	}
 }
