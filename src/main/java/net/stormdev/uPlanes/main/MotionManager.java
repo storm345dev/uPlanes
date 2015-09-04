@@ -154,7 +154,10 @@ public class MotionManager {
 				: (f == 0 ? AccelerationManager.decelerateAndGetMult(player, plane, pln) 
 						: AccelerationManager.decelerateAndGetMult(player, plane, pln));
 		
-		float hoverAmount = (float) (0.001 * pln.getSpeed());
+		float hoverAmount = (float) (0.0001 * pln.getSpeed());
+		if(hoverAmount < 0.005){
+			hoverAmount = 0.005f;
+		}
 		
 		if (turning) {
 			if (side < 0) {// do left action
