@@ -431,7 +431,7 @@ public class uPlanesListener implements Listener {
 			//Check if they crashed xD
 			Block current = cart.getLocation().getBlock();
 			Block b = null;
-			if(current.isEmpty() || current.isLiquid()){
+			if((current.isEmpty() || current.isLiquid()) && !cart.hasMetadata("plane.destination") && !cart.hasMetadata("arrivedAtDest")){
 				Location nextHorizontal = cart.getLocation().add(new Vector(cart.getVelocity().getX(), 0, cart.getVelocity().getZ()));
 				b = nextHorizontal.getBlock();
 				if(!b.isEmpty() && !b.isLiquid() && b.getType().isSolid() && !b.getType().equals(Material.CARPET) && !b.getType().equals(Material.BARRIER)){ //Crashed into something
@@ -465,8 +465,8 @@ public class uPlanesListener implements Listener {
 			}
 			
 			
-			//TODO If crash into ground with significantly less x/z speed than needed for flight
-			
+			/*// If crash into ground with significantly less x/z speed than needed for flight
+*/			
 			
 			
 			/*if(cart.getVelocity().getY() < 0.5 && new Vector(cart.getVelocity().getX(), 0, cart.getVelocity().getZ()).lengthSquared() < 0.5){ //Going down fast enough to do some damage
@@ -515,16 +515,16 @@ public class uPlanesListener implements Listener {
 			
 			boolean cont = false;
 			
-			if(aData != null && !aData.isAutopilotOverridenByControlInput()){
+			if(aData != null && aData.isAutopilotOverridenByControlInput()){
 				cont = true;
 			}
 			
-			if(!cont){
+			if(!cont && !event.wasKeypressed(Keypress.NONE)){
 				//Disable autopilot
-				if(aData != null){
+				if(aData != null && !event.wasKeypressed(Keypress.NONE)){
 					aData.autoPilotCancelled();
 				}
-				else{
+				else if(!event.wasKeypressed(Keypress.NONE)){
 					player.sendMessage(main.colors.getInfo()+Lang.get("general.cmd.destinations.cancel"));
 				}
 				cart.removeMetadata("plane.destination", main.plugin);
@@ -586,7 +586,7 @@ public class uPlanesListener implements Listener {
 			plane.setCurrentPitch(pitch);*/
 		}
 		
-		if(crashing && !plane.isHover()){
+		if(crashing && !plane.isHover() && !cart.hasMetadata("plane.destination") && !cart.hasMetadata("arrivedAtDest")){
 			if((travel.getY() < -0.3 && plane.getCurrentPitch() > 25) || ((travel.getY() < -0.3 && new Vector(travel.getX(), 0, travel.getZ()).lengthSquared() < 0.8 && event.getAcceleration() < 0.8))){
 				Location nextVertical = cart.getLocation().add(0, cart.getVelocity().getY(), 0);
 				Block b = nextVertical.getBlock();
@@ -619,7 +619,9 @@ public class uPlanesListener implements Listener {
 		Location exhaust = loc.add(behind);
 		exhaust.getWorld().playEffect(exhaust, Effect.SMOKE, 1);
 		
-		cart.setVelocity(travel);
+		if(!cart.hasMetadata("plane.destination")){ 
+			cart.setVelocity(travel);
+		}
 		return;
 	}
 	

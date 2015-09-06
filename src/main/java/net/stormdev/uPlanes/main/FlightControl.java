@@ -1,21 +1,27 @@
 package net.stormdev.uPlanes.main;
 
 import net.stormdev.uPlanes.api.AutopilotDestination;
+import net.stormdev.uPlanes.hover.HoverCart;
+import net.stormdev.uPlanes.utils.CartOrientationUtil;
 import net.stormdev.uPlanes.utils.ClosestFace;
 import net.stormdev.uPlanes.utils.Lang;
+import net.stormdev.uPlanes.utils.StatValue;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Vehicle;
+import org.bukkit.util.EulerAngle;
 import org.bukkit.util.Vector;
 
 public class FlightControl {
 	private static double speed = 1.2;
-	public static Vector route(Location targetLoc, Location current, Vehicle vehicle){
+	public static Vector route(Location targetLoc, Location current, final Vehicle vehicle){
 		Vector v = new Vector(0,0,0);
 		Entity passenger = vehicle.getPassenger();
 		AutopilotDestination aData = null;
@@ -129,7 +135,16 @@ public class FlightControl {
 			}
 			else if(current.getY() - targetLoc.getY() < 2){
 				//Arrived
+				vehicle.setVelocity(new Vector(0,0,0));
+				vehicle.setMetadata("arrivedAtDest", new StatValue(null, main.plugin));
 				vehicle.removeMetadata("plane.destination", main.plugin);
+				Bukkit.getScheduler().runTaskLater(main.plugin, new Runnable(){
+
+					@Override
+					public void run() {
+						vehicle.removeMetadata("arrivedAtDest", main.plugin);
+						return;
+					}}, 5l);
 				
 				if(aData == null){
 					player.sendMessage(main.colors.getSuccess()+Lang.get("general.cmd.destinations.arrive"));
@@ -144,7 +159,9 @@ public class FlightControl {
 		Vector behind = vel.clone().multiply(-2);
 		Location back = current.add(behind);
 		back.getWorld().playEffect(back, Effect.SMOKE, 1);
-		vehicle.setVelocity(vel);
+		vehicle.setVelocity(vel.clone().multiply(0.5));
+		float vYaw = (float) Math.toDegrees(Math.atan2(toGo.getX() , -toGo.getZ())); 
+		CartOrientationUtil.setYaw(vehicle, vYaw-90);
 		return vel;
 	}
 

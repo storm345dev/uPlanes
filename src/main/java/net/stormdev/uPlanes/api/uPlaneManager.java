@@ -22,6 +22,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.MaterialData;
 import org.bukkit.metadata.MetadataValue;
 
 /**
@@ -279,14 +280,26 @@ public class uPlaneManager {
 	public Vehicle placePlane(Plane plane, Location loc){
 		PlanePreset pp = plane.getPreset();
 		Vehicle ent;
-		if(pp == null || !pp.hasDisplayBlock()){
+		
+		MaterialData display = null;
+		double offset = 0;
+		if(plane.getCartDisplayBlock() != null){
+			display = plane.getCartDisplayBlock();
+			offset = plane.getDisplayOffset();
+		}
+		else if(pp != null && pp.hasDisplayBlock()){
+			display = pp.getDisplayBlock();
+			offset = pp.getDisplayOffset();
+		}
+		
+		if(display == null){
 			ent = (Vehicle) loc.getWorld().spawnEntity(loc, EntityType.MINECART);
 		}
 		else {
 			HoverCartEntity hce = new HoverCartEntity(loc.clone().add(0, 0.3, 0));
 			HoverCart hc = hce.spawn();
 			ent = hc;
-			hc.setDisplay(new ItemStack(pp.getDisplayBlock().getItemType(), 1, pp.getDisplayBlock().getData()), pp.getDisplayOffset());
+			hc.setDisplay(new ItemStack(display.getItemType(), 1, display.getData()), offset);
 		}
 		
 		ent.setMetadata("ucars.ignore", new StatValue(true, main.plugin));

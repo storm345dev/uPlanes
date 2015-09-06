@@ -61,18 +61,29 @@ public class CraftHoverCart extends CraftArmorStand implements HoverCart {
 		while(y < 0){
 			y = 360 + y;
 		}
-		
+		/*
 		double radians = Math.toRadians(y);
 		if(radians > Math.PI){
 			radians -= (Math.PI * 2);
 		}
 		if(radians < -Math.PI){
 			radians += (Math.PI * 2);
-		}
+		}*/
 		
 		/*setHeadPose(new EulerAngle(getHeadPose().getX(), radians, getHeadPose().getZ()));
 		setBodyPose(new EulerAngle(getBodyPose().getX(), radians, getBodyPose().getZ()));*/
 		getHandle().setYaw((float) y);
+		/*setBodyPose(new EulerAngle(getBodyPose().getX(), 0, getBodyPose().getZ()));
+		setHeadPose(new EulerAngle(getHeadPose().getX(), 0, getHeadPose().getZ()));*/
+		/*Entity passenger = getPassenger();
+		if(passenger instanceof Player){
+			Player pl = (Player) passenger;
+			WrapperPlayServerEntityLook p = new WrapperPlayServerEntityLook();
+			p.setEntityID(getHandle().getId());
+			p.setPitch(getHandle().pitch);
+			p.setYaw((float) y);
+			p.sendPacket(pl);
+		}*/
 	}
 
 	@Override

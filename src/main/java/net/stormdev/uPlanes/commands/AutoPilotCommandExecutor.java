@@ -14,8 +14,8 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Vehicle;
 
 public class AutoPilotCommandExecutor implements CommandExecutor {
 	private Boolean autoPilotEnabled;
@@ -53,7 +53,7 @@ public class AutoPilotCommandExecutor implements CommandExecutor {
 			Plane plane = main.plugin.planeManager.getPlane(id);
 			
 			if(vehicle == null
-					|| !(vehicle instanceof Minecart)
+					|| !(vehicle instanceof Vehicle)
 					|| plane == null){
 				//Not in a plane
 				sender.sendMessage(main.colors.getError()+Lang.get("general.cmd.destinations.notInPlane"));

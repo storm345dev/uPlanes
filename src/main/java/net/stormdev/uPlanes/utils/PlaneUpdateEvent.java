@@ -38,7 +38,7 @@ public class PlaneUpdateEvent extends VehicleUpdateEvent implements Cancellable 
 	}
 	
 	public boolean wasKeypressed(Keypress press){
-		return pressed.contains(press);
+		return pressed.contains(press) || press.equals(Keypress.NONE) && pressed.size() < 1;
 	}
 
 	public Player getPlayer() {

@@ -77,7 +77,7 @@ public class MotionManager {
 		Vector planeDirection = null;
 		
 		if(!main.doTurningCircles){
-			if(AccelerationManager.getCurrentMultiplier(plane) >= 0.2 || pln.isHover()){
+			if((AccelerationManager.getCurrentMultiplier(plane) >= 0.2 || pln.isHover()) && !plane.hasMetadata("plane.destination")){
 				planeDirection = playD.clone().setY(0).normalize();
 				float vYaw = (float) Math.toDegrees(Math.atan2(planeDirection.getX() , -planeDirection.getZ()));
 				CartOrientationUtil.setYaw(plane, vYaw-90);
@@ -116,7 +116,7 @@ public class MotionManager {
 				yawDiff = (float) rotMod;
 			}
 			
-			if(AccelerationManager.getCurrentMultiplier(plane) >= 0.2 || pln.isHover()){
+			if((AccelerationManager.getCurrentMultiplier(plane) >= 0.2 || pln.isHover()) && !plane.hasMetadata("plane.destination")){
 				pln.updateRoll();
 				CartOrientationUtil.setRoll(plane, pln.getRoll());
 				planeDirection = rotateXZVector3dDegrees(planeDirection, yawDiff);

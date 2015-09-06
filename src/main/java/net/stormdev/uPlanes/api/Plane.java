@@ -14,6 +14,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.material.MaterialData;
 
 /**
  * Simple serializable format for plane data
@@ -36,6 +37,8 @@ public class Plane implements Serializable {
 	private transient float currentPitch = 0;
 	private transient float roll = 0; //TODO
 	private transient RollTarget rollTarget = RollTarget.NONE;
+	private transient MaterialData displayBlock;
+	private transient double offset;
 	
 	public static enum RollTarget {
 		LEFT(25), NONE(0), RIGHT(-25);
@@ -230,5 +233,37 @@ public class Plane implements Serializable {
 
 	public void setAccelMod(double accelMod) {
 		this.accelMod = accelMod;
+	}
+
+	/**
+	 * WON'T work after plane has been broken and placed back down! Use presets for that!
+	 * @return
+	 */
+	public MaterialData getCartDisplayBlock() {
+		return displayBlock;
+	}
+
+	/**
+	 * WON'T work after plane has been broken and placed back down! Use presets for that!
+	 * @return
+	 */
+	public void setCartDisplayBlock(MaterialData displayBlock) {
+		this.displayBlock = displayBlock;
+	}
+
+	/**
+	 * WON'T work after plane has been broken and placed back down! Use presets for that!
+	 * @return
+	 */
+	public double getDisplayOffset() {
+		return offset;
+	}
+
+	/**
+	 * WON'T work after plane has been broken and placed back down! Use presets for that!
+	 * @return
+	 */
+	public void setDisplayOffset(double offset) {
+		this.offset = offset;
 	}
 }
