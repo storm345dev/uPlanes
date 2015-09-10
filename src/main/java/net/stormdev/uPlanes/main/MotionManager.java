@@ -218,7 +218,7 @@ public class MotionManager {
 				
 				if(vertModKey != Keypress.NONE){
 					float pitch = pln.getCurrentPitch();
-					float change = (float) pln.getTurnAmountPerTick();
+					float change = (float) 2;
 					pitch += vertModKey.equals(Keypress.D) ? change : -change;
 					if(pitch > 89){
 						pitch = 89;
