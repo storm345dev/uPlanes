@@ -30,6 +30,7 @@ import net.stormdev.uPlanes.utils.uCarsCompatibility;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
@@ -512,8 +513,11 @@ public class main extends JavaPlugin {
 								}
 								
 								double y = (double)event.getPacket().getIntegers().read(2) / 32.0;
-								y+= hce.getDisplayOffset()-0.9;
-								event.getPacket().getIntegers().write(2, (int) (y * 32));
+								Block b = hce.getLocation().getBlock();
+								if(b.isEmpty() || b.isLiquid()){
+									y+= hce.getDisplayOffset()-0.9;
+									event.getPacket().getIntegers().write(2, (int) (y * 32));
+								}
 							}
 					
 				});

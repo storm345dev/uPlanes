@@ -11,7 +11,6 @@ import net.minecraft.server.v1_8_R3.Vec3D;
 import net.minecraft.server.v1_8_R3.World;
 import net.stormdev.uPlanes.utils.CustomEntityHandler;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
@@ -29,7 +28,7 @@ public class HoverCartEntity extends EntityArmorStand {	 //TODO Stop it falling 
 	
 	private CraftHoverCart ce;
 	private Location loc;
-	private double heightOffset = -1;
+	private double heightOffset = 0;
 	
 	public static HoverCart getCart(org.bukkit.entity.Entity e){
 		if(((CraftEntity)e).getHandle() instanceof HoverCartEntity){
