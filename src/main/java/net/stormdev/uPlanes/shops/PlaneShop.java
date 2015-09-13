@@ -75,7 +75,7 @@ public class PlaneShop {
 		}
 		double rem = bal-cost;
 		if(rem<0){
-			player.sendMessage(main.colors.getError()+Lang.get("general.buy.notEnoughMoney"));
+			player.sendMessage(main.colors.getError()+Lang.get("general.buy.notEnoughMoney").replaceAll(Pattern.quote("%balance%"), bal+""));
 			return;
 		}
 		main.economy.withdrawPlayer(player.getName(), cost);
