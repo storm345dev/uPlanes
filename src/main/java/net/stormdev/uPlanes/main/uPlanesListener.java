@@ -9,6 +9,7 @@ import net.stormdev.uPlanes.api.Keypress;
 import net.stormdev.uPlanes.api.Plane;
 import net.stormdev.uPlanes.api.PlaneDeathEvent;
 import net.stormdev.uPlanes.api.uPlanesAPI;
+import net.stormdev.uPlanes.hover.HoverCart;
 import net.stormdev.uPlanes.items.ItemPlaneValidation;
 import net.stormdev.uPlanes.presets.PresetManager;
 import net.stormdev.uPlanes.utils.CartOrientationUtil;
@@ -51,6 +52,7 @@ import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.event.player.PlayerArmorStandManipulateEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
 import org.bukkit.event.vehicle.VehicleDestroyEvent;
@@ -710,6 +712,13 @@ public class uPlanesListener implements Listener {
 			return;
 		}
 		event.setCancelled(true); //Don't allow, let health handle it
+	}
+	
+	@EventHandler(priority=EventPriority.HIGHEST)
+	void allowArmorStandInteractDespiteProtection(PlayerArmorStandManipulateEvent event){
+		if(event.getRightClicked() instanceof HoverCart){
+			event.setCancelled(false);
+		}
 	}
 	
 	@EventHandler(priority=EventPriority.HIGHEST)
