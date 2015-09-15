@@ -657,6 +657,13 @@ public class uPlanesListener implements Listener {
 		//Now place the car
 		Block b = event.getClickedBlock();
 		final Location toSpawn = b.getLocation().add(0,1.5,0);
+		
+		if(toSpawn.getY() >= toSpawn.getWorld().getMaxHeight()){
+			event.setCancelled(true);
+			player.sendMessage(ChatColor.RED+"You may not place this here!");
+			return;
+		}
+		
 		Block in = toSpawn.getBlock();
 		if(!in.isEmpty() && !in.isLiquid()){
 			return;
