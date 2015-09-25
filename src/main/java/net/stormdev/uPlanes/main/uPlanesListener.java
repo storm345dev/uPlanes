@@ -29,6 +29,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.Chest;
 import org.bukkit.block.DoubleChest;
 import org.bukkit.block.Sign;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Damageable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
@@ -332,8 +333,18 @@ public class uPlanesListener implements Listener {
 		Location loc = car.getLocation();
 		
 		if(car.hasMetadata("plane.frozen")){
-			car.setVelocity(new Vector(0,0.04,0));
+			if(car instanceof ArmorStand){
+				((ArmorStand)car).setGravity(false);
+			}
+			else {
+				car.setVelocity(new Vector(0,0.04,0));
+			}
 			return;
+		}
+		else {
+			if(car instanceof ArmorStand && !((ArmorStand)car).hasGravity()){
+				((ArmorStand)car).setGravity(true);
+			}
 		}
 		
 		Entity passenger = car.getPassenger();
