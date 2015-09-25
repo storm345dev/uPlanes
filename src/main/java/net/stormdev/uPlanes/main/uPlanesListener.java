@@ -552,8 +552,18 @@ public class uPlanesListener implements Listener {
 		}
 		
 		if(cart.hasMetadata("plane.frozen")){
-			cart.setVelocity(new Vector(0,0.04,0));
+			if(cart instanceof ArmorStand){
+				((ArmorStand)cart).setGravity(false);
+			}
+			else {
+				cart.setVelocity(new Vector(0,0.04,0));
+			}
 			return;
+		}
+		else {
+			if(cart instanceof ArmorStand && !((ArmorStand)cart).hasGravity()){
+				((ArmorStand)cart).setGravity(true);
+			}
 		}
 		
 		if(cart instanceof Minecart){
