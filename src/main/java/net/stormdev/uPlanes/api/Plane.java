@@ -15,6 +15,7 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.MaterialData;
+import org.bukkit.util.Vector;
 
 /**
  * Simple serializable format for plane data
@@ -39,6 +40,8 @@ public class Plane implements Serializable {
 	private transient RollTarget rollTarget = RollTarget.NONE;
 	private transient MaterialData displayBlock;
 	private transient double offset;
+	private transient long lastUpdateEventTime = System.currentTimeMillis();
+	private transient Vector lastUpdateEventVec = null;
 	
 	public static enum RollTarget {
 		LEFT(25), NONE(0), RIGHT(-25);
@@ -51,6 +54,15 @@ public class Plane implements Serializable {
 		public float getTargetAngle(){
 			return this.amt;
 		}
+	}
+	
+	public long getTimeSinceLastUpdateEvent(){
+		return System.currentTimeMillis() - this.lastUpdateEventTime;
+	}
+	
+	public void postPlaneUpdateEvent(Vector vec){
+		this.lastUpdateEventTime = System.currentTimeMillis();
+		this.setLastUpdateEventVec(vec);
 	}
 	
 	public Plane(){ //An empty plane
@@ -265,5 +277,13 @@ public class Plane implements Serializable {
 	 */
 	public void setDisplayOffset(double offset) {
 		this.offset = offset;
+	}
+
+	public Vector getLastUpdateEventVec() {
+		return lastUpdateEventVec;
+	}
+
+	public void setLastUpdateEventVec(Vector lastUpdateEventVec) {
+		this.lastUpdateEventVec = lastUpdateEventVec;
 	}
 }

@@ -372,6 +372,9 @@ public class uPlanesListener implements Listener {
 		
 		if(!pln.isHover()){
 			CartOrientationUtil.setPitch(car, pln.getCurrentPitch());
+			if(pln.getTimeSinceLastUpdateEvent() >= 100){
+				car.setVelocity(pln.getLastUpdateEventVec());
+			}
 			/*if(Math.abs(car.getVelocity().getX()) > 0 || Math.abs(car.getVelocity().getZ()) > 0){
 				float cYaw = (float) Math.toDegrees(Math.atan2(car.getVelocity().getX() , -car.getVelocity().getZ())) - 90;
 				CartOrientationUtil.setYaw(car, cYaw);
