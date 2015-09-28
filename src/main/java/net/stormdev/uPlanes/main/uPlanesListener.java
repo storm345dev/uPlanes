@@ -372,7 +372,7 @@ public class uPlanesListener implements Listener {
 		
 		if(!pln.isHover()){
 			CartOrientationUtil.setPitch(car, pln.getCurrentPitch());
-			if(pln.getTimeSinceLastUpdateEvent() >= 100 && pln.getLastUpdateEventVec() != null){
+			if(pln.getTimeSinceLastUpdateEvent() >= 150 && pln.getLastUpdateEventVec() != null){
 				car.setVelocity(pln.getLastUpdateEventVec());
 			}
 			/*if(Math.abs(car.getVelocity().getX()) > 0 || Math.abs(car.getVelocity().getZ()) > 0){
@@ -647,6 +647,7 @@ public class uPlanesListener implements Listener {
 		
 		if(!cart.hasMetadata("plane.destination")){ 
 			cart.setVelocity(travel);
+			plane.postPlaneUpdateEvent(travel);
 		}
 		return;
 	}
