@@ -54,6 +54,7 @@ import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerArmorStandManipulateEvent;
+import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
 import org.bukkit.event.vehicle.VehicleDestroyEvent;
@@ -748,6 +749,13 @@ public class uPlanesListener implements Listener {
 	
 	@EventHandler(priority=EventPriority.HIGHEST)
 	void allowArmorStandInteractDespiteProtection(PlayerArmorStandManipulateEvent event){
+		if(event.getRightClicked() instanceof HoverCart){
+			event.setCancelled(false);
+		}
+	}
+	
+	@EventHandler(priority=EventPriority.HIGHEST)
+	void interact(PlayerInteractAtEntityEvent event){
 		if(event.getRightClicked() instanceof HoverCart){
 			event.setCancelled(false);
 		}
