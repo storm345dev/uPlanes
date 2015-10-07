@@ -755,6 +755,13 @@ public class uPlanesListener implements Listener {
 	}
 	
 	@EventHandler(priority=EventPriority.HIGHEST)
+	void armorStandHurt(EntityDamageByEntityEvent event){
+		if(event.getEntity() instanceof HoverCart){
+			event.setCancelled(false);
+		}
+	}
+	
+	@EventHandler(priority=EventPriority.HIGHEST)
 	void interact(PlayerInteractAtEntityEvent event){
 		if(event.getRightClicked() instanceof HoverCart){
 			event.setCancelled(false);
