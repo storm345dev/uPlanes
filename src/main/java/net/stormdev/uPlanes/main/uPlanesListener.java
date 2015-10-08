@@ -532,7 +532,7 @@ public class uPlanesListener implements Listener {
 			
 			boolean cont = false;
 			
-			if(aData != null && aData.isAutopilotOverridenByControlInput()){
+			if(aData != null && !aData.isAutopilotOverridenByControlInput()){
 				cont = true;
 			}
 			
