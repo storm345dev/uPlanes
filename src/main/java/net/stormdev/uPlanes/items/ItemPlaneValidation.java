@@ -40,10 +40,10 @@ public class ItemPlaneValidation {
 		int i = 0;
 		if(!Colors.strip((lore.get(i))).toLowerCase().contains("[speed:]")){
 			String firstLine = Colors.strip((lore.get(i))).toLowerCase();
-			if(firstLine.equalsIgnoreCase("car")){
+			if(/*firstLine.equalsIgnoreCase("car")*/!firstLine.equalsIgnoreCase("plane") && !firstLine.equalsIgnoreCase("helicopter")){
 				return null;
 			}
-			else if(!firstLine.equalsIgnoreCase("plane")){ //It doesn't say plane...
+			else if(!firstLine.equalsIgnoreCase("plane") && !firstLine.equalsIgnoreCase("helicopter")){ //It doesn't say plane...
 				try {
 					UUID.fromString(firstLine); //Test if it's a UUID string
 				} catch (Exception e) {

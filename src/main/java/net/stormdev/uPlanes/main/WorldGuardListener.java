@@ -1,7 +1,6 @@
 package net.stormdev.uPlanes.main;
 
 import net.stormdev.uPlanes.api.uPlanesAPI;
-import net.stormdev.uPlanes.hover.HoverCart;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.EntityType;

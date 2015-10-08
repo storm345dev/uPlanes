@@ -151,7 +151,7 @@ public class Plane implements Serializable {
 		ItemStack stack = new ItemStack(Material.MINECART);
 		List<String> lore = new ArrayList<String>();
 		ItemMeta meta = stack.getItemMeta();
-		lore.add(ChatColor.GRAY+"plane");
+		lore.add(ChatColor.GRAY+(isHover()?"helicopter":"plane"));
 		lore.add(main.colors.getTitle()+"[Speed:] "+main.colors.getInfo()+mutliplier);
 		lore.add(main.colors.getTitle()+"[Health:] "+main.colors.getInfo()+health);
 		lore.add(main.colors.getTitle()+"[Acceleration:] "+main.colors.getInfo()+accelMod*10.0d);
