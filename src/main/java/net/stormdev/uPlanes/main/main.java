@@ -358,6 +358,14 @@ public class main extends JavaPlugin {
 		}
 		
 		listener = new uPlanesListener(this);
+		
+		if(Bukkit.getPluginManager().getPlugin("WorldGuard") != null){
+			new WorldGuardListener();
+		}
+		else {
+			main.logger.info("WorldGuard handling not enabled!");
+		}
+		
 		this.planeManager = new PlanesManager(planesSaveFile);
 		getServer().getPluginManager().registerEvents(listener, this);
 		
