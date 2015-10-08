@@ -556,6 +556,33 @@ public class main extends JavaPlugin {
 					}
 			
 		});
+				((ProtocolManager) this.protocolManager).addPacketListener(new PacketAdapter(this, PacketType.Play.Server.SPAWN_ENTITY_LIVING){
+					@Override
+					public void onPacketSending(PacketEvent event){
+						int entityId = event.getPacket().getIntegers().read(0);
+						
+						HoverCart hce = null;
+						for(World w:Bukkit.getServer().getWorlds()){
+							for(net.minecraft.server.v1_8_R3.Entity e:((CraftWorld)w).getHandle().entityList){
+								if(entityId == e.getId()){
+									HoverCart hc = HoverCartEntity.getCart(e.getBukkitEntity());
+									if(hc == null){
+										return;
+									}
+									hce = hc;
+								}
+							}
+						}
+						if(hce == null){
+							return;
+						}
+						
+						double y = (double)event.getPacket().getIntegers().read(2) / 32.0;
+						y+= hce.getDisplayOffset()-0.9;
+						event.getPacket().getIntegers().write(2, (int) (y * 32));
+					}
+			
+		});
 			} catch (Exception e) {
 			}
 		} catch (Exception e) {
