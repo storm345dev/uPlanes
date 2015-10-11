@@ -366,6 +366,9 @@ public class uPlaneManager {
 	 * @param breakIt Whether or not to break the car if necessary
 	 */
 	public void damagePlane(Vehicle m, Plane plane, double damage, Player damager, boolean breakIt){
+		if(m.hasMetadata("invincible")){
+			return;
+		}
 		//Plane being punched to death
 		double health = plane.getHealth();
 		if(m.hasMetadata("plane.health")){
@@ -396,6 +399,9 @@ public class uPlaneManager {
 	 * @param breakIt Whether or not to break the car if necessary
 	 */
 	public void damagePlane(Vehicle m, Plane plane, double damage, Player damager, String cause, boolean breakIt){
+		if(m.hasMetadata("invincible")){
+			return;
+		}
 		//Plane being punched to death
 		double health = plane.getHealth();
 		if(m.hasMetadata("plane.health")){
@@ -473,6 +479,9 @@ public class uPlaneManager {
 	 * @param cause The cause of the damage
 	 */
 	public void damagePlane(Vehicle m, Plane plane, double damage, String cause, boolean breakIt){
+		if(m.hasMetadata("invincible")){
+			return;
+		}
 		double health = plane.getHealth();
 		if(m.hasMetadata("plane.health")){
 			List<MetadataValue> ms = m.getMetadata("plane.health");
