@@ -271,6 +271,25 @@ public class uPlanesListener implements Listener {
 	        if(!plugin.planeManager.isPlaneInUse(veh.getUniqueId())){
 	        	return;
 	        }
+	        
+	        //Block if in autopilot with no control override
+	        if(veh.hasMetadata("plane.destination")){
+				AutopilotDestination aData = null;
+				
+				if(veh.hasMetadata("plane.autopilotData")){
+					try {
+						aData = (AutopilotDestination) veh.getMetadata("plane.autopilotData").get(0).value();
+					} catch (Exception e) {
+						aData = null;
+					}
+				}
+				
+				if(aData != null && !aData.isAutopilotOverridenByControlInput()){
+					event.setCancelled(true);
+					return;
+				}
+	        }
+	        
 	        veh.removeMetadata(AccelerationManager.ACCEL_META, main.plugin);
 	    	if(!safeExit){
 	    		/*if(Bukkit.getServer().getPluginManager().getPlugin("AntiCheat") != null){
