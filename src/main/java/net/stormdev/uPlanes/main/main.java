@@ -34,6 +34,7 @@ import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -79,6 +80,7 @@ public class main extends JavaPlugin {
 	public PresetManager presets = null;
 	
 	public static HashMap<String, Double> fuel = new HashMap<String, Double>();
+	public static boolean fireUpdateEvent = false;
 	
 	/**
 	 * Economy setup code
@@ -264,6 +266,12 @@ public class main extends JavaPlugin {
         	}
         	if(!config.contains("general.planes.upgradeperms")){
         		config.set("general.planes.upgradeperms", false);
+        	}
+        	if(!config.contains("general.planes.enableUpdateEvent")){
+        		config.set("general.planes.enableUpdateEvent", false);
+        	}
+        	else {
+        		fireUpdateEvent = config.getBoolean("general.planes.enableUpdateEvent");
         	}
         	perms = config.getBoolean("general.planes.perms");
         	upgradePerms = config.getBoolean("general.planes.upgradeperms");
@@ -491,10 +499,18 @@ public class main extends JavaPlugin {
 						  @Override
 						  public void onPacketReceiving(PacketEvent event) {
 								PacketContainer packet = event.getPacket();
-								float sideways = packet.getFloat().read(0);
-								float forwards = packet.getFloat().read(1);
-								MotionManager.move(event.getPlayer(), forwards,
-										sideways);
+								final float sideways = packet.getFloat().read(0);
+								final float forwards = packet.getFloat().read(1);
+								final Player pl = event.getPlayer();
+								
+								Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable(){
+
+									@Override
+									public void run() {
+										MotionManager.move(pl, forwards,
+												sideways);
+										return;
+									}});
 						  }
 					});
 			

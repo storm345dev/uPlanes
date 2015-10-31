@@ -280,11 +280,17 @@ public class MotionManager {
 		}
 		
 		final PlaneUpdateEvent event = new PlaneUpdateEvent(plane, vec, player, pressedKeys, accelMod, pln);
+		
 		main.plugin.getServer().getScheduler()
 				.runTask(main.plugin, new Runnable() {
 					public void run() {
-						main.plugin.getServer().getPluginManager()
+						if(main.fireUpdateEvent){
+							main.plugin.getServer().getPluginManager()
 								.callEvent(event);
+						}
+						else {
+							main.plugin.listener.planeFlightControl(event);
+						}
 					}
 				});
 		return;
