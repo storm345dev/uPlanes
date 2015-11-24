@@ -849,7 +849,7 @@ public class uPlanesListener implements Listener {
 			((Player)attacker).sendMessage(main.colors.getInfo()+msg);
 		}
 		else{
-			if(plane.isHover() && m.getVelocity().getY() < -0.5){
+			if(plane.isHover() && m.getVelocity().getY() < -0.1){
 				return; //Don't damage helicopters landing TODO
 			}
 			msg = msg.replaceAll(Pattern.quote("%damage%"), damage+"HP");
