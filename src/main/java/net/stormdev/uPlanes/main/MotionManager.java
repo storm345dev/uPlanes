@@ -123,7 +123,8 @@ public class MotionManager {
 				CartOrientationUtil.setYaw(plane, vYaw-90);
 			}
 			if(pln.isHover() && am == 0){
-				pln.setRoll(0);
+				pln.setRollTarget(RollTarget.NONE);
+				pln.updateRoll();
 				CartOrientationUtil.setRoll(plane, pln.getRoll());
 			}
 			plane.removeMetadata("plane.direction", main.plugin);
