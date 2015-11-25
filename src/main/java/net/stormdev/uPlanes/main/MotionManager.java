@@ -5,13 +5,13 @@ import java.util.List;
 
 import net.stormdev.uPlanes.api.Keypress;
 import net.stormdev.uPlanes.api.Plane;
-import net.stormdev.uPlanes.api.uPlanesAPI;
 import net.stormdev.uPlanes.api.Plane.RollTarget;
+import net.stormdev.uPlanes.api.uPlanesAPI;
 import net.stormdev.uPlanes.utils.CartOrientationUtil;
 import net.stormdev.uPlanes.utils.PlaneUpdateEvent;
 import net.stormdev.uPlanes.utils.StatValue;
 
-import org.bukkit.Bukkit;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Vehicle;
@@ -67,10 +67,9 @@ public class MotionManager {
 				//Not moving
 				return;
 			}*/
-			if(pln.isHover()){
+			/*if(pln.isHover()){
 				AccelerationManager.setCurrentAccel(plane, 0);
-				return;
-			}
+			}*/
 		}
 		
 		Vector playD = player.getEyeLocation().getDirection();
@@ -116,11 +115,16 @@ public class MotionManager {
 				yawDiff = (float) rotMod;
 			}
 			
-			if((AccelerationManager.getCurrentMultiplier(plane) >= 0.2 || pln.isHover()) && !plane.hasMetadata("plane.destination")){
+			double am = AccelerationManager.getCurrentMultiplier(plane);
+			if((am >= 0.2 || (pln.isHover()&&am>0)) && !plane.hasMetadata("plane.destination")){
 				pln.updateRoll();
 				CartOrientationUtil.setRoll(plane, pln.getRoll());
 				planeDirection = rotateXZVector3dDegrees(planeDirection, yawDiff);
 				CartOrientationUtil.setYaw(plane, vYaw-90);
+			}
+			if(pln.isHover() && am == 0){
+				pln.setRoll(0);
+				CartOrientationUtil.setRoll(plane, pln.getRoll());
 			}
 			plane.removeMetadata("plane.direction", main.plugin);
 			plane.setMetadata("plane.direction", new StatValue(planeDirection.clone().normalize(), main.plugin));
@@ -198,7 +202,14 @@ public class MotionManager {
 		
 		boolean hasFlightSpeed = (new Vector(x, 0, z).lengthSquared() > 0.75 || accelMod > 0.75);
 		
-		if(!pln.isHover()){ //Calculate y
+		if(pln.isHover()){
+			double pitch = 40*accelMod;
+			if(pitch > 16){
+				pitch = 16;
+			}
+			pln.setCurrentPitch((float) (pitch));
+		}
+		else { //Calculate y
 			if(plane.isOnGround()){
 				if(!hasFlightSpeed){
 					pln.setCurrentPitch(0);

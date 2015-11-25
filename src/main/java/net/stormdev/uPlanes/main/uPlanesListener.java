@@ -390,8 +390,9 @@ public class uPlanesListener implements Listener {
 			return;
 		}
 		
+		CartOrientationUtil.setPitch(car, pln.getCurrentPitch());
+		
 		if(!pln.isHover()){
-			CartOrientationUtil.setPitch(car, pln.getCurrentPitch());
 			if(pln.getTimeSinceLastUpdateEvent() >= 150 && pln.getLastUpdateEventVec() != null){
 				car.setVelocity(pln.getLastUpdateEventVec());
 			}
@@ -401,8 +402,15 @@ public class uPlanesListener implements Listener {
 			}*/
 			return;
 		}
+		else {
+			if(!car.hasMetadata("plane.left") && !car.hasMetadata("plane.right")){
+				//Going up or down
+				car.setVelocity(car.getVelocity().clone().setY(0));
+				return; //Ignore it
+			}
+		}
 		
-		//Hover
+		/*//Hover
 		if(car.hasMetadata("plane.left") || car.hasMetadata("plane.right")){
 			//Going up or down
 			return; //Ignore it
@@ -429,7 +437,7 @@ public class uPlanesListener implements Listener {
 		}
 		if((loc.getY() < heightLimit)){
 			car.setVelocity(vel);
-		}
+		}*/
 		return;
 	}
 	
@@ -623,7 +631,7 @@ public class uPlanesListener implements Listener {
 		}
 		
 		if((new Vector(travel.getX(), 0, travel.getZ()).lengthSquared() < 0.75 && event.getAcceleration() < 0.75) && !plane.isHover() && travel.getY() < 0.1){
-			travel.setY(cart.getVelocity().getY() * 1.015); //Need more speed to maintain flight!
+			travel.setY(-Math.abs(cart.getVelocity().getY()) * 1.015); //Need more speed to maintain flight!
 			/*float pitch = plane.getCurrentPitch();
 			pitch += 1;
 			if(pitch > 90){
@@ -657,9 +665,9 @@ public class uPlanesListener implements Listener {
 			}
 		}
 		
-		if(plane.isHover() && !event.wasKeypressed(Keypress.A) && !event.wasKeypressed(Keypress.D)){
+		/*if(plane.isHover() && !event.wasKeypressed(Keypress.A) && !event.wasKeypressed(Keypress.D)){
 			travel.setY(cart.getVelocity().getY());
-		}
+		}*/
 		
 		Vector behind = travel.clone().multiply(-1); //Behind the plane
 		Location exhaust = loc.add(behind);
@@ -849,11 +857,11 @@ public class uPlanesListener implements Listener {
 			((Player)attacker).sendMessage(main.colors.getInfo()+msg);
 		}
 		else{
-			if(plane.isHover() && m.getVelocity().getY() < -0.1){
+			if(plane.isHover() && m.getVelocity().getY() < 0.001){
 				return; //Don't damage helicopters landing TODO
 			}
 			msg = msg.replaceAll(Pattern.quote("%damage%"), damage+"HP");
-			health -= damage;
+			health -= ((int)Math.floor(damage));
 			if(health <= 0){
 				die = true;
 				health = 0;
