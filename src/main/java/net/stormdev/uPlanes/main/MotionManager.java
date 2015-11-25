@@ -158,6 +158,9 @@ public class MotionManager {
 		double accelMod = !decel ? AccelerationManager.getMultiplier(player, plane, pln) 
 				: (f == 0 ? AccelerationManager.decelerateAndGetMult(player, plane, pln) 
 						: AccelerationManager.decelerateAndGetMult(player, plane, pln));
+		if(f < 0 && pln.isHover()){
+			accelMod = AccelerationManager.decelerateAndGetMult(player, plane, pln); //Decelerate faster by calling again
+		}
 		
 		float hoverAmount = (float) (0.0005 * pln.getSpeed());
 		if(hoverAmount < 0.009){
