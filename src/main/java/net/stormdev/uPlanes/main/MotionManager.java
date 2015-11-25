@@ -162,9 +162,12 @@ public class MotionManager {
 			accelMod = AccelerationManager.decelerateAndGetMult(player, plane, pln); //Decelerate faster by calling again
 		}
 		
-		float hoverAmount = (float) (0.0005 * pln.getSpeed());
+		float hoverAmount = (float) (0.0004 * pln.getSpeed());
 		if(hoverAmount < 0.009){
 			hoverAmount = 0.009f;
+		}
+		if(hoverAmount > 0.04){
+			hoverAmount = 0.04f;
 		}
 		
 		if (turning) {
