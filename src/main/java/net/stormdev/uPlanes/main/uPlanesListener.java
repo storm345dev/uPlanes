@@ -472,68 +472,6 @@ public class uPlanesListener implements Listener {
 				}
 			}
 		}
-		if(crashing){
-			//Check if they crashed xD
-			/*Block current = cart.getLocation().getBlock();*/
-			Block b = null;
-			if(/*(current.isEmpty() || current.isLiquid()) &&*/ !cart.hasMetadata("plane.destination") && !cart.hasMetadata("arrivedAtDest")){
-				Location nextHorizontal = cart.getLocation().add(new Vector(cart.getVelocity().getX(), 0, cart.getVelocity().getZ()));
-				b = nextHorizontal.getBlock();
-				if(!b.isEmpty() && !b.isLiquid() && b.getType().isSolid() && !b.getType().equals(Material.CARPET) && !b.getType().equals(Material.BARRIER)){ //Crashed into something
-					/*b = b.getRelative(BlockFace.UP);
-					String bt = b.getType().name().toLowerCase();*/
-					if(true/*(!b.isEmpty() && !b.isLiquid() && b.getType().isSolid())
-							|| (!bt.contains("step")
-									&& !bt.contains("carpet")
-									&& (!bt.contains("grass") && !b.getType().equals(Material.GRASS))
-									)*/){ //Crashed into definitely a wall or something bad
-						double speedSq = cart.getVelocity().lengthSquared();
-						if(speedSq > 0.1 || plane.isHover()){ //Going v. slow
-							if(plane.isHover()){
-								speedSq *= 3;
-							}
-							double damage = 100.0 * speedSq;
-							damage = Math.round(damage*10.0d)/10.0d;
-							if(damage < 1){
-								damage = 1;
-							}
-							if(damage > 100){
-								damage = 100;
-							}
-							
-							PrePlaneCrashEvent evt = new PrePlaneCrashEvent(cart, player, event.getAcceleration(), plane, damage);
-							Bukkit.getPluginManager().callEvent(evt);
-							
-							if(!evt.isCancelled() && evt.getDamage() > 0){
-								uPlanesAPI.getPlaneManager().damagePlane(cart, plane, evt.getDamage(), "Crash");
-							}
-						}
-					}
-				}
-			}
-			
-			
-			/*// If crash into ground with significantly less x/z speed than needed for flight
-*/			
-			
-			
-			/*if(cart.getVelocity().getY() < 0.5 && new Vector(cart.getVelocity().getX(), 0, cart.getVelocity().getZ()).lengthSquared() < 0.5){ //Going down fast enough to do some damage
-				Location nextVertical = cart.getLocation().add(0, cart.getVelocity().getY(), 0);
-				b = nextVertical.getBlock();
-				if(!b.isEmpty() && !b.isLiquid() && b.getType().isSolid()){ //Crashed into something
-					double damage = 20.0 * cart.getVelocity().getY();
-					damage = Math.round(damage*10.0d)/10.0d;
-					if(damage < 1){
-						damage = 1;
-					}
-					if(damage > 15){
-						damage = 15;
-					}
-					
-					uPlanesAPI.getPlaneManager().damagePlane(cart, plane, damage, "Rough Landing");
-				}
-			}*/
-		}
 		
 		if (fuel
 				&& !player.hasPermission(fuelBypassPerm)) {
@@ -644,12 +582,87 @@ public class uPlanesListener implements Listener {
 			plane.setCurrentPitch(pitch);*/
 		}
 		
+		if(crashing){
+			//Check if they crashed xD
+			/*Block current = cart.getLocation().getBlock();*/
+			Block b = null;
+			if(/*(current.isEmpty() || current.isLiquid()) &&*/ !cart.hasMetadata("plane.destination") && !cart.hasMetadata("arrivedAtDest")){
+				double x = travel.getX();
+				double z = travel.getZ();
+				double vx = cart.getVelocity().getX();
+				double vz = cart.getVelocity().getZ();
+				if(Math.abs(vx) > Math.abs(x)){
+					x = vx;
+				}
+				if(Math.abs(vz) > Math.abs(z)){
+					z = vz;
+				}
+				Location nextHorizontal = cart.getLocation().clone().add(new Vector(x, 0, z));
+				b = nextHorizontal.getBlock();
+				if(!b.isEmpty() && !b.isLiquid() && b.getType().isSolid() && !b.getType().equals(Material.CARPET) && !b.getType().equals(Material.BARRIER)){ //Crashed into something
+					/*b = b.getRelative(BlockFace.UP);
+					String bt = b.getType().name().toLowerCase();*/
+					if(true/*(!b.isEmpty() && !b.isLiquid() && b.getType().isSolid())
+							|| (!bt.contains("step")
+									&& !bt.contains("carpet")
+									&& (!bt.contains("grass") && !b.getType().equals(Material.GRASS))
+									)*/){ //Crashed into definitely a wall or something bad
+						double speedSq = new Vector(x, 0, z).lengthSquared();
+						if(true){ //Going v. slow
+							speedSq *= 1.5;
+							double damage = 150.0 * speedSq;
+							if(plane.isHover()){
+								damage *= 1.5;
+							}
+							damage = Math.round(damage*10.0d)/10.0d;
+							if(damage < 1){
+								damage = 1;
+							}
+							if(damage > 100){
+								damage = 100;
+							}
+							
+							PrePlaneCrashEvent evt = new PrePlaneCrashEvent(cart, player, event.getAcceleration(), plane, damage);
+							Bukkit.getPluginManager().callEvent(evt);
+							
+							if(!evt.isCancelled() && evt.getDamage() > 0){
+								uPlanesAPI.getPlaneManager().damagePlane(cart, plane, evt.getDamage(), "Crash");
+							}
+						}
+					}
+				}
+			}
+			
+			
+			/*// If crash into ground with significantly less x/z speed than needed for flight
+*/			
+			
+			
+			/*if(cart.getVelocity().getY() < 0.5 && new Vector(cart.getVelocity().getX(), 0, cart.getVelocity().getZ()).lengthSquared() < 0.5){ //Going down fast enough to do some damage
+				Location nextVertical = cart.getLocation().add(0, cart.getVelocity().getY(), 0);
+				b = nextVertical.getBlock();
+				if(!b.isEmpty() && !b.isLiquid() && b.getType().isSolid()){ //Crashed into something
+					double damage = 20.0 * cart.getVelocity().getY();
+					damage = Math.round(damage*10.0d)/10.0d;
+					if(damage < 1){
+						damage = 1;
+					}
+					if(damage > 15){
+						damage = 15;
+					}
+					
+					uPlanesAPI.getPlaneManager().damagePlane(cart, plane, damage, "Rough Landing");
+				}
+			}*/
+		}
+		
 		if(crashing && !plane.isHover() && !cart.hasMetadata("plane.destination") && !cart.hasMetadata("arrivedAtDest")){
 			if((travel.getY() < -0.3 && plane.getCurrentPitch() > 25) || ((travel.getY() < -0.3 && new Vector(travel.getX(), 0, travel.getZ()).lengthSquared() < 0.8 && event.getAcceleration() < 0.8))){
-				Location nextVertical = cart.getLocation().add(0, cart.getVelocity().getY(), 0);
+				double y = Math.min(travel.getY(), cart.getVelocity().getY());
+				Location nextVertical = cart.getLocation().add(0, y, 0);
 				Block b = nextVertical.getBlock();
 				if(!b.isEmpty() && !b.isLiquid() && b.getType().isSolid()){ //Crashed into something
-					double damage = 110.0 * Math.abs(cart.getVelocity().getY());
+					double damage = 130.0 * Math.abs(y);
 					damage = Math.round(damage*10.0d)/10.0d;
 					if(damage < 1){
 						damage = 1;
