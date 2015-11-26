@@ -675,8 +675,8 @@ public class uPlanesListener implements Listener {
 					Bukkit.getPluginManager().callEvent(evt);
 					
 					if(!evt.isCancelled() && evt.getDamage() > 0){
-						player.damage(20*(damage/200.0));
 						uPlanesAPI.getPlaneManager().damagePlane(cart, plane, evt.getDamage(), "Rough Landing");
+						player.damage(20*(damage/200.0));
 					}
 				}
 			}
@@ -699,8 +699,8 @@ public class uPlanesListener implements Listener {
 					Bukkit.getPluginManager().callEvent(evt);
 					
 					if(!evt.isCancelled() && evt.getDamage() > 0){
-						player.damage(20*(damage/200.0));
 						uPlanesAPI.getPlaneManager().damagePlane(cart, plane, evt.getDamage(), "Rough Landing");
+						player.damage(20*(damage/200.0));
 					}
 				}
 			}
