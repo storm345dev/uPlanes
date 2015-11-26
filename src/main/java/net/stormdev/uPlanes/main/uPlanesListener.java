@@ -686,7 +686,7 @@ public class uPlanesListener implements Listener {
 				Location nextVertical = cart.getLocation().add(0, cart.getVelocity().getY(), 0);
 				Block b = nextVertical.getBlock();
 				if(!b.isEmpty() && !b.isLiquid() && b.getType().isSolid()){ //Crashed into something
-					double damage = 110.0 * new Vector(travel.getX(), 0, travel.getZ()).lengthSquared() * 2;
+					double damage = 110.0 * new Vector(travel.getX(), 0, travel.getZ()).lengthSquared();
 					damage = Math.round(damage*10.0d)/10.0d;
 					if(damage < 1){
 						damage = 1;
