@@ -495,6 +495,7 @@ public class uPlaneManager {
 			die = true;
 			health = 0;
 		}
+		health = Math.round(health*10.0d)/10.0d;
 		msg = msg.replaceAll(Pattern.quote("%remainder%"), (health)+"HP");
 		msg = msg.replaceAll(Pattern.quote("%cause%"), cause);
 		
