@@ -162,12 +162,12 @@ public class MotionManager {
 			accelMod = AccelerationManager.decelerateAndGetMult(player, plane, pln); //Decelerate faster by calling again
 		}
 		
-		float hoverAmount = (float) (0.0004 * pln.getSpeed());
-		if(hoverAmount < 0.009){
-			hoverAmount = 0.009f;
+		float hoverAmount = (float) (0.0002 * pln.getSpeed());
+		if(hoverAmount < 0.005){
+			hoverAmount = 0.005f;
 		}
-		if(hoverAmount > 0.04){
-			hoverAmount = 0.04f;
+		if(hoverAmount > 0.02){
+			hoverAmount = 0.02f;
 		}
 		
 		if (turning) {
@@ -210,9 +210,9 @@ public class MotionManager {
 		boolean hasFlightSpeed = (new Vector(x, 0, z).lengthSquared() > 0.75 || accelMod > 0.75);
 		
 		if(pln.isHover()){
-			double pitch = 40*accelMod;
-			if(pitch > 16){
-				pitch = 16;
+			double pitch = 20*accelMod;
+			if(pitch > 10){
+				pitch = 10;
 			}
 			pln.setCurrentPitch((float) (pitch));
 		}
