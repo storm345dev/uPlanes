@@ -546,6 +546,9 @@ public class uPlanesListener implements Listener {
 		Location loc = cart.getLocation();
 		Vector travel = event.getTravelVector();
 		double multiplier = plane.getSpeed();
+		if(multiplier > 15){
+			multiplier = 15 + ((multiplier-15) * 0.5); 
+		}
 		
 		travel.multiply(multiplier);
 		
