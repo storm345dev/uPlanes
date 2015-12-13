@@ -1145,10 +1145,15 @@ public class uPlanesListener implements Listener {
 					}}, 2l); //Teleport back to car loc after exit
 			}
 		}
-		vehicle.eject();
-		vehicle.remove();
-		if(!plane.isWrittenOff()){
-			loc.getWorld().dropItemNaturally(loc, new ItemStack(PlaneItemMethods.getItem(plane)));
+		synchronized(uPlanesListener.class){
+			if(vehicle.isDead() || !vehicle.isValid()){
+				return;
+			}
+			vehicle.eject();
+			vehicle.remove();
+			if(!plane.isWrittenOff()){
+				loc.getWorld().dropItem(loc, new ItemStack(PlaneItemMethods.getItem(plane)));
+			}
 		}
 		//Remove plane and get back item
 		return;
