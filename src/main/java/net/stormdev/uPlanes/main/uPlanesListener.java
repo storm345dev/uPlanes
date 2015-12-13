@@ -775,36 +775,47 @@ public class uPlanesListener implements Listener {
 
 			@Override
 			public void run() {
-				Vehicle ent = uPlanesAPI.getPlaneManager().placePlane(plane, toSpawn);
-				
-				float yaw = player.getLocation().getYaw()+90;
-				if(yaw < 0){
-					yaw = 360 + yaw;
-				}
-				else if(yaw >= 360){
-					yaw = yaw - 360;
-				}
-				CartOrientationUtil.setYaw(ent, yaw);
-				
-				Block in = ent.getLocation().getBlock();
-				Block n = in.getRelative(BlockFace.NORTH);   // The directions minecraft aligns the cart to
-				Block w = in.getRelative(BlockFace.WEST);
-				Block nw = in.getRelative(BlockFace.NORTH_WEST);
-				Block ne = in.getRelative(BlockFace.NORTH_EAST);
-				Block sw = in.getRelative(BlockFace.SOUTH_WEST);
-				if((!in.isEmpty() && !in.isLiquid())
-						|| (!n.isEmpty() && !n.isLiquid())
-						|| (!w.isEmpty() && !w.isLiquid())
-						|| (!ne.isEmpty() && !ne.isLiquid())
-						|| (!nw.isEmpty() && !nw.isLiquid())
-						|| (!sw.isEmpty() && !sw.isLiquid())){
-					ent.remove();
-					return;
-				}
-				
-				inHand.setAmount(inHand.getAmount()-1);
-				if(inHand.getAmount() < 1){
-					player.setItemInHand(new ItemStack(Material.AIR)); //Remove from their hand
+				synchronized(uPlanesListener.class){
+					ItemStack inHand = player.getItemInHand();
+					if(inHand == null || !(inHand.getType().equals(Material.MINECART)) || inHand.getAmount() < 1){
+						return;
+					}
+					Plane pln = main.plugin.planeManager.getPlane(inHand);
+					if(pln == null){
+						return; //Just a minecart
+					}
+					
+					Vehicle ent = uPlanesAPI.getPlaneManager().placePlane(plane, toSpawn);
+					
+					float yaw = player.getLocation().getYaw()+90;
+					if(yaw < 0){
+						yaw = 360 + yaw;
+					}
+					else if(yaw >= 360){
+						yaw = yaw - 360;
+					}
+					CartOrientationUtil.setYaw(ent, yaw);
+					
+					Block in = ent.getLocation().getBlock();
+					Block n = in.getRelative(BlockFace.NORTH);   // The directions minecraft aligns the cart to
+					Block w = in.getRelative(BlockFace.WEST);
+					Block nw = in.getRelative(BlockFace.NORTH_WEST);
+					Block ne = in.getRelative(BlockFace.NORTH_EAST);
+					Block sw = in.getRelative(BlockFace.SOUTH_WEST);
+					if((!in.isEmpty() && !in.isLiquid())
+							|| (!n.isEmpty() && !n.isLiquid())
+							|| (!w.isEmpty() && !w.isLiquid())
+							|| (!ne.isEmpty() && !ne.isLiquid())
+							|| (!nw.isEmpty() && !nw.isLiquid())
+							|| (!sw.isEmpty() && !sw.isLiquid())){
+						ent.remove();
+						return;
+					}
+					
+					inHand.setAmount(inHand.getAmount()-1);
+					if(inHand.getAmount() < 1){
+						player.setItemInHand(new ItemStack(Material.AIR)); //Remove from their hand
+					}
 				}
 				return;
 			}});
@@ -1148,8 +1159,18 @@ public class uPlanesListener implements Listener {
 			}
 		}
 		synchronized(uPlanesListener.class){
-			if(vehicle.isDead() || !vehicle.isValid()){
+			if(vehicle.isDead() || !vehicle.isValid() || (vehicle.getCustomName() != null && vehicle.getCustomName().equals("broken"))){
 				return;
+			}
+			vehicle.setCustomName("broken");
+			List<Entity> near = vehicle.getNearbyEntities(5, 5, 5);
+			for(Entity e:near){
+				if(e.getEntityId() == vehicle.getEntityId()){
+					continue;
+				}
+				if(!(e instanceof Vehicle)){
+					continue;
+				}
 			}
 			vehicle.eject();
 			vehicle.remove();

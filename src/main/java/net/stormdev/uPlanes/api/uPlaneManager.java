@@ -278,41 +278,43 @@ public class uPlaneManager {
 	 * @return Returns the placed entity
 	 */
 	public Vehicle placePlane(Plane plane, Location loc){
-		PlanePreset pp = plane.getPreset();
-		Vehicle ent;
-		
-		MaterialData display = null;
-		double offset = 0;
-		if(plane.getCartDisplayBlock() != null){
-			display = plane.getCartDisplayBlock();
-			offset = plane.getDisplayOffset();
+		synchronized (uPlaneManager.class){
+			PlanePreset pp = plane.getPreset();
+			Vehicle ent;
+			
+			MaterialData display = null;
+			double offset = 0;
+			if(plane.getCartDisplayBlock() != null){
+				display = plane.getCartDisplayBlock();
+				offset = plane.getDisplayOffset();
+			}
+			else if(pp != null && pp.hasDisplayBlock()){
+				display = pp.getDisplayBlock();
+				offset = pp.getDisplayOffset();
+			}
+			
+			if(display == null){
+				ent = (Vehicle) loc.getWorld().spawnEntity(loc, EntityType.MINECART);
+			}
+			else {
+				HoverCartEntity hce = new HoverCartEntity(loc.clone().add(0, 0.3, 0));
+				HoverCart hc = hce.spawn();
+				ent = hc;
+				hc.setDisplay(new ItemStack(display.getItemType(), 1, display.getData()), offset);
+			}
+			
+			ent.setMetadata("ucars.ignore", new StatValue(true, main.plugin));
+			ent.setMetadata("plane.health", new StatValue(plane.getHealth(), main.plugin));
+			if(plane.isHover()){
+				ent.setMetadata("plane.hover", new StatValue(true, main.plugin));
+				plane.setHover(true);
+			}
+			plane.setId(ent.getUniqueId());
+			plane.setRoll(0);
+			
+			main.plugin.planeManager.nowPlaced(plane);
+			return ent;
 		}
-		else if(pp != null && pp.hasDisplayBlock()){
-			display = pp.getDisplayBlock();
-			offset = pp.getDisplayOffset();
-		}
-		
-		if(display == null){
-			ent = (Vehicle) loc.getWorld().spawnEntity(loc, EntityType.MINECART);
-		}
-		else {
-			HoverCartEntity hce = new HoverCartEntity(loc.clone().add(0, 0.3, 0));
-			HoverCart hc = hce.spawn();
-			ent = hc;
-			hc.setDisplay(new ItemStack(display.getItemType(), 1, display.getData()), offset);
-		}
-		
-		ent.setMetadata("ucars.ignore", new StatValue(true, main.plugin));
-		ent.setMetadata("plane.health", new StatValue(plane.getHealth(), main.plugin));
-		if(plane.isHover()){
-			ent.setMetadata("plane.hover", new StatValue(true, main.plugin));
-			plane.setHover(true);
-		}
-		plane.setId(ent.getUniqueId());
-		plane.setRoll(0);
-		
-		main.plugin.planeManager.nowPlaced(plane);
-		return ent;
 	}
 	
 	/**
