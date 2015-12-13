@@ -377,13 +377,15 @@ public class uPlanesListener implements Listener {
 				AntiCheatAPI.exemptPlayer(player, CheckType.FLY);
 			}*/
 		}
+		
 		if(car.hasMetadata("plane.destination")){
 			//Autopilot
 			List<MetadataValue> metas = car.getMetadata("plane.destination");
 			Location dest = (Location) metas.get(0).value();
+			AccelerationManager.setCurrentAccel(car, 1.0);
 			FlightControl.route(dest, loc, car);
 			return;
-		}
+		}	
 		
 		Plane pln = getPlane(car);
 		if(pln == null){
