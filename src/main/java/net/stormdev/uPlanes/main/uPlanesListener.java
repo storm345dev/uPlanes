@@ -660,7 +660,7 @@ public class uPlanesListener implements Listener {
 		}
 		
 		if(crashing && !plane.isHover() && !cart.hasMetadata("plane.destination") && !cart.hasMetadata("arrivedAtDest")){
-			if((travel.getY() < -0.3 && plane.getCurrentPitch() > 25) || ((travel.getY() < -0.3 && new Vector(travel.getX(), 0, travel.getZ()).lengthSquared() < 0.8 && event.getAcceleration() < 0.8))){
+			if((travel.getY() < -0.2 && plane.getCurrentPitch() > 22) || ((travel.getY() < -0.2 && new Vector(travel.getX(), 0, travel.getZ()).lengthSquared() < 0.8 && event.getAcceleration() < 0.8))){
 				double y = Math.min(travel.getY(), cart.getVelocity().getY());
 				Location nextVertical = cart.getLocation().add(0, y, 0);
 				Block b = nextVertical.getBlock();
@@ -851,8 +851,8 @@ public class uPlanesListener implements Listener {
 		if(event.isCancelled()){
 			return;
 		}
-		Vehicle m = event.getVehicle();
-		Plane plane = getPlane(m);
+		final Vehicle m = event.getVehicle();
+		final Plane plane = getPlane(m);
 		if(plane == null){
 			return;
 		}
@@ -902,7 +902,7 @@ public class uPlanesListener implements Listener {
 		}
 		else{
 			if(plane.isHover() && m.getVelocity().getY() < 0.001){
-				return; //Don't damage helicopters landing TODO
+				return; //Don't damage helicopters landing
 			}
 			msg = msg.replaceAll(Pattern.quote("%damage%"), damage+"HP");
 			health -= ((int)Math.floor(damage));
@@ -928,7 +928,14 @@ public class uPlanesListener implements Listener {
 			main.plugin.getServer().getPluginManager().callEvent(evt);
 			if(!evt.isCancelled()){
 				//Kill the plane
-				killPlane(m, plane);
+				Bukkit.getScheduler().runTaskLater(plugin, new Runnable(){
+
+					@Override
+					public void run() {
+						killPlane(m, plane);
+						return;
+					}}, 2l);
+				
 			}
 		}
 		return;
