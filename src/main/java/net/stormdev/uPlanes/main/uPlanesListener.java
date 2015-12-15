@@ -99,6 +99,9 @@ public class uPlanesListener implements Listener {
 		if(!crashing){
 			return;
 		}
+		if(event.isCancelled()){
+			return;
+		}
 		Vehicle m = event.getVehicle();
 		if(m == null){
 			return;
