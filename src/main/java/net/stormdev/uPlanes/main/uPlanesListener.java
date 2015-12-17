@@ -689,7 +689,7 @@ public class uPlanesListener implements Listener {
 				}
 			}
 		}
-		else if(crashing && plane.isHover()){
+		else if(crashing && plane.isHover() && !cart.hasMetadata("plane.destination") && !cart.hasMetadata("arrivedAtDest")){
 			if((travel.getY() < -0 && (Math.abs(travel.getX())>0.1 || Math.abs(travel.getZ()) > 0.1))){
 				Location nextVertical = cart.getLocation().add(0, cart.getVelocity().getY(), 0);
 				Block b = nextVertical.getBlock();
