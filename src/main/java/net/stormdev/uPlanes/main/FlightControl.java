@@ -121,10 +121,14 @@ public class FlightControl {
 		}
 		if(asc
 				&& (!next.getRelative(BlockFace.UP).isEmpty()
+						|| !next.getRelative(BlockFace.UP, 2).isEmpty()
+						|| !next.getRelative(BlockFace.UP, 3).isEmpty()
+						|| !next.getRelative(BlockFace.UP, 4).isEmpty()
 				|| !left.isEmpty()
 				|| !right.isEmpty())){
 			z = -toGo.getZ();
 			x = -toGo.getX();
+			y = 0;
 		}
 		if(pz < 1 && px < 1){
 			x = 0;
