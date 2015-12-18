@@ -6,12 +6,17 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.stormdev.uPlanes.api.Plane;
 import net.stormdev.uPlanes.items.ItemPlaneValidation;
 
+import org.bukkit.Bukkit;
+import org.bukkit.World;
+import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -22,6 +27,34 @@ public class PlanesManager {
 	public PlanesManager(File saveFile){
 		this.saveFile = saveFile;
 		load();
+		Bukkit.getScheduler().runTaskTimer(main.plugin, new Runnable(){
+
+			@Override
+			public void run() {
+				//Remove removed entities from inUse
+				final List<Entity> entities = new ArrayList<Entity>();
+				for(World w:Bukkit.getWorlds()){
+					entities.addAll(w.getEntities());
+				}
+				Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
+
+					@Override
+					public void run() {
+						mainLoop: for(UUID id:new ArrayList<UUID>(planes.keySet())){
+							for(Entity e:entities){
+								if(e.getUniqueId().equals(id)){
+									continue mainLoop;
+								}
+							}
+							//No entity matched it!
+							planes.remove(id);
+							cache.remove(id);
+							main.logger.info("Unlinked plane data "+id+"! Removed from map!");
+						}
+						return;
+					}});
+				return;
+			}}, 260*20l, 260*20l);
 	}
 	public Boolean isPlaneInUse(UUID PlaneId){
 		if(cache.containsKey(PlaneId)){
