@@ -49,7 +49,6 @@ public class PlanesManager {
 							//No entity matched it!
 							planes.remove(id);
 							cache.remove(id);
-							main.logger.info("Unlinked plane data "+id+"! Removed from map!");
 						}
 						return;
 					}});
