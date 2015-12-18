@@ -1176,6 +1176,12 @@ public class uPlanesListener implements Listener {
 				}
 			}
 			vehicle.eject();
+			vehicle.removeMetadata("plane.destination", main.plugin);
+			vehicle.removeMetadata("plane.autopilotData", main.plugin);
+			vehicle.removeMetadata("uPlanes.accel", main.plugin);
+			vehicle.removeMetadata("plane.direction", main.plugin);
+			vehicle.removeMetadata("plane.frozen", main.plugin);
+			vehicle.removeMetadata("plane.hover", main.plugin);
 			vehicle.remove();
 			if(!plane.isWrittenOff()){
 				loc.getWorld().dropItem(loc, new ItemStack(PlaneItemMethods.getItem(plane)));

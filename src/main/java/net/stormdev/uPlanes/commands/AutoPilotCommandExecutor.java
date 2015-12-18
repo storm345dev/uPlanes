@@ -60,6 +60,11 @@ public class AutoPilotCommandExecutor implements CommandExecutor {
 				return true;
 			}
 			
+			if(!plane.isHover()){
+				sender.sendMessage(main.colors.getError()+"Autopilot requires being in a helicopter!");
+				return true;
+			}
+			
 			Location destination = main.plugin.destinationManager.getLocation(name, main.plugin.getServer());
 			
 			if(destination == null){
