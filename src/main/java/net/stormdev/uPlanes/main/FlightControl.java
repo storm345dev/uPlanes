@@ -40,6 +40,7 @@ public class FlightControl {
 				if(aData != null){
 					aData.autoPilotCancelled();
 				}
+				AccelerationManager.setCurrentAccel(vehicle, 0);
 				vehicle.removeMetadata("plane.destination", main.plugin);
 				vehicle.removeMetadata("plane.autopilotData", main.plugin);
 				return v;
@@ -139,8 +140,10 @@ public class FlightControl {
 			}
 			else if(current.getY() - targetLoc.getY() < 2){
 				//Arrived
+				AccelerationManager.setCurrentAccel(vehicle, 1.0);
 				vehicle.setVelocity(new Vector(0,0,0));
 				vehicle.setMetadata("arrivedAtDest", new StatValue(null, main.plugin));
+				AccelerationManager.setCurrentAccel(vehicle, 0);
 				vehicle.removeMetadata("plane.destination", main.plugin);
 				Bukkit.getScheduler().runTaskLater(main.plugin, new Runnable(){
 

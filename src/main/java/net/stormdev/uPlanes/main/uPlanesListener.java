@@ -385,7 +385,6 @@ public class uPlanesListener implements Listener {
 			//Autopilot
 			List<MetadataValue> metas = car.getMetadata("plane.destination");
 			Location dest = (Location) metas.get(0).value();
-			AccelerationManager.setCurrentAccel(car, 1.0);
 			FlightControl.route(dest, loc, car);
 			return;
 		}	
