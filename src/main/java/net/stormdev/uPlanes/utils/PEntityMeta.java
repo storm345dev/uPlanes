@@ -1,5 +1,6 @@
 package net.stormdev.uPlanes.utils;
 
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +9,6 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.bukkit.Bukkit;
-import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.metadata.MetadataValue;
 
@@ -17,6 +17,7 @@ import com.useful.ucars.ucars;
 public class PEntityMeta {
 	
 	private static volatile Map<UUID, Object> entityMetaObjs = new ConcurrentHashMap<UUID, Object>(100, 0.75f, 2);
+	private static volatile Map<UUID, WeakReference<Entity>> entityObjs = new ConcurrentHashMap<UUID, WeakReference<Entity>>(100, 0.75f, 2);
 	public static boolean USING_UCARS = false;
 	
 	public static void cleanEntityObjs(){
@@ -31,6 +32,21 @@ public class PEntityMeta {
 				e.printStackTrace();
 			}
 		}
+		Bukkit.getScheduler().runTaskAsynchronously(ucars.plugin, new Runnable(){
+
+			@Override
+			public void run() {
+				for(UUID entID:new ArrayList<UUID>(entityObjs.keySet())){
+					WeakReference<Entity> val = entityObjs.get(entID);
+					if(val == null){
+						continue;
+					}
+					if(val.get() == null){
+						entityObjs.remove(entID);
+					}
+				}
+				return;
+			}});
 		/*Bukkit.getScheduler().runTask(ucars.plugin, new Runnable(){
 
 			@Override
@@ -80,6 +96,18 @@ public class PEntityMeta {
 			}});*/
 	}
 	
+	private static void setEntityObj(Entity e){
+		synchronized(entityObjs){
+			entityObjs.put(e.getUniqueId(), new WeakReference<Entity>(e));
+		}
+	}
+	
+	private static void delEntityObj(Entity e){
+		synchronized(entityObjs){
+			entityObjs.remove(e.getUniqueId());
+		}
+	}
+	
 	public static void removeAllMeta(Entity e){
 		try {
 			Class<?> uEntityMetaClass = Class.forName("com.useful.ucars.util.UEntityMeta");
@@ -94,6 +122,7 @@ public class PEntityMeta {
 		}
 		Object o = entityMetaObjs.get(e.getUniqueId());
 		entityMetaObjs.remove(e.getUniqueId());
+		delEntityObj(e);
 		if(o != null){
 			PMeta.removeAllMeta(o);
 		}
@@ -118,6 +147,7 @@ public class PEntityMeta {
 			if(obj == null){
 				obj = new Object();
 				entityMetaObjs.put(e.getUniqueId(), obj);
+				setEntityObj(e);
 			}
 			return obj;
 		}
@@ -135,6 +165,7 @@ public class PEntityMeta {
 				e.printStackTrace();
 			}
 		}
+		setEntityObj(entity);
 		PMeta.getMeta(getMetaObj(entity), metaKey).add(value);
 	}
 	
