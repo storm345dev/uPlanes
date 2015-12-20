@@ -1,15 +1,15 @@
 package net.stormdev.uPlanes.utils;
 
 import java.lang.ref.WeakReference;
-import java.util.WeakHashMap;
+import java.util.HashMap;
 
 /**
  * Super awesome memory-leak-free (TESTED) class for allowing any objects to be used as synchronized code block monitor objects
  * This WILL work IF (and only if) the objects used return true for .equals()
  *
  */
-public class SchLocks {
-	private static volatile WeakHashMap<WeakKey, WeakReference> monitors = new WeakHashMap<WeakKey, WeakReference>();
+public class PSchLocks {
+	private static volatile HashMap<WeakKey, WeakReference> monitors = new HashMap<WeakKey, WeakReference>();
 	
 	public static Object getMonitor(Object key){
 		clean();
@@ -47,17 +47,16 @@ public class SchLocks {
 	
 	private static class WeakKey extends WeakReference {
 
+		private int hash;
+		
 		public WeakKey(Object arg0) {
 			super(arg0);
+			this.hash = arg0.hashCode();
 		}
 		
 		@Override
 		public int hashCode(){
-			Object val = get();
-			if(val == null){
-				return super.hashCode();
-			}
-			return val.hashCode();
+			return hash;
 		}
 		
 		@Override

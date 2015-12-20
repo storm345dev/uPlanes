@@ -16,7 +16,7 @@ import com.useful.ucars.ucars;
 
 public class PEntityMeta {
 	
-	private static Map<UUID, Object> entityMetaObjs = new ConcurrentHashMap<UUID, Object>(100, 0.75f, 2);
+	private static volatile Map<UUID, Object> entityMetaObjs = new ConcurrentHashMap<UUID, Object>(100, 0.75f, 2);
 	public static boolean USING_UCARS = false;
 	
 	public static void cleanEntityObjs(){

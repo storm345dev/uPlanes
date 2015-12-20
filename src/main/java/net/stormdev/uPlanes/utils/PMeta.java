@@ -3,16 +3,16 @@ package net.stormdev.uPlanes.utils;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.bukkit.Bukkit;
 import org.bukkit.metadata.MetadataValue;
 
 public class PMeta {
-	private static volatile WeakHashMap<WeakKey, Map<String, List<MetadataValue>>> metadata = new WeakHashMap<WeakKey, Map<String, List<MetadataValue>>>();
+	private static volatile HashMap<WeakKey, Map<String, List<MetadataValue>>> metadata = new HashMap<WeakKey, Map<String, List<MetadataValue>>>();
 	
 	public static boolean USING_UCARS = false;
 	
@@ -69,7 +69,7 @@ public class PMeta {
 		}
 		Map<String, List<MetadataValue>> meta = getAllMeta(key);
 		List<MetadataValue> list;
-		synchronized(SchLocks.getMonitor(key)){
+		synchronized(PSchLocks.getMonitor(key)){
 			list = meta.get(metaKey);
 			if(list == null){
 				list = new ArrayList<MetadataValue>();
@@ -92,7 +92,7 @@ public class PMeta {
 			}
 		}
 		Map<String, List<MetadataValue>> meta = getAllMeta(key);
-		synchronized(SchLocks.getMonitor(key)){
+		synchronized(PSchLocks.getMonitor(key)){
 			meta.remove(metaKey);
 		}
 	}
@@ -128,17 +128,16 @@ public class PMeta {
 	
 	private static class WeakKey extends WeakReference {
 
+		private int hash;
+		
 		public WeakKey(Object arg0) {
 			super(arg0);
+			this.hash = arg0.hashCode();
 		}
 		
 		@Override
 		public int hashCode(){
-			Object val = get();
-			if(val == null){
-				return super.hashCode();
-			}
-			return val.hashCode();
+			return hash;
 		}
 		
 		@Override

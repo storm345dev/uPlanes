@@ -5,6 +5,7 @@ import net.stormdev.uPlanes.api.uPlanesAPI;
 import net.stormdev.uPlanes.utils.PEntityMeta;
 import net.stormdev.uPlanes.utils.StatValue;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Vehicle;
 
