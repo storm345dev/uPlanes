@@ -1,6 +1,7 @@
 package net.stormdev.uPlanes.utils;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -33,7 +34,7 @@ public class PSchLocks {
 	
 	private static void clean(){
 		synchronized(monitors){
-			for(WeakKey ref:monitors.keySet()){
+			for(WeakKey ref:new ArrayList<WeakKey>(monitors.keySet())){
 				try {
 					if(ref.get() == null || monitors.get(ref).get() == null){
 						monitors.remove(ref);
