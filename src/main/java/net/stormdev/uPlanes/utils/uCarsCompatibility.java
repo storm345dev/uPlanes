@@ -25,7 +25,7 @@ public class uCarsCompatibility {
 
 			public Boolean isACar(Minecart car) {
 				if(main.plugin.planeManager.isPlaneInUse(car.getUniqueId())){
-					car.setMetadata("ucars.ignore", new StatValue(true, main.plugin));
+					PEntityMeta.setMetadata(car, "ucars.ignore", new StatValue(true, main.plugin));
 					return false;
 				}
 				return true;

@@ -13,6 +13,7 @@ import net.stormdev.uPlanes.main.PlaneItemMethods;
 import net.stormdev.uPlanes.main.main;
 import net.stormdev.uPlanes.presets.PlanePreset;
 import net.stormdev.uPlanes.utils.Lang;
+import net.stormdev.uPlanes.utils.PEntityMeta;
 import net.stormdev.uPlanes.utils.StatValue;
 
 import org.bukkit.Location;
@@ -303,10 +304,10 @@ public class uPlaneManager {
 				hc.setDisplay(new ItemStack(display.getItemType(), 1, display.getData()), offset);
 			}
 			
-			ent.setMetadata("ucars.ignore", new StatValue(true, main.plugin));
-			ent.setMetadata("plane.health", new StatValue(plane.getHealth(), main.plugin));
+			PEntityMeta.setMetadata(ent, "ucars.ignore", new StatValue(true, main.plugin));
+			PEntityMeta.setMetadata(ent, "plane.health", new StatValue(plane.getHealth(), main.plugin));
 			if(plane.isHover()){
-				ent.setMetadata("plane.hover", new StatValue(true, main.plugin));
+				PEntityMeta.setMetadata(ent, "plane.hover", new StatValue(true, main.plugin));
 				plane.setHover(true);
 			}
 			plane.setId(ent.getUniqueId());
@@ -368,13 +369,13 @@ public class uPlaneManager {
 	 * @param breakIt Whether or not to break the car if necessary
 	 */
 	public void damagePlane(Vehicle m, Plane plane, double damage, Player damager, boolean breakIt){
-		if(m.hasMetadata("invincible")){
+		if(m.hasMetadata("invincible") || PEntityMeta.hasMetadata(m, "invincible")){
 			return;
 		}
 		//Plane being punched to death
 		double health = plane.getHealth();
-		if(m.hasMetadata("plane.health")){
-			List<MetadataValue> ms = m.getMetadata("plane.health");
+		if(PEntityMeta.hasMetadata(m, "plane.health")){
+			List<MetadataValue> ms = PEntityMeta.getMetadata(m, "plane.health");
 			health = (Double) ms.get(0).value();
 		}
 		String msg = Lang.get("general.damage.msg");
@@ -401,13 +402,13 @@ public class uPlaneManager {
 	 * @param breakIt Whether or not to break the car if necessary
 	 */
 	public void damagePlane(Vehicle m, Plane plane, double damage, Player damager, String cause, boolean breakIt){
-		if(m.hasMetadata("invincible")){
+		if(m.hasMetadata("invincible") || PEntityMeta.hasMetadata(m, "invincible")){
 			return;
 		}
 		//Plane being punched to death
 		double health = plane.getHealth();
-		if(m.hasMetadata("plane.health")){
-			List<MetadataValue> ms = m.getMetadata("plane.health");
+		if(PEntityMeta.hasMetadata(m, "plane.health")){
+			List<MetadataValue> ms = PEntityMeta.getMetadata(m, "plane.health");
 			health = (Double) ms.get(0).value();
 		}
 		String msg = Lang.get("general.damage.msg");
@@ -481,12 +482,12 @@ public class uPlaneManager {
 	 * @param cause The cause of the damage
 	 */
 	public void damagePlane(Vehicle m, Plane plane, double damage, String cause, boolean breakIt){
-		if(m.hasMetadata("invincible")){
+		if(m.hasMetadata("invincible") || PEntityMeta.hasMetadata(m, "invincible")){
 			return;
 		}
 		double health = plane.getHealth();
-		if(m.hasMetadata("plane.health")){
-			List<MetadataValue> ms = m.getMetadata("plane.health");
+		if(PEntityMeta.hasMetadata(m, "plane.health")){
+			List<MetadataValue> ms = PEntityMeta.getMetadata(m, "plane.health");
 			health = (Double) ms.get(0).value();
 		}
 		String msg = Lang.get("general.damage.msg");
@@ -505,8 +506,8 @@ public class uPlaneManager {
 			((Player)m.getPassenger()).sendMessage(main.colors.getInfo()+msg);
 		}
 		
-		m.removeMetadata("plane.health", main.plugin);
-		m.setMetadata("plane.health", new StatValue(health, main.plugin)); //Update the health on the vehicle
+		PEntityMeta.removeMetadata(m, "plane.health");
+		PEntityMeta.setMetadata(m, "plane.health", new StatValue(health, main.plugin));
 		
 		if(die || health < 0.1 && breakIt){
 			//Kill the plane
@@ -529,8 +530,8 @@ public class uPlaneManager {
 	public void healPlane(Vehicle m, Plane plane){
 		double health = plane.getHealth();
 		
-		m.removeMetadata("plane.health", main.plugin);
-		m.setMetadata("plane.health", new StatValue(health, main.plugin)); //Update the health on the vehicle
+		PEntityMeta.removeMetadata(m, "plane.health");
+		PEntityMeta.setMetadata(m, "plane.health", new StatValue(health, main.plugin));
 		return;
 	}
 	

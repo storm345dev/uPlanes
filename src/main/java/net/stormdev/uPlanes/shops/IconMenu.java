@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import net.stormdev.uPlanes.utils.PEntityMeta;
 import net.stormdev.uPlanes.utils.StatValue;
 
 import org.bukkit.Bukkit;
@@ -95,7 +96,7 @@ public class IconMenu implements Listener {
 			}
 		}
 		player.openInventory(inventory);
-		player.setMetadata(metaData, new StatValue(null, plugin));
+		PEntityMeta.setMetadata(player, metaData, new StatValue(null, plugin));
 		//Bukkit.broadcastMessage("Player has got meta:"+metaData);
 	}
 
@@ -114,14 +115,14 @@ public class IconMenu implements Listener {
 	
 	@EventHandler(priority = EventPriority.MONITOR)
 	void invClose(InventoryCloseEvent event){
-		if(event.getPlayer().hasMetadata(metaData)){
+		if(PEntityMeta.hasMetadata(event.getPlayer(), metaData)){
 			if(this.plugin == null){
 				Bukkit.broadcastMessage("PLUGIN NULL HALP HALP");
 			}
 			if(!event.getInventory().getName().equals(name)){
 				return;
 			}
-			event.getPlayer().removeMetadata(metaData, this.plugin);
+			PEntityMeta.removeMetadata(event.getPlayer(), metaData);
 			if(destroyOnClose){
 				destroy();
 			}
@@ -131,7 +132,7 @@ public class IconMenu implements Listener {
 	@EventHandler(priority = EventPriority.MONITOR)
 	void onInventoryClick(InventoryClickEvent event) {
 		if (event.getInventory().getTitle().equals(name) && enabled
-				&& event.getWhoClicked().hasMetadata(metaData)) {
+				&& PEntityMeta.hasMetadata(event.getWhoClicked(), metaData)) {
 			event.setCancelled(true);
 			int slot = event.getRawSlot();
 			if (slot >= 0 && slot < size && optionNames[slot] != null) {
@@ -145,7 +146,7 @@ public class IconMenu implements Listener {
 						@Override
 						public void run() {
 							p.closeInventory();
-							p.removeMetadata(metaData, plugin);
+							PEntityMeta.removeMetadata(p, metaData);
 						}
 					}, 1);
 				}

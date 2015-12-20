@@ -14,6 +14,7 @@ import net.stormdev.uPlanes.items.ItemPlaneValidation;
 import net.stormdev.uPlanes.presets.PresetManager;
 import net.stormdev.uPlanes.utils.CartOrientationUtil;
 import net.stormdev.uPlanes.utils.Lang;
+import net.stormdev.uPlanes.utils.PEntityMeta;
 import net.stormdev.uPlanes.utils.PlaneUpdateEvent;
 import net.stormdev.uPlanes.utils.PrePlaneCrashEvent;
 import net.stormdev.uPlanes.utils.PrePlaneRoughLandingEvent;
@@ -149,6 +150,9 @@ public class uPlanesListener implements Listener {
 			return;
 		}
 		plugin.planeManager.noLongerPlaced(event.getEntity().getUniqueId());
+		if(!PEntityMeta.USING_UCARS){
+			PEntityMeta.removeAllMeta(event.getEntity());
+		}
 	}
 	
 	@EventHandler(priority = EventPriority.LOW)
@@ -276,12 +280,12 @@ public class uPlanesListener implements Listener {
 	        }
 	        
 	        //Block if in autopilot with no control override
-	        if(veh.hasMetadata("plane.destination")){
+	        if(PEntityMeta.hasMetadata(veh, "plane.destination")){
 				AutopilotDestination aData = null;
 				
-				if(veh.hasMetadata("plane.autopilotData")){
+				if(PEntityMeta.hasMetadata(veh, "plane.autopilotData")){
 					try {
-						aData = (AutopilotDestination) veh.getMetadata("plane.autopilotData").get(0).value();
+						aData = (AutopilotDestination) PEntityMeta.getMetadata(veh, "plane.autopilotData").get(0).value();
 					} catch (Exception e) {
 						aData = null;
 					}
@@ -293,7 +297,7 @@ public class uPlanesListener implements Listener {
 				}
 	        }
 	        
-	        veh.removeMetadata(AccelerationManager.ACCEL_META, main.plugin);
+	        PEntityMeta.removeMetadata(veh, AccelerationManager.ACCEL_META);
 	    	if(!safeExit){
 	    		/*if(Bukkit.getServer().getPluginManager().getPlugin("AntiCheat") != null){
 	    			final Entity exited = event.getExited();
@@ -355,7 +359,7 @@ public class uPlanesListener implements Listener {
 		Vehicle car = event.getVehicle();
 		Location loc = car.getLocation();
 		
-		if(car.hasMetadata("plane.frozen")){
+		if(car.hasMetadata("plane.frozen") || PEntityMeta.hasMetadata(car, "plane.frozen")){
 			if(car instanceof ArmorStand){
 				((ArmorStand)car).setGravity(false);
 			}
@@ -381,9 +385,9 @@ public class uPlanesListener implements Listener {
 			}*/
 		}
 		
-		if(car.hasMetadata("plane.destination")){
+		if(PEntityMeta.hasMetadata(car, "plane.destination")){
 			//Autopilot
-			List<MetadataValue> metas = car.getMetadata("plane.destination");
+			List<MetadataValue> metas = PEntityMeta.getMetadata(car, "plane.destination");
 			Location dest = (Location) metas.get(0).value();
 			FlightControl.route(dest, loc, car);
 			return;
@@ -407,7 +411,7 @@ public class uPlanesListener implements Listener {
 			return;
 		}
 		else {
-			if(!car.hasMetadata("plane.left") && !car.hasMetadata("plane.right")){
+			if(!PEntityMeta.hasMetadata(car, "plane.left") && !PEntityMeta.hasMetadata(car, "plane.right")){
 				//Going up or down
 				car.setVelocity(car.getVelocity().clone().setY(0));
 				return; //Ignore it
@@ -468,7 +472,7 @@ public class uPlanesListener implements Listener {
 		}
 		
 		if(plane.isHover()){
-			cart.setMetadata("plane.hover", new StatValue(true, main.plugin));
+			PEntityMeta.setMetadata(cart, "plane.hover", new StatValue(true, main.plugin));
 			if(main.perms){
 				if(!player.hasPermission("uplanes.hoverplane")){
 					player.sendMessage(main.colors.getError()+"You don't have the permission 'uplanes.hoverplane' required to fly a plane!");
@@ -496,11 +500,11 @@ public class uPlanesListener implements Listener {
 			}
 		}
 		
-		if(cart.hasMetadata("plane.destination")){
+		if(PEntityMeta.hasMetadata(cart, "plane.destination")){
 			AutopilotDestination aData = null;
 			
-			if(cart.hasMetadata("plane.autopilotData")){
-				aData = (AutopilotDestination) cart.getMetadata("plane.autopilotData").get(0).value();
+			if(PEntityMeta.hasMetadata(cart, "plane.autopilotData")){
+				aData = (AutopilotDestination) PEntityMeta.getMetadata(cart, "plane.autopilotData").get(0).value();
 			}
 			
 			boolean cont = false;
@@ -517,8 +521,8 @@ public class uPlanesListener implements Listener {
 				else if(!event.wasKeypressed(Keypress.NONE)){
 					player.sendMessage(main.colors.getInfo()+Lang.get("general.cmd.destinations.cancel"));
 				}
-				cart.removeMetadata("plane.destination", main.plugin);
-				cart.removeMetadata("plane.autopilotData", main.plugin);
+				PEntityMeta.removeMetadata(cart, "plane.destination");
+				PEntityMeta.removeMetadata(cart, "plane.autopilotData");
 			}
 		}
 		
@@ -528,7 +532,7 @@ public class uPlanesListener implements Listener {
 			}
 		}
 		
-		if(cart.hasMetadata("plane.frozen")){
+		if(cart.hasMetadata("plane.frozen") || PEntityMeta.hasMetadata(cart, "plane.frozen")){
 			if(cart instanceof ArmorStand){
 				((ArmorStand)cart).setGravity(false);
 			}
@@ -593,7 +597,7 @@ public class uPlanesListener implements Listener {
 			//Check if they crashed xD
 			/*Block current = cart.getLocation().getBlock();*/
 			Block b = null;
-			if(/*(current.isEmpty() || current.isLiquid()) &&*/ !cart.hasMetadata("plane.destination") && !cart.hasMetadata("arrivedAtDest")){
+			if(/*(current.isEmpty() || current.isLiquid()) &&*/ !PEntityMeta.hasMetadata(cart, "plane.destination") && !PEntityMeta.hasMetadata(cart, "arrivedAtDest")){
 				double x = travel.getX();
 				double z = travel.getZ();
 				double vx = cart.getVelocity().getX();
@@ -663,7 +667,7 @@ public class uPlanesListener implements Listener {
 			}*/
 		}
 		
-		if(crashing && !plane.isHover() && !cart.hasMetadata("plane.destination") && !cart.hasMetadata("arrivedAtDest")){
+		if(crashing && !plane.isHover() && !PEntityMeta.hasMetadata(cart, "plane.destination") && !PEntityMeta.hasMetadata(cart, "arrivedAtDest")){
 			if((travel.getY() < -0.2 && plane.getCurrentPitch() > 22) || ((travel.getY() < -0.2 && new Vector(travel.getX(), 0, travel.getZ()).lengthSquared() < 0.8 && event.getAcceleration() < 0.8))){
 				double y = Math.min(travel.getY(), cart.getVelocity().getY());
 				Location nextVertical = cart.getLocation().add(0, y, 0);
@@ -688,7 +692,7 @@ public class uPlanesListener implements Listener {
 				}
 			}
 		}
-		else if(crashing && plane.isHover() && !cart.hasMetadata("plane.destination") && !cart.hasMetadata("arrivedAtDest")){
+		else if(crashing && plane.isHover() && !PEntityMeta.hasMetadata(cart, "plane.destination") && !PEntityMeta.hasMetadata(cart, "arrivedAtDest")){
 			if((travel.getY() < -0 && (Math.abs(travel.getX())>0.1 || Math.abs(travel.getZ()) > 0.1))){
 				Location nextVertical = cart.getLocation().add(0, cart.getVelocity().getY(), 0);
 				Block b = nextVertical.getBlock();
@@ -721,7 +725,7 @@ public class uPlanesListener implements Listener {
 		Location exhaust = loc.add(behind);
 		exhaust.getWorld().playEffect(exhaust, Effect.SMOKE, 1);
 		
-		if(!cart.hasMetadata("plane.destination")){ 
+		if(!PEntityMeta.hasMetadata(cart, "plane.destination")){ 
 			cart.setVelocity(travel);
 			plane.postPlaneUpdateEvent(travel);
 		}
@@ -894,8 +898,8 @@ public class uPlanesListener implements Listener {
 		}
 		
 		double health = plane.getHealth();
-		if(m.hasMetadata("plane.health")){
-			List<MetadataValue> ms = m.getMetadata("plane.health");
+		if(PEntityMeta.hasMetadata(m, "plane.health")){
+			List<MetadataValue> ms = PEntityMeta.getMetadata(m, "plane.health");
 			health = (Double) ms.get(0).value();
 		}
 		double damage = event.getDamage();
@@ -932,8 +936,8 @@ public class uPlanesListener implements Listener {
 			((Player)m.getPassenger()).sendMessage(main.colors.getInfo()+msg);
 		}
 		
-		m.removeMetadata("plane.health", main.plugin);
-		m.setMetadata("plane.health", new StatValue(health, main.plugin)); //Update the health on the vehicle
+		PEntityMeta.removeMetadata(m, "plane.health");
+		PEntityMeta.setMetadata(m, "plane.health", new StatValue(health, main.plugin)); //Update the health on the vehicle
 		
 		event.setDamage(-5.5);
 		event.setCancelled(true);
@@ -1139,6 +1143,9 @@ public class uPlanesListener implements Listener {
 	public void killPlane(Vehicle vehicle, Plane plane){
 		//Kill plane
 		UUID id = vehicle.getUniqueId();
+		if(!PEntityMeta.USING_UCARS){
+			PEntityMeta.removeAllMeta(vehicle);
+		}
 		plugin.planeManager.noLongerPlaced(id);
 		final Location loc = vehicle.getLocation();
 		Entity top = vehicle.getPassenger();
@@ -1175,12 +1182,6 @@ public class uPlanesListener implements Listener {
 				}
 			}
 			vehicle.eject();
-			vehicle.removeMetadata("plane.destination", main.plugin);
-			vehicle.removeMetadata("plane.autopilotData", main.plugin);
-			vehicle.removeMetadata("uPlanes.accel", main.plugin);
-			vehicle.removeMetadata("plane.direction", main.plugin);
-			vehicle.removeMetadata("plane.frozen", main.plugin);
-			vehicle.removeMetadata("plane.hover", main.plugin);
 			vehicle.remove();
 			if(!plane.isWrittenOff()){
 				loc.getWorld().dropItem(loc, new ItemStack(PlaneItemMethods.getItem(plane)));

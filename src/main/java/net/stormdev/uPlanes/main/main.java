@@ -25,6 +25,8 @@ import net.stormdev.uPlanes.presets.PresetManager;
 import net.stormdev.uPlanes.shops.PlaneShop;
 import net.stormdev.uPlanes.utils.Colors;
 import net.stormdev.uPlanes.utils.CustomLogger;
+import net.stormdev.uPlanes.utils.PEntityMeta;
+import net.stormdev.uPlanes.utils.PMeta;
 import net.stormdev.uPlanes.utils.uCarsCompatibility;
 
 import org.bukkit.Bukkit;
@@ -446,6 +448,18 @@ public class main extends JavaPlugin {
 		}
 		
 		api = uPlanesAPI.getAPI(); //Setup the API
+		
+		Bukkit.getScheduler().runTaskTimerAsynchronously(this, new Runnable(){
+
+			@Override
+			public void run() {
+				if(PMeta.USING_UCARS || PEntityMeta.USING_UCARS){
+					return;
+				}
+				PEntityMeta.cleanEntityObjs();
+				PMeta.clean();
+				return;
+			}}, 120*20l, 120*20l);
 		
 		logger.info("uPlanes v"+plugin.getDescription().getVersion()+" has been enabled!");
 	}

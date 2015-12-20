@@ -2,6 +2,7 @@ package net.stormdev.uPlanes.main;
 
 import net.stormdev.uPlanes.api.Plane;
 import net.stormdev.uPlanes.api.uPlanesAPI;
+import net.stormdev.uPlanes.utils.PEntityMeta;
 import net.stormdev.uPlanes.utils.StatValue;
 
 import org.bukkit.entity.Player;
@@ -38,17 +39,17 @@ public class AccelerationManager {
 	}
 	
 	private static AccelMeta getMeta(Vehicle cart){
-		if(!cart.hasMetadata(ACCEL_META)){
+		if(!PEntityMeta.hasMetadata(cart, ACCEL_META)){
 			AccelMeta am = new AccelMeta(0);
-			cart.setMetadata(ACCEL_META, new StatValue(am, main.plugin));
+			PEntityMeta.setMetadata(cart, ACCEL_META, new StatValue(am, main.plugin));
 			return am;
 		}
 		try {
-			return (AccelMeta) cart.getMetadata(ACCEL_META).get(0).value();
+			return (AccelMeta) PEntityMeta.getMetadata(cart, ACCEL_META).get(0).value();
 		} catch (Exception e) {
-			cart.removeMetadata(ACCEL_META, main.plugin);
+			PEntityMeta.removeMetadata(cart, ACCEL_META);
 			AccelMeta am = new AccelMeta(0);
-			cart.setMetadata(ACCEL_META, new StatValue(am, main.plugin));
+			PEntityMeta.setMetadata(cart, ACCEL_META, new StatValue(am, main.plugin));
 			return am;
 		}
 	}

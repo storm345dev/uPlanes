@@ -7,6 +7,7 @@ import net.stormdev.uPlanes.api.Plane;
 import net.stormdev.uPlanes.main.main;
 import net.stormdev.uPlanes.utils.Colors;
 import net.stormdev.uPlanes.utils.Lang;
+import net.stormdev.uPlanes.utils.PEntityMeta;
 import net.stormdev.uPlanes.utils.StatValue;
 
 import org.bukkit.Location;
@@ -77,8 +78,9 @@ public class AutoPilotCommandExecutor implements CommandExecutor {
 				sender.sendMessage(main.colors.getError()+Lang.get("general.cmd.destinations.wrongWorld"));
 				return true;
 			}
-			vehicle.removeMetadata("plane.destination", main.plugin); //Remove any existing destinations
-			vehicle.setMetadata("plane.destination", new StatValue(destination, main.plugin)); //Set it
+			
+			PEntityMeta.removeMetadata(vehicle, "plane.destination");
+			PEntityMeta.setMetadata(vehicle, "plane.destination", new StatValue(destination, main.plugin));
 			sender.sendMessage(main.colors.getSuccess()+Lang.get("general.cmd.destinations.go"));
 			return true;
 		}

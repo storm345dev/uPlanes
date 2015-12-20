@@ -8,6 +8,7 @@ import net.stormdev.uPlanes.api.Plane;
 import net.stormdev.uPlanes.api.Plane.RollTarget;
 import net.stormdev.uPlanes.api.uPlanesAPI;
 import net.stormdev.uPlanes.utils.CartOrientationUtil;
+import net.stormdev.uPlanes.utils.PEntityMeta;
 import net.stormdev.uPlanes.utils.PlaneUpdateEvent;
 import net.stormdev.uPlanes.utils.StatValue;
 
@@ -56,7 +57,7 @@ public class MotionManager {
 			return;
 		}
 		
-		if(plane.hasMetadata("plane.frozen")){
+		if(plane.hasMetadata("plane.frozen") || PEntityMeta.hasMetadata(plane, "plane.frozen")){
 			return;
 		}
 		
@@ -76,7 +77,7 @@ public class MotionManager {
 		Vector planeDirection = null;
 		
 		if(!main.doTurningCircles){
-			if((AccelerationManager.getCurrentMultiplier(plane) >= 0.2 || pln.isHover()) && !plane.hasMetadata("plane.destination")){
+			if((AccelerationManager.getCurrentMultiplier(plane) >= 0.2 || pln.isHover()) && !PEntityMeta.hasMetadata(plane, "plane.destination")){
 				planeDirection = playD.clone().setY(0).normalize();
 				float vYaw = (float) Math.toDegrees(Math.atan2(planeDirection.getX() , -planeDirection.getZ()));
 				CartOrientationUtil.setYaw(plane, vYaw-90);
@@ -84,7 +85,7 @@ public class MotionManager {
 		}
 		else {
 			try {
-				planeDirection = (Vector) plane.getMetadata("plane.direction").get(0).value();
+				planeDirection = (Vector) PEntityMeta.getMetadata(plane, "plane.direction").get(0).value();
 			} catch (Exception e) {
 				planeDirection = playD.clone().setY(0).normalize(); //Start plane off facing the way the player is
 			}
@@ -116,7 +117,7 @@ public class MotionManager {
 			}
 			
 			double am = AccelerationManager.getCurrentMultiplier(plane);
-			if((am >= 0.2 || (pln.isHover()&&am>0)) && !plane.hasMetadata("plane.destination")){
+			if((am >= 0.2 || (pln.isHover()&&am>0)) && !PEntityMeta.hasMetadata(plane, "plane.destination")){
 				pln.updateRoll();
 				CartOrientationUtil.setRoll(plane, pln.getRoll());
 				planeDirection = rotateXZVector3dDegrees(planeDirection, yawDiff);
@@ -127,8 +128,8 @@ public class MotionManager {
 				pln.updateRoll();
 				CartOrientationUtil.setRoll(plane, pln.getRoll());
 			}
-			plane.removeMetadata("plane.direction", main.plugin);
-			plane.setMetadata("plane.direction", new StatValue(planeDirection.clone().normalize(), main.plugin));
+			PEntityMeta.removeMetadata(plane, "plane.direction");
+			PEntityMeta.setMetadata(plane, "plane.direction", new StatValue(planeDirection.clone().normalize(), main.plugin));
 		}
 		
 		List<Keypress> pressedKeys = new ArrayList<Keypress>();
@@ -174,14 +175,14 @@ public class MotionManager {
 			if (side < 0) {// do left action
 				isLeft = true;
 				pressedKeys.add(Keypress.A);
-				plane.setMetadata("plane.left", new StatValue(true, main.plugin));
+				PEntityMeta.setMetadata(plane, "plane.left", new StatValue(true, main.plugin));
 				if(pln.isHover()){
 					y = hoverAmount;
 				}
 			} else if (side > 0) {// do right action
 				isRight = true;
 				pressedKeys.add(Keypress.D);
-				plane.setMetadata("plane.right", new StatValue(true, main.plugin));
+				PEntityMeta.setMetadata(plane, "plane.right", new StatValue(true, main.plugin));
 				if(pln.isHover()){
 					y = -hoverAmount;
 				}
@@ -191,10 +192,10 @@ public class MotionManager {
 		double x = planeDirection.getX() / d;
 		double z = planeDirection.getZ() / d;
 		if (!isRight) {
-			plane.removeMetadata("plane.right", main.plugin);
+			PEntityMeta.removeMetadata(plane, "plane.right");
 		}
 		if (!isLeft) {
-			plane.removeMetadata("plane.left", main.plugin);
+			PEntityMeta.removeMetadata(plane, "plane.left");
 		}
 		if(f < 0 && pln.isHover()){
 			speedModKey = Keypress.S;

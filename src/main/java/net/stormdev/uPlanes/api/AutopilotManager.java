@@ -1,6 +1,7 @@
 package net.stormdev.uPlanes.api;
 
 import net.stormdev.uPlanes.main.main;
+import net.stormdev.uPlanes.utils.PEntityMeta;
 import net.stormdev.uPlanes.utils.StatValue;
 
 import org.bukkit.Location;
@@ -25,9 +26,8 @@ public class AutopilotManager {
 	 */
 	public void startAutopilot(Vehicle planeVehicle, AutopilotDestination destination){
 		Location dest = destination.getDestination();
-		planeVehicle.setMetadata("plane.destination", new StatValue(dest, main.plugin));
-		
-		planeVehicle.setMetadata("plane.autopilotData", new StatValue(destination, main.plugin));
+		PEntityMeta.setMetadata(planeVehicle, "plane.destination", new StatValue(dest, main.plugin));
+		PEntityMeta.setMetadata(planeVehicle, "plane.autopilotData", new StatValue(destination, main.plugin));
 	
 		destination.autoPilotEngaged();
 	}

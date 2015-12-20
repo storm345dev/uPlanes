@@ -5,6 +5,7 @@ import net.stormdev.uPlanes.hover.HoverCart;
 import net.stormdev.uPlanes.utils.CartOrientationUtil;
 import net.stormdev.uPlanes.utils.ClosestFace;
 import net.stormdev.uPlanes.utils.Lang;
+import net.stormdev.uPlanes.utils.PEntityMeta;
 import net.stormdev.uPlanes.utils.StatValue;
 
 import org.bukkit.Bukkit;
@@ -26,8 +27,8 @@ public class FlightControl {
 		Entity passenger = vehicle.getPassenger();
 		AutopilotDestination aData = null;
 		
-		if(vehicle.hasMetadata("plane.autopilotData")){
-			aData = (AutopilotDestination) vehicle.getMetadata("plane.autopilotData").get(0).value();
+		if(PEntityMeta.hasMetadata(vehicle, "plane.autopilotData")){
+			aData = (AutopilotDestination) PEntityMeta.getMetadata(vehicle, "plane.autopilotData").get(0).value();
 		}
 		
 		if(!(passenger instanceof Player)){
@@ -41,8 +42,8 @@ public class FlightControl {
 					aData.autoPilotCancelled();
 				}
 				AccelerationManager.setCurrentAccel(vehicle, 0);
-				vehicle.removeMetadata("plane.destination", main.plugin);
-				vehicle.removeMetadata("plane.autopilotData", main.plugin);
+				PEntityMeta.removeMetadata(vehicle, "plane.destination");
+				PEntityMeta.removeMetadata(vehicle, "plane.autopilotData");
 				return v;
 			}
 		}
@@ -142,14 +143,14 @@ public class FlightControl {
 				//Arrived
 				AccelerationManager.setCurrentAccel(vehicle, 1.0);
 				vehicle.setVelocity(new Vector(0,0,0));
-				vehicle.setMetadata("arrivedAtDest", new StatValue(null, main.plugin));
+				PEntityMeta.setMetadata(vehicle, "arrivedAtDest", new StatValue(null, main.plugin));
 				AccelerationManager.setCurrentAccel(vehicle, 0);
-				vehicle.removeMetadata("plane.destination", main.plugin);
+				PEntityMeta.removeMetadata(vehicle, "plane.destination");
 				Bukkit.getScheduler().runTaskLater(main.plugin, new Runnable(){
 
 					@Override
 					public void run() {
-						vehicle.removeMetadata("arrivedAtDest", main.plugin);
+						PEntityMeta.removeMetadata(vehicle, "arrivedAtDest");
 						return;
 					}}, 5l);
 				
@@ -158,7 +159,7 @@ public class FlightControl {
 				}
 				else{
 					aData.arrivedAtDestination();
-					vehicle.removeMetadata("plane.autopilotData", main.plugin);
+					PEntityMeta.removeMetadata(vehicle, "plane.autopilotData");
 				}
 			}
 		}
