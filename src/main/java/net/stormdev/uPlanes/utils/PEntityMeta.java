@@ -17,6 +17,7 @@ import com.useful.ucars.ucars;
 public class PEntityMeta {
 	
 	private static volatile Map<UUID, Object> entityMetaObjs = new ConcurrentHashMap<UUID, Object>(100, 0.75f, 2);
+	private static volatile Map<UUID, Entity> entityObjs = new ConcurrentHashMap<UUID, Entity>(100, 0.75f, 2);
 	public static boolean USING_UCARS = false;
 	
 	public static void cleanEntityObjs(){
@@ -35,26 +36,46 @@ public class PEntityMeta {
 
 			@Override
 			public void run() {
-				final List<Entity> allEntities = new ArrayList<Entity>();
+/*				final List<Entity> allEntities = new ArrayList<Entity>();
 				for(World w:Bukkit.getWorlds()){
 					allEntities.addAll(w.getEntities());
-				}
+				}*/
 				Bukkit.getScheduler().runTaskAsynchronously(ucars.plugin, new Runnable(){
 
 					@Override
 					public void run() {
-						mainLoop: for(UUID entID:new ArrayList<UUID>(entityMetaObjs.keySet())){
+						for(final Entity e:new ArrayList<Entity>(entityObjs.values())){
+							if(e.isDead() && !e.isValid()){
+								synchronized(entityMetaObjs){
+									Bukkit.getScheduler().runTaskLaterAsynchronously(ucars.plugin, new Runnable(){
+
+										@Override
+										public void run() {
+											entityObjs.remove(e.getUniqueId());
+											entityMetaObjs.remove(e.getUniqueId());
+											return;
+										}}, 100l);
+								}
+							}
+						}
+						/*mainLoop: for(final UUID entID:new ArrayList<UUID>(entityMetaObjs.keySet())){
 							for(Entity e:allEntities){
 								if(e.getUniqueId().equals(entID)){
 									continue mainLoop;
 								}
 							}
-							Object o = entityMetaObjs.get(entID);
-							entityMetaObjs.remove(entID);
-							if(o != null){
-								PMeta.removeAllMeta(o);
-							}
-						}
+							Bukkit.getScheduler().runTaskLaterAsynchronously(ucars.plugin, new Runnable(){
+
+								@Override
+								public void run() {
+									Object o = entityMetaObjs.get(entID);
+									entityMetaObjs.remove(entID);
+									if(o != null){
+										UMeta.removeAllMeta(o);
+									}
+									return;
+								}}, 100l);
+						}*/
 					}});
 				return;
 			}});
@@ -74,6 +95,7 @@ public class PEntityMeta {
 		}
 		Object o = entityMetaObjs.get(e.getUniqueId());
 		entityMetaObjs.remove(e.getUniqueId());
+		entityObjs.put(e.getUniqueId(), e);
 		if(o != null){
 			PMeta.removeAllMeta(o);
 		}
@@ -93,6 +115,7 @@ public class PEntityMeta {
 				e1.printStackTrace();
 			}
 		}
+		entityObjs.put(e.getUniqueId(), e);
 		synchronized(entityMetaObjs){
 			Object obj = entityMetaObjs.get(e.getUniqueId());
 			if(obj == null){
@@ -115,6 +138,7 @@ public class PEntityMeta {
 				e.printStackTrace();
 			}
 		}
+		entityObjs.put(entity.getUniqueId(), entity);
 		PMeta.getMeta(getMetaObj(entity), metaKey).add(value);
 	}
 	
@@ -129,6 +153,7 @@ public class PEntityMeta {
 				e.printStackTrace();
 			}
 		}
+		entityObjs.put(entity.getUniqueId(), entity);
 		return PMeta.getAllMeta(getMetaObj(entity)).get(metaKey);
 	}
 	
@@ -143,6 +168,7 @@ public class PEntityMeta {
 				e.printStackTrace();
 			}
 		}
+		entityObjs.put(entity.getUniqueId(), entity);
 		return PMeta.getAllMeta(getMetaObj(entity)).containsKey(metaKey);
 	}
 	
@@ -158,6 +184,7 @@ public class PEntityMeta {
 				e.printStackTrace();
 			}
 		}
+		entityObjs.put(entity.getUniqueId(), entity);
 		PMeta.removeMeta(getMetaObj(entity), metaKey);
 	}
 }
