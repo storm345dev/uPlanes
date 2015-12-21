@@ -761,7 +761,7 @@ public class uPlanesListener implements Listener {
 		
 		//Now place the car
 		Block b = event.getClickedBlock();
-		final Location toSpawn = b.getLocation().add(0,1.5,0);
+		final Location toSpawn = b.getLocation().clone().add(0,1.5,0);
 		
 		if(toSpawn.getY() >= toSpawn.getWorld().getMaxHeight()){
 			event.setCancelled(true);
@@ -790,9 +790,6 @@ public class uPlanesListener implements Listener {
 					if(pln == null){
 						return; //Just a minecart
 					}
-					
-					Vehicle ent = uPlanesAPI.getPlaneManager().placePlane(plane, toSpawn);
-					
 					float yaw = player.getLocation().getYaw()+90;
 					if(yaw < 0){
 						yaw = 360 + yaw;
@@ -800,6 +797,9 @@ public class uPlanesListener implements Listener {
 					else if(yaw >= 360){
 						yaw = yaw - 360;
 					}
+					toSpawn.setYaw(player.getLocation().getYaw());
+					
+					Vehicle ent = uPlanesAPI.getPlaneManager().placePlane(plane, toSpawn);
 					CartOrientationUtil.setYaw(ent, yaw);
 					
 					Block in = ent.getLocation().getBlock();
