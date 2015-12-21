@@ -150,7 +150,7 @@ public class uPlanesListener implements Listener {
 			return;
 		}
 		plugin.planeManager.noLongerPlaced(event.getEntity().getUniqueId());
-		if(!PEntityMeta.USING_UCARS){
+		if(!PEntityMeta.USING_UCARS && !(event.getEntity() instanceof Player)){
 			PEntityMeta.removeAllMeta(event.getEntity());
 		}
 	}
