@@ -581,7 +581,10 @@ public class main extends JavaPlugin {
 						}
 						
 						double y = (double)event.getPacket().getIntegers().read(2) / 32.0;
-						y+= hce.getDisplayOffset()-0.9;
+						Block b = hce.getLocation().getBlock();
+						if(b.isEmpty() || b.isLiquid()){
+							y+= hce.getDisplayOffset()-0.9;
+						}
 						event.getPacket().getIntegers().write(2, (int) (y * 32));
 					}
 			
@@ -608,7 +611,10 @@ public class main extends JavaPlugin {
 						}
 						
 						double y = (double)event.getPacket().getIntegers().read(2) / 32.0;
-						y+= hce.getDisplayOffset()-0.9;
+						Block b = hce.getLocation().getBlock();
+						if(b.isEmpty() || b.isLiquid()){
+							y+= hce.getDisplayOffset()-0.9;
+						}
 						event.getPacket().getIntegers().write(2, (int) (y * 32));
 					}
 			
