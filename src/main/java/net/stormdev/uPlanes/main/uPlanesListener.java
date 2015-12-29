@@ -573,11 +573,7 @@ public class uPlanesListener implements Listener {
 		
 		if(loc.getY() >= heightLimit){
 			travel.setY(-1);
-			float pitch = plane.getCurrentPitch();
-			pitch += 20;
-			if(pitch > 90){
-				pitch = 90;
-			}
+			float pitch = 1;
 			plane.setCurrentPitch(pitch);
 			//Send message it's too high
 			player.sendMessage(main.colors.getError()+Lang.get("general.heightLimit"));
