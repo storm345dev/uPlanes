@@ -54,6 +54,11 @@ public interface AutopilotDestination {
 	public void arrivedAtDestination();
 	
 	/**
+	 * Called when the autopilot gets stuck
+	 */
+	public void autopilotStuck();
+	
+	/**
 	 * Called when the autopilot starts
 	 * 
 	 */

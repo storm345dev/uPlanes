@@ -1,7 +1,6 @@
 package net.stormdev.uPlanes.main;
 
 import net.stormdev.uPlanes.api.AutopilotDestination;
-import net.stormdev.uPlanes.hover.HoverCart;
 import net.stormdev.uPlanes.utils.CartOrientationUtil;
 import net.stormdev.uPlanes.utils.ClosestFace;
 import net.stormdev.uPlanes.utils.Lang;
@@ -14,21 +13,64 @@ import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Vehicle;
-import org.bukkit.util.EulerAngle;
 import org.bukkit.util.Vector;
 
 public class FlightControl {
 	private static double speed = 1.2;
+	
+	private static class PosTracking {
+		private Vector lastPos;
+		private long lastMoveTime;
+		
+		public PosTracking(Vector nowPos){
+			setLastPos(nowPos);
+			setLastMoveTime(System.currentTimeMillis());
+		}
+
+		public Vector getLastPos() {
+			return lastPos;
+		}
+
+		public void setLastPos(Vector lastPos) {
+			this.lastPos = lastPos;
+		}
+
+		public long getLastMoveTime() {
+			return lastMoveTime;
+		}
+
+		public void setLastMoveTime(long lastMoveTime) {
+			this.lastMoveTime = lastMoveTime;
+		}
+	}
+	
 	public static Vector route(Location targetLoc, Location current, final Vehicle vehicle){
 		Vector v = new Vector(0,0,0);
 		Entity passenger = vehicle.getPassenger();
 		AutopilotDestination aData = null;
+		PosTracking posTracking;
+		if(PEntityMeta.hasMetadata(vehicle, "plane.autopilotPosTracking")){
+			posTracking = (PosTracking) PEntityMeta.getMetadata(vehicle, "plane.autopilotPosTracking");
+		}
+		else {
+			posTracking = new PosTracking(current.toVector());
+		}
+		
+		if(current.toVector().distanceSquared(posTracking.getLastPos()) > 4){
+			posTracking.setLastPos(current.toVector());
+			posTracking.setLastMoveTime(System.currentTimeMillis());
+		}
 		
 		if(PEntityMeta.hasMetadata(vehicle, "plane.autopilotData")){
 			aData = (AutopilotDestination) PEntityMeta.getMetadata(vehicle, "plane.autopilotData").get(0).value();
+		}
+		
+		if(System.currentTimeMillis() - posTracking.getLastMoveTime() > 5000){
+			if(aData != null){
+				aData.autopilotStuck();
+			}
 		}
 		
 		if(!(passenger instanceof Player)){
@@ -44,6 +86,7 @@ public class FlightControl {
 				AccelerationManager.setCurrentAccel(vehicle, 0);
 				PEntityMeta.removeMetadata(vehicle, "plane.destination");
 				PEntityMeta.removeMetadata(vehicle, "plane.autopilotData");
+				PEntityMeta.removeMetadata(vehicle, "plane.autopilotPosTracking");
 				return v;
 			}
 		}
@@ -146,6 +189,7 @@ public class FlightControl {
 				PEntityMeta.setMetadata(vehicle, "arrivedAtDest", new StatValue(null, main.plugin));
 				AccelerationManager.setCurrentAccel(vehicle, 0);
 				PEntityMeta.removeMetadata(vehicle, "plane.destination");
+				PEntityMeta.removeMetadata(vehicle, "plane.autopilotPosTracking");
 				Bukkit.getScheduler().runTaskLater(main.plugin, new Runnable(){
 
 					@Override
@@ -160,6 +204,7 @@ public class FlightControl {
 				else{
 					aData.arrivedAtDestination();
 					PEntityMeta.removeMetadata(vehicle, "plane.autopilotData");
+					PEntityMeta.removeMetadata(vehicle, "plane.autopilotPosTracking");
 				}
 			}
 		}

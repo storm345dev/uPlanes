@@ -149,5 +149,5 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-    <version>7</version>
+    <version>8</version>
 </project>
