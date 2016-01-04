@@ -550,7 +550,7 @@ public class main extends JavaPlugin {
 									return;
 								}
 								
-								double y = (double)event.getPacket().getIntegers().read(2) / 32.0;
+								double y = hce.getLocation().getY()/*(double)event.getPacket().getIntegers().read(2) / 32.0*/;
 								Block b = hce.getLocation().getBlock();
 								if(b.isEmpty() || b.isLiquid()){
 									y+= hce.getDisplayOffset()-0.9;
@@ -559,7 +559,7 @@ public class main extends JavaPlugin {
 							}
 					
 				});
-				((ProtocolManager) this.protocolManager).addPacketListener(new PacketAdapter(this, PacketType.Play.Server.SPAWN_ENTITY){
+				/*((ProtocolManager) this.protocolManager).addPacketListener(new PacketAdapter(this, PacketType.Play.Server.SPAWN_ENTITY){
 					@Override
 					public void onPacketSending(PacketEvent event){
 						int entityId = event.getPacket().getIntegers().read(0);
@@ -588,8 +588,9 @@ public class main extends JavaPlugin {
 						event.getPacket().getIntegers().write(2, (int) (y * 32));
 					}
 			
-		});
-				((ProtocolManager) this.protocolManager).addPacketListener(new PacketAdapter(this, PacketType.Play.Server.SPAWN_ENTITY_LIVING){
+		});*/
+				
+				/*((ProtocolManager) this.protocolManager).addPacketListener(new PacketAdapter(this, PacketType.Play.Server.SPAWN_ENTITY_LIVING){
 					@Override
 					public void onPacketSending(PacketEvent event){
 						int entityId = event.getPacket().getIntegers().read(0);
@@ -618,7 +619,7 @@ public class main extends JavaPlugin {
 						event.getPacket().getIntegers().write(2, (int) (y * 32));
 					}
 			
-		});
+		});*/
 			} catch (Exception e) {
 			}
 		} catch (Exception e) {
