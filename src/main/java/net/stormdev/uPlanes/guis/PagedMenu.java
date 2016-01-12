@@ -1,11 +1,11 @@
-package net.stormdev.uPlanes.shops;
+package net.stormdev.uPlanes.guis;
 
 import java.util.List;
 
+import net.stormdev.uPlanes.guis.IconMenu.OptionClickEvent;
+import net.stormdev.uPlanes.guis.IconMenu.OptionClickEventHandler;
+import net.stormdev.uPlanes.guis.PagedMenu.MenuDetails.MenuItem;
 import net.stormdev.uPlanes.main.main;
-import net.stormdev.uPlanes.shops.IconMenu.OptionClickEvent;
-import net.stormdev.uPlanes.shops.IconMenu.OptionClickEventHandler;
-import net.stormdev.uPlanes.shops.PagedMenu.MenuDetails.MenuItem;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -75,7 +75,7 @@ public class PagedMenu {
 			public void run() {
 				final List<MenuItem> items = details.getDisplayItems(player);
 				
-				Bukkit.getScheduler().runTask(plug, new Runnable(){
+				Bukkit.getScheduler().runTaskAsynchronously(plug, new Runnable(){
 
 					@Override
 					public void run() {

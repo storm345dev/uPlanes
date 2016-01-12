@@ -1,26 +1,24 @@
-package net.stormdev.uPlanes.shops;
+package net.stormdev.uPlanes.guis;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import net.stormdev.uPlanes.utils.PEntityMeta;
-import net.stormdev.uPlanes.utils.StatValue;
-
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 
-public class IconMenu implements Listener {
+import com.useful.ucars.util.UEntityMeta;
+import com.useful.ucarsCommon.StatValue;
+
+public class IconMenu implements Listener,InventoryHolder {
 
 	private String name;
 	private int size;
@@ -32,6 +30,7 @@ public class IconMenu implements Listener {
 	private Boolean enabled = true;
 	private String metaData;
 	private boolean destroyOnClose = false;
+	private UUID selfID = UUID.randomUUID();
 
 	public IconMenu(String name, int size, OptionClickEventHandler handler,
 			Plugin plugin) {
@@ -45,7 +44,7 @@ public class IconMenu implements Listener {
 		if(this.plugin == null){
 			System.out.println("UH OH Plugin null in iconmenu = memory leak");
 		}
-		plugin.getServer().getPluginManager().registerEvents(this, plugin);
+		/*plugin.getServer().getPluginManager().registerEvents(this, plugin);*/
 	}
 	
 	public IconMenu(String name, int size, OptionClickEventHandler handler,
@@ -87,7 +86,7 @@ public class IconMenu implements Listener {
 	}
 
 	public void open(Player player) {
-		Inventory inventory = Bukkit.createInventory(player, size, name);
+		Inventory inventory = Bukkit.createInventory(this, size, name);
 		enabled = true;
 		name = inventory.getTitle();
 		for (int i = 0; i < optionIcons.length; i++) {
@@ -96,49 +95,54 @@ public class IconMenu implements Listener {
 			}
 		}
 		player.openInventory(inventory);
-		PEntityMeta.setMetadata(player, metaData, new StatValue(null, plugin));
+		UEntityMeta.setMetadata(player, metaData, new StatValue(null, plugin));
 		//Bukkit.broadcastMessage("Player has got meta:"+metaData);
 	}
 
 	public void destroy() {
-		try {
+		/*try {
 			HandlerList.unregisterAll(this);
 		} catch (Exception e) {
 			System.out.println("UH OH Bukkit didn't want to unregister the IconMenu's events! Therefore MEMORY LEAK!!!");
 			e.printStackTrace();
-		}
+		}*/
 		handler = null;
 		optionNames = null;
 		optionIcons = null;
 		enabled = false;
 	}
 	
-	@EventHandler(priority = EventPriority.MONITOR)
+/*	@EventHandler(priority = EventPriority.MONITOR)*/
 	void invClose(InventoryCloseEvent event){
-		if(PEntityMeta.hasMetadata(event.getPlayer(), metaData)){
+		if(/*event.getPlayer().hasMetadata(metaData)*/event.getInventory().getHolder() != null && event.getInventory().getHolder().equals(this)){
 			if(this.plugin == null){
 				Bukkit.broadcastMessage("PLUGIN NULL HALP HALP");
 			}
 			if(!event.getInventory().getName().equals(name)){
 				return;
 			}
-			PEntityMeta.removeMetadata(event.getPlayer(), metaData);
+			UEntityMeta.removeMetadata(event.getPlayer(), metaData);
 			if(destroyOnClose){
 				destroy();
 			}
 		}
 	}
 
-	@EventHandler(priority = EventPriority.MONITOR)
+	/*@EventHandler(priority = EventPriority.MONITOR)*/
 	void onInventoryClick(InventoryClickEvent event) {
-		if (event.getInventory().getTitle().equals(name) && enabled
-				&& PEntityMeta.hasMetadata(event.getWhoClicked(), metaData)) {
+		InventoryHolder ih = event.getInventory().getHolder();
+		boolean sameHolder = ih != null && ih instanceof IconMenu && ((IconMenu)ih).selfID.equals(this.selfID);
+		if (/*event.getInventory().getTitle().equals(name) && */
+				/*&& event.getWhoClicked().hasMetadata(metaData)&&*/ sameHolder) {
 			event.setCancelled(true);
+			if(!enabled){
+				return;
+			}
 			int slot = event.getRawSlot();
 			if (slot >= 0 && slot < size && optionNames[slot] != null) {
 				final Plugin plugin = this.plugin;
 				OptionClickEvent e = new OptionClickEvent(event.getInventory(), this,
-						(Player) event.getWhoClicked(), slot, optionNames[slot]);
+						(Player) event.getWhoClicked(), slot, optionNames[slot], event);
 				handler.onOptionClick(e);
 				if (e.willClose()) {
 					final Player p = (Player) event.getWhoClicked();
@@ -146,7 +150,7 @@ public class IconMenu implements Listener {
 						@Override
 						public void run() {
 							p.closeInventory();
-							PEntityMeta.removeMetadata(p, metaData);
+							UEntityMeta.removeMetadata(p, metaData);
 						}
 					}, 1);
 				}
@@ -169,8 +173,9 @@ public class IconMenu implements Listener {
 		private boolean destroy;
 		private Inventory inv;
 		private IconMenu menu;
+		private InventoryClickEvent parentEvent;
 
-		public OptionClickEvent(Inventory inv, IconMenu menu, Player player, int position, String name) {
+		public OptionClickEvent(Inventory inv, IconMenu menu, Player player, int position, String name, InventoryClickEvent parentEvent) {
 			this.player = player;
 			this.position = position;
 			this.name = name;
@@ -178,6 +183,11 @@ public class IconMenu implements Listener {
 			this.destroy = false;
 			this.inv = inv;
 			this.menu = menu;
+			this.parentEvent = parentEvent;
+		}
+		
+		public InventoryClickEvent getParentEvent(){
+			return this.parentEvent;
 		}
 		
 		public Inventory getInventory(){
@@ -241,6 +251,11 @@ public class IconMenu implements Listener {
 		im.setLore(lore);
 		item.setItemMeta(im);
 		return item;
+	}
+
+	@Override
+	public Inventory getInventory() {
+		return null;
 	}
 
 }

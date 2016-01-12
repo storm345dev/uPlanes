@@ -6,12 +6,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.stormdev.uPlanes.api.Plane;
+import net.stormdev.uPlanes.guis.PagedMenu;
+import net.stormdev.uPlanes.guis.PagedMenu.MenuDetails;
+import net.stormdev.uPlanes.guis.PagedMenu.MenuDetails.MenuItem;
 import net.stormdev.uPlanes.main.PlaneGenerator;
 import net.stormdev.uPlanes.main.PlaneItemMethods;
 import net.stormdev.uPlanes.main.main;
 import net.stormdev.uPlanes.presets.PlanePreset;
 import net.stormdev.uPlanes.presets.PresetManager;
-import net.stormdev.uPlanes.shops.PagedMenu.MenuDetails;
 import net.stormdev.uPlanes.utils.Lang;
 
 import org.bukkit.ChatColor;

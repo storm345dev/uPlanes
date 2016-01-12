@@ -19,6 +19,7 @@ import net.stormdev.uPlanes.commands.AutoPilotAdminCommandExecutor;
 import net.stormdev.uPlanes.commands.AutoPilotCommandExecutor;
 import net.stormdev.uPlanes.commands.FuelCommandExecutor;
 import net.stormdev.uPlanes.commands.InfoCommandExecutor;
+import net.stormdev.uPlanes.guis.IconMenuListener;
 import net.stormdev.uPlanes.hover.HoverCart;
 import net.stormdev.uPlanes.hover.HoverCartEntity;
 import net.stormdev.uPlanes.presets.PresetManager;
@@ -460,6 +461,8 @@ public class main extends JavaPlugin {
 				PMeta.clean();
 				return;
 			}}, 120*20l, 120*20l);
+		
+		new IconMenuListener();
 		
 		logger.info("uPlanes v"+plugin.getDescription().getVersion()+" has been enabled!");
 	}
