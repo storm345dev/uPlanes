@@ -554,11 +554,9 @@ public class main extends JavaPlugin {
 								}
 								
 								double y = hce.getLocation().getY()/*(double)event.getPacket().getIntegers().read(2) / 32.0*/;
-								Block b = hce.getLocation().getBlock();
-								if(b.isEmpty() || b.isLiquid()){
-									y+= hce.getDisplayOffset()-0.9;
-									event.getPacket().getIntegers().write(2, (int) (y * 32));
-								}
+								/*Block b = hce.getLocation().getBlock();*/
+								y+= hce.getDisplayOffset()-0.9;
+								event.getPacket().getIntegers().write(2, (int) (y * 32));
 							}
 					
 				});
