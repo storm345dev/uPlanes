@@ -209,7 +209,6 @@ public class MotionManager {
 		z *= accelMod;	
 		
 		boolean hasFlightSpeed = (new Vector(x, 0, z).lengthSquared() > 0.75 || accelMod > 0.75);
-		
 		if(pln.isHover()){
 			double pitch = 20*accelMod;
 			if(pitch > 10){

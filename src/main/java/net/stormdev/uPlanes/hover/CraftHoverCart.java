@@ -108,4 +108,24 @@ public class CraftHoverCart extends CraftArmorStand implements HoverCart {
 		setHeadPose(new EulerAngle(getHeadPose().getX(), getHeadPose().getY(), Math.toRadians(y))); 
 	}
 
+	@Override
+	public float getHitBoxX() {
+		return getHandle().getHitBoxX();
+	}
+
+	@Override
+	public float getHitBoxZ() {
+		return getHandle().getHitBoxZ();
+	}
+
+	@Override
+	public void setHitBoxX(float x) {
+		getHandle().setHitBoxX(x);
+	}
+
+	@Override
+	public void setHitBoxZ(float z) {
+		getHandle().setHitBoxZ(z);
+	}
+
 }

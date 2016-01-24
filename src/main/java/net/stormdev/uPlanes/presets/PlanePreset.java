@@ -33,8 +33,10 @@ public class PlanePreset implements Serializable {
 	private double cost = 0;
 	private MaterialData displayBlock;
 	private double displayOffset = 0;
+	private float hitBoxX = -1;
+	private float hitBoxZ = -1;
 	
-	public PlanePreset(String presetID, double speed, String name, double health, double accelMod, double turnAmountPerTick, boolean hover, double cost, MaterialData displayBlock, double offset){
+	public PlanePreset(String presetID, double speed, String name, double health, double accelMod, double turnAmountPerTick, boolean hover, double cost, MaterialData displayBlock, double offset, float hitBoxX, float hitBoxZ){
 		this.setPresetID(presetID);
 		if(speed > main.maxSpeed){
 			speed = main.maxSpeed;
@@ -48,6 +50,16 @@ public class PlanePreset implements Serializable {
 		this.setCost(cost);
 		this.setDisplayBlock(displayBlock);
 		this.setDisplayOffset(offset);
+		this.hitBoxX = hitBoxX;
+		this.hitBoxZ = hitBoxZ;
+	}
+	
+	public float getHitBoxX(){
+		return this.hitBoxX;
+	}
+	
+	public float getHitBoxZ(){
+		return this.hitBoxZ;
 	}
 	
 	private String getHandleString(boolean b){

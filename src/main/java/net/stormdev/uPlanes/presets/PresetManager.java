@@ -101,8 +101,16 @@ public class PresetManager {
 				if(sect.contains("displayOffset")){
 					displayOffset = sect.getDouble("displayOffset");
 				}
+				float hitBoxX = -1;
+				float hitBoxZ = -1;
+				if(sect.contains("hitbox.x")){
+					hitBoxX = (float) sect.getDouble("hitbox.x");
+				}
+				if(sect.contains("hitbox.z")){
+					hitBoxZ = (float) sect.getDouble("hitbox.z");
+				}
 				
-				PlanePreset pp = new PlanePreset(id, speed, name, health, accelMod, turnAmountPerTick, hover, cost, displayBlock, displayOffset);
+				PlanePreset pp = new PlanePreset(id, speed, name, health, accelMod, turnAmountPerTick, hover, cost, displayBlock, displayOffset, hitBoxX, hitBoxZ);
 				this.presets.add(pp);
 			} catch (Exception e) {
 				//Error loading this preset!

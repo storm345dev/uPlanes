@@ -11,6 +11,7 @@ import net.stormdev.uPlanes.api.PlaneDeathEvent;
 import net.stormdev.uPlanes.api.uPlanesAPI;
 import net.stormdev.uPlanes.hover.HoverCart;
 import net.stormdev.uPlanes.items.ItemPlaneValidation;
+import net.stormdev.uPlanes.presets.PlanePreset;
 import net.stormdev.uPlanes.presets.PresetManager;
 import net.stormdev.uPlanes.utils.CartOrientationUtil;
 import net.stormdev.uPlanes.utils.Lang;
@@ -604,7 +605,21 @@ public class uPlanesListener implements Listener {
 				if(Math.abs(vz) > Math.abs(z)){
 					z = vz;
 				}
-				Location nextHorizontal = cart.getLocation().clone().add(new Vector(x, 0, z));
+				double ax = x;
+				double az = z;
+				PlanePreset pp = plane.getPreset();
+				if(pp != null){
+					if(pp.getHitBoxX() > 0){ //TODO Does .length() lag too much
+						double length = new Vector(ax, 0, az).length();
+						double goodLength = length + pp.getHitBoxX()/2.0 + (plane.isHover()?0.5:0);
+						if(length != 0 && goodLength != 0){
+							double mult = goodLength/length;
+							ax *= mult;
+							az *= mult;
+						}
+					}
+				}
+				Location nextHorizontal = cart.getLocation().clone().add(new Vector(ax, 0, az));
 				b = nextHorizontal.getBlock();
 				if(!b.isEmpty() && !b.isLiquid() && b.getType().isSolid() && !b.getType().equals(Material.CARPET) && !b.getType().equals(Material.BARRIER)){ //Crashed into something
 					/*b = b.getRelative(BlockFace.UP);
@@ -768,6 +783,28 @@ public class uPlanesListener implements Listener {
 		Block in = toSpawn.getBlock();
 		if(!in.isEmpty() && !in.isLiquid()){
 			return;
+		}
+		
+		Vector v = toSpawn.toVector().clone().setY(event.getPlayer().getLocation().getY()).subtract(event.getPlayer().getLocation().toVector());
+		v = v.normalize();
+		boolean loop = safeExit;
+		Location current = event.getPlayer().getLocation().clone();
+		double prevDist = Double.MAX_VALUE;
+		while (loop){
+			double dist = current.distanceSquared(toSpawn);
+			if(dist > prevDist || dist < 1.5){
+				loop = false;
+			}
+			prevDist = dist;
+			
+			Block b1 = current.getBlock();
+			if(!(b1.isEmpty() || b1.isLiquid())){
+				event.getPlayer().sendMessage(ChatColor.RED+"You need a clear path between you and the vehicle to be placed!");
+				event.setCancelled(true);
+				return;
+			}
+			
+			current = current.add(v);
 		}
 		
 		event.setUseItemInHand(Result.DENY);

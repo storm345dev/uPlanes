@@ -26,9 +26,29 @@ import org.bukkit.event.vehicle.VehicleUpdateEvent;
 public class HoverCartEntity extends EntityArmorStand {	 //TODO Stop it falling out of the world
 	public static final double OFFSET_AMOUNT = /*-1*/0;
 	
+	public float getHitBoxX() {
+		return hitBoxX;
+	}
+
+	public void setHitBoxX(float hitBoxX) {
+		this.hitBoxX = hitBoxX;
+		setSize();
+	}
+
+	public float getHitBoxZ() {
+		return hitBoxZ;
+	}
+
+	public void setHitBoxZ(float hitBoxZ) {
+		this.hitBoxZ = hitBoxZ;
+		setSize();
+	}
+
 	private CraftHoverCart ce;
 	private Location loc;
 	private double heightOffset = 0;
+	private float hitBoxX = -1;
+	private float hitBoxZ = -1;
 	
 	public static HoverCart getCart(org.bukkit.entity.Entity e){
 		if(((CraftEntity)e).getHandle() instanceof HoverCartEntity){
@@ -60,11 +80,14 @@ public class HoverCartEntity extends EntityArmorStand {	 //TODO Stop it falling 
 	
 	/*@Override
 	public boolean s() {
+		if(!super.s()){
+			setSize();
+		}
 	    return true; //Say our size is set
 	}*/
 	
 	private void setSize(){
-		/*setSize(0.98F, 0.7F);*/
+		setSize(hitBoxX<0?0.98F:hitBoxX, hitBoxZ<0?0.7F:hitBoxZ);
 	}
 	
 	public Location getTrueLocation(){
@@ -168,6 +191,10 @@ public class HoverCartEntity extends EntityArmorStand {	 //TODO Stop it falling 
 
 	    if (!from.equals(to)) {
 	      this.world.getServer().getPluginManager().callEvent(new VehicleMoveEvent(vehicle, from, to));
+	    }
+	    
+	    if(s()){
+	    	setSize();
 	    }
 	}
 	
