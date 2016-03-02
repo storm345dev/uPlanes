@@ -3,6 +3,7 @@ package net.stormdev.uPlanes.hover;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_9_R1.CraftServer;
 import org.bukkit.craftbukkit.v1_9_R1.entity.CraftArmorStand;
+import org.bukkit.entity.Arrow;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.EulerAngle;
@@ -13,6 +14,11 @@ public class CraftHoverCart extends CraftArmorStand implements HoverCart {
 		super(server, entity);
 		this.setVisible(false);
 		this.setGravity(true);
+	}
+	
+	@Override
+	public Arrow shootArrow(){
+		return null;
 	}
 	
 	@Override
