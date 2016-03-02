@@ -33,10 +33,9 @@ import net.stormdev.uPlanes.utils.uCarsCompatibility;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_9_R1.CraftWorld;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
@@ -539,7 +538,7 @@ public class main extends JavaPlugin {
 								
 								HoverCart hce = null;
 								for(World w:Bukkit.getServer().getWorlds()){
-									for(net.minecraft.server.v1_8_R3.Entity e:((CraftWorld)w).getHandle().entityList){
+									for(net.minecraft.server.v1_9_R1.Entity e:((CraftWorld)w).getHandle().entityList){
 										if(entityId == e.getId()){
 											HoverCart hc = HoverCartEntity.getCart(e.getBukkitEntity());
 											if(hc == null){
@@ -556,7 +555,7 @@ public class main extends JavaPlugin {
 								double y = hce.getLocation().getY()/*(double)event.getPacket().getIntegers().read(2) / 32.0*/;
 								/*Block b = hce.getLocation().getBlock();*/
 								y+= hce.getDisplayOffset()-0.9;
-								event.getPacket().getIntegers().write(2, (int) (y * 32));
+								event.getPacket().getDoubles().write(1, y);
 							}
 					
 				});

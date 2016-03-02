@@ -2,18 +2,21 @@ package net.stormdev.uPlanes.hover;
 
 import java.util.List;
 
-import net.minecraft.server.v1_8_R3.DamageSource;
-import net.minecraft.server.v1_8_R3.Entity;
-import net.minecraft.server.v1_8_R3.EntityArmorStand;
-import net.minecraft.server.v1_8_R3.EntityHuman;
-import net.minecraft.server.v1_8_R3.EntityMinecartAbstract;
-import net.minecraft.server.v1_8_R3.Vec3D;
-import net.minecraft.server.v1_8_R3.World;
+import net.minecraft.server.v1_9_R1.DamageSource;
+import net.minecraft.server.v1_9_R1.Entity;
+import net.minecraft.server.v1_9_R1.EntityArmorStand;
+import net.minecraft.server.v1_9_R1.EntityHuman;
+import net.minecraft.server.v1_9_R1.EntityMinecartAbstract;
+import net.minecraft.server.v1_9_R1.EnumHand;
+import net.minecraft.server.v1_9_R1.EnumInteractionResult;
+import net.minecraft.server.v1_9_R1.ItemStack;
+import net.minecraft.server.v1_9_R1.Vec3D;
+import net.minecraft.server.v1_9_R1.World;
 import net.stormdev.uPlanes.utils.CustomEntityHandler;
 
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_9_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_9_R1.entity.CraftEntity;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.vehicle.VehicleCreateEvent;
@@ -126,13 +129,13 @@ public class HoverCartEntity extends EntityArmorStand {	 //TODO Stop it falling 
 	}
 	
 	@Override
-	public boolean a(EntityHuman entityhuman, Vec3D vec3d)
+	public EnumInteractionResult a(EntityHuman entityhuman, Vec3D vec3d, ItemStack stack, EnumHand hand)
 	  {
-		if(this.passenger != null){
-			return false;
+		if(ce.getPassenger() != null){
+			return EnumInteractionResult.FAIL;
 		}
 		ce.setPassenger(entityhuman.getBukkitEntity());
-		return false;
+		return EnumInteractionResult.FAIL;
 	  }
 	
 	/*@Override
@@ -157,7 +160,7 @@ public class HoverCartEntity extends EntityArmorStand {	 //TODO Stop it falling 
 	
 	@Override
 	public void collide(Entity entity){
-		if(this.passenger != null && entity.equals(this.passenger)){
+		if(this.passengers.size() >0 && entity.equals(this.passengers.get(0))){
 			return;
 		}
 		
@@ -174,13 +177,13 @@ public class HoverCartEntity extends EntityArmorStand {	 //TODO Stop it falling 
 	}
 	
 	@Override
-	public void t_(){
+	public void U(){
 		double prevX = this.locX;
 	    double prevY = this.locY;
 	    double prevZ = this.locZ;
 	    float prevYaw = this.yaw;
 	    float prevPitch = this.pitch;
-	    super.t_();
+	    super.U();
 	    
 	    org.bukkit.World bworld = this.world.getWorld();
 	    Location from = new Location(bworld, prevX, prevY, prevZ, prevYaw, prevPitch);
@@ -193,9 +196,7 @@ public class HoverCartEntity extends EntityArmorStand {	 //TODO Stop it falling 
 	      this.world.getServer().getPluginManager().callEvent(new VehicleMoveEvent(vehicle, from, to));
 	    }
 	    
-	    if(s()){
-	    	setSize();
-	    }
+	    setSize();
 	}
 	
 	private DamageSource damagesource = null;
@@ -308,7 +309,7 @@ public class HoverCartEntity extends EntityArmorStand {	 //TODO Stop it falling 
 	}
 	
 	@Override
-	 protected void bL() {
+	 protected void cn() {
 	    List<?> list = this.world.getEntities(this, getBoundingBox());
 
 	    if ((list != null) && (!list.isEmpty()))
