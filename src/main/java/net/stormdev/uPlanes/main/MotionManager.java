@@ -1,7 +1,10 @@
 package net.stormdev.uPlanes.main;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import net.stormdev.uPlanes.api.Keypress;
 import net.stormdev.uPlanes.api.Plane;
@@ -12,7 +15,6 @@ import net.stormdev.uPlanes.utils.PEntityMeta;
 import net.stormdev.uPlanes.utils.PlaneUpdateEvent;
 import net.stormdev.uPlanes.utils.StatValue;
 
-import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Vehicle;
@@ -38,6 +40,36 @@ public class MotionManager {
 	    return result;
 	}
 	
+	public static class MovePacketInfo {
+		public float f = 0;
+		public float s = 0;
+		
+		public MovePacketInfo(float f, float s){
+			this.f = f;
+			this.s = s;
+		}
+	}
+	private static Map<UUID, MovePacketInfo> playerPacketUpdates = new HashMap<UUID, MovePacketInfo>();
+	
+	public static void removePlayer(Player player){
+		playerPacketUpdates.remove(player.getUniqueId());
+	}
+	
+	public static void onPacket(Player player, float f, float s){
+		if(!player.isOnline()){
+			return;
+		}
+		playerPacketUpdates.put(player.getUniqueId(), new MovePacketInfo(f, s));
+	}
+	
+	public static MovePacketInfo getMostRecentPacketInfo(Player player){
+		MovePacketInfo m = playerPacketUpdates.get(player.getUniqueId());
+		if(m == null){
+			m = new MovePacketInfo(0, 0);
+		}
+		return m;
+	}
+	
 	public static void move(Player player, float f, float s) {
 		Vector vec = new Vector();
 		Entity ent = player.getVehicle();
@@ -50,6 +82,7 @@ public class MotionManager {
 		if (!(ent instanceof Vehicle)) {
 			return;
 		}
+		
 		Vehicle plane = (Vehicle) ent;
 		Plane pln = main.plugin.listener.getPlane(plane);
 		if(pln == null){

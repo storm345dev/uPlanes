@@ -11,6 +11,7 @@ import net.stormdev.uPlanes.api.PlaneDeathEvent;
 import net.stormdev.uPlanes.api.uPlanesAPI;
 import net.stormdev.uPlanes.hover.HoverCart;
 import net.stormdev.uPlanes.items.ItemPlaneValidation;
+import net.stormdev.uPlanes.main.MotionManager.MovePacketInfo;
 import net.stormdev.uPlanes.presets.PlanePreset;
 import net.stormdev.uPlanes.presets.PresetManager;
 import net.stormdev.uPlanes.utils.CartOrientationUtil;
@@ -58,6 +59,8 @@ import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerArmorStandManipulateEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerKickEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
 import org.bukkit.event.vehicle.VehicleDestroyEvent;
 import org.bukkit.event.vehicle.VehicleEntityCollisionEvent;
@@ -265,6 +268,16 @@ public class uPlanesListener implements Listener {
 			return;
 		}
 	
+	 @EventHandler (priority = EventPriority.MONITOR)
+	 void onQuit(PlayerQuitEvent event){
+		 MotionManager.removePlayer(event.getPlayer());
+	 }
+	 
+	 @EventHandler (priority = EventPriority.MONITOR)
+	 void onQuit(PlayerKickEvent event){
+		 MotionManager.removePlayer(event.getPlayer());
+	 }
+	 
 	 @EventHandler (priority = EventPriority.HIGHEST) //Call late
 	    void vehicleExit(VehicleExitEvent event){
 		 	if(event.isCancelled()){
@@ -329,6 +342,9 @@ public class uPlanesListener implements Listener {
 				public void run() {
 					exited.teleport(loc.add(0, 0.5, 0));
 					exited.setVelocity(vel);
+					if(exited instanceof Player){
+						MotionManager.removePlayer((Player) exited);
+					}
 					return;
 				}}, 2l); //Teleport back to car loc after exit
 	        /*
@@ -355,6 +371,23 @@ public class uPlanesListener implements Listener {
 	    	return;
 	    }
 	
+	 @EventHandler(priority=EventPriority.HIGH)
+	void onVehTick(VehicleUpdateEvent event){
+		 if(event instanceof PlaneUpdateEvent){
+			 return;
+		 }
+		 
+		 Vehicle v = event.getVehicle();
+		 if(uPlanesAPI.getPlaneManager().isAPlane(v)){
+			 Entity pass = v.getPassenger();
+			 if(pass instanceof Player){
+				 Player pl = (Player) pass;
+				 MovePacketInfo mpi = MotionManager.getMostRecentPacketInfo(pl);
+				 MotionManager.move(pl, mpi.f, mpi.s);
+			 }
+		 }
+	 }
+	 
 	@EventHandler
 	void vehicleUpdate(VehicleUpdateEvent event){
 		Vehicle car = event.getVehicle();
