@@ -642,7 +642,7 @@ public class uPlanesListener implements Listener {
 				double az = z;
 				PlanePreset pp = plane.getPreset();
 				if(pp != null){
-					if(pp.getHitBoxX() > 0){ //TODO Does .length() lag too much
+					if(pp.getHitBoxX() > 0){
 						double length = new Vector(ax, 0, az).length();
 						double goodLength = length + pp.getHitBoxX()/2.0 + (plane.isHover()?0.5:0);
 						if(length != 0 && goodLength != 0){
@@ -655,9 +655,21 @@ public class uPlanesListener implements Listener {
 				Location nextHorizontal = cart.getLocation().clone().add(new Vector(ax, 0, az));
 				b = nextHorizontal.getBlock();
 				if(!b.isEmpty() && !b.isLiquid() && b.getType().isSolid() && !b.getType().equals(Material.CARPET) && !b.getType().equals(Material.BARRIER)){ //Crashed into something
+					boolean inside = true;
+					double relY = nextHorizontal.getY()-b.getY();
+					if(relY < 0){
+						relY = 0;
+					}
+					String name = b.getType().name().toLowerCase();
+					if(name.contains("step") && relY >= 0.4){
+						inside = false;
+					}
+					if(name.contains("carpet") && relY > 0){
+						inside = false;
+					}
 					/*b = b.getRelative(BlockFace.UP);
 					String bt = b.getType().name().toLowerCase();*/
-					if(true/*(!b.isEmpty() && !b.isLiquid() && b.getType().isSolid())
+					if(inside/*(!b.isEmpty() && !b.isLiquid() && b.getType().isSolid())
 							|| (!bt.contains("step")
 									&& !bt.contains("carpet")
 									&& (!bt.contains("grass") && !b.getType().equals(Material.GRASS))
@@ -717,21 +729,35 @@ public class uPlanesListener implements Listener {
 				Location nextVertical = cart.getLocation().add(0, y, 0);
 				Block b = nextVertical.getBlock();
 				if(!b.isEmpty() && !b.isLiquid() && b.getType().isSolid()){ //Crashed into something
-					double damage = 130.0 * Math.abs(y);
-					damage = Math.round(damage*10.0d)/10.0d;
-					if(damage < 1){
-						damage = 1;
+					boolean inside = true;
+					double relY = nextVertical.getY()-b.getY();
+					if(relY < 0){
+						relY = 0;
 					}
-					if(damage > 200){
-						damage = 200;
+					String name = b.getType().name().toLowerCase();
+					if(name.contains("step") && relY >= 0.4){
+						inside = false;
 					}
-					
-					PrePlaneRoughLandingEvent evt = new PrePlaneRoughLandingEvent(cart, player, event.getAcceleration(), plane, damage);
-					Bukkit.getPluginManager().callEvent(evt);
-					
-					if(!evt.isCancelled() && evt.getDamage() > 0){
-						uPlanesAPI.getPlaneManager().damagePlane(cart, plane, evt.getDamage(), "Rough Landing");
-						player.damage(20*(damage/200.0));
+					if(name.contains("carpet") && relY > 0){
+						inside = false;
+					}
+						if(inside){
+						double damage = 130.0 * Math.abs(y);
+						damage = Math.round(damage*10.0d)/10.0d;
+						if(damage < 1){
+							damage = 1;
+						}
+						if(damage > 200){
+							damage = 200;
+						}
+						
+						PrePlaneRoughLandingEvent evt = new PrePlaneRoughLandingEvent(cart, player, event.getAcceleration(), plane, damage);
+						Bukkit.getPluginManager().callEvent(evt);
+						
+						if(!evt.isCancelled() && evt.getDamage() > 0){
+							uPlanesAPI.getPlaneManager().damagePlane(cart, plane, evt.getDamage(), "Rough Landing");
+							player.damage(20*(damage/200.0));
+						}
 					}
 				}
 			}
@@ -741,21 +767,35 @@ public class uPlanesListener implements Listener {
 				Location nextVertical = cart.getLocation().add(0, cart.getVelocity().getY(), 0);
 				Block b = nextVertical.getBlock();
 				if(!b.isEmpty() && !b.isLiquid() && b.getType().isSolid()){ //Crashed into something
-					double damage = 110.0 * new Vector(travel.getX(), 0, travel.getZ()).lengthSquared();
-					damage = Math.round(damage*10.0d)/10.0d;
-					if(damage < 1){
-						damage = 1;
+					boolean inside = true;
+					double relY = nextVertical.getY()-b.getY();
+					if(relY < 0){
+						relY = 0;
 					}
-					if(damage > 200){
-						damage = 200;
+					String name = b.getType().name().toLowerCase();
+					if(name.contains("step") && relY >= 0.4){
+						inside = false;
 					}
-					
-					PrePlaneRoughLandingEvent evt = new PrePlaneRoughLandingEvent(cart, player, event.getAcceleration(), plane, damage);
-					Bukkit.getPluginManager().callEvent(evt);
-					
-					if(!evt.isCancelled() && evt.getDamage() > 0){
-						uPlanesAPI.getPlaneManager().damagePlane(cart, plane, evt.getDamage(), "Rough Landing");
-						player.damage(20*(damage/200.0));
+					if(name.contains("carpet") && relY > 0){
+						inside = false;
+					}
+					if(inside){
+						double damage = 110.0 * new Vector(travel.getX(), 0, travel.getZ()).lengthSquared();
+						damage = Math.round(damage*10.0d)/10.0d;
+						if(damage < 1){
+							damage = 1;
+						}
+						if(damage > 200){
+							damage = 200;
+						}
+						
+						PrePlaneRoughLandingEvent evt = new PrePlaneRoughLandingEvent(cart, player, event.getAcceleration(), plane, damage);
+						Bukkit.getPluginManager().callEvent(evt);
+						
+						if(!evt.isCancelled() && evt.getDamage() > 0){
+							uPlanesAPI.getPlaneManager().damagePlane(cart, plane, evt.getDamage(), "Rough Landing");
+							player.damage(20*(damage/200.0));
+						}
 					}
 				}
 			}
