@@ -86,7 +86,7 @@ public class AccelerationManager {
 	
 	public static double stall(Player player, Vehicle cart, Plane plane){
 		if(!main.doAcceleration){
-			return 0d;
+			return 1d;
 		}
 		
 		double accel = getCurrentAccel(cart);
@@ -98,7 +98,7 @@ public class AccelerationManager {
 	
 	public static double decelerateAndGetMult(Player player, Vehicle cart, Plane plane){
 		if(!main.doAcceleration){
-			return 0d;
+			return 1d;
 		}
 		
 		double current = getCurrentAccel(cart);
@@ -116,7 +116,7 @@ public class AccelerationManager {
 	
 	public static double glideAndGetMult(Player player, Vehicle cart, Plane plane){
 		if(!main.doAcceleration){
-			return 0d;
+			return 1d;
 		}
 		
 		double current = getCurrentAccel(cart);
@@ -140,14 +140,18 @@ public class AccelerationManager {
 		return getCurrentAccel(cart);
 	}
 	
-	public static double getMultiplier(Player player, Vehicle cart, Plane plane){
+	public static double getMultiplier(Player player, Vehicle cart, Plane plane, boolean speedLocked){
 		if(!main.doAcceleration){
 			return 1.0d;
 		}
 		
 		double current = getCurrentAccel(cart);
-		if(current >= 0.97){ //Close enough to 1; so just be 1 or else you get infinitely close to 1 without getting to it (Wasting time calculating for no visible reason)
+		if(current >= 0.97 && current != 1){ //Close enough to 1; so just be 1 or else you get infinitely close to 1 without getting to it (Wasting time calculating for no visible reason)
 			current = 1;
+			setCurrentAccel(cart, 1);
+			return current;
+		}
+		if(speedLocked || current == 1){
 			return current;
 		}
 		float diff = (float) (1-current); //The difference between 1 (full speed) and the rate we want to accelerate by

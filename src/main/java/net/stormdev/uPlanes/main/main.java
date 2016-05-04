@@ -517,13 +517,14 @@ public class main extends JavaPlugin {
 								PacketContainer packet = event.getPacket();
 								final float sideways = packet.getFloat().read(0);
 								final float forwards = packet.getFloat().read(1);
+								final boolean jumping = packet.getBooleans().read(0);
 								final Player pl = event.getPlayer();
 								
 								Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable(){
 
 									@Override
 									public void run() {
-										MotionManager.onPacket(pl, forwards, sideways);
+										MotionManager.onPacket(pl, forwards, sideways, jumping);
 										/*MotionManager.move(pl, forwards,
 												sideways);*/
 										return;

@@ -383,7 +383,7 @@ public class uPlanesListener implements Listener {
 			 if(pass instanceof Player){
 				 Player pl = (Player) pass;
 				 MovePacketInfo mpi = MotionManager.getMostRecentPacketInfo(pl);
-				 MotionManager.move(pl, mpi.f, mpi.s);
+				 MotionManager.move(pl, mpi.f, mpi.s, mpi.jumping);
 			 }
 		 }
 	 }

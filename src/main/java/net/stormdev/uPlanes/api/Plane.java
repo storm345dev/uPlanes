@@ -42,6 +42,8 @@ public class Plane implements Serializable {
 	private transient double offset;
 	private transient long lastUpdateEventTime = System.currentTimeMillis();
 	private transient Vector lastUpdateEventVec = null;
+	private transient boolean speedLocked = false;
+	private transient long speedLockTime = 0;
 	
 	public static enum RollTarget {
 		LEFT(25), NONE(0), RIGHT(-25);
@@ -285,5 +287,21 @@ public class Plane implements Serializable {
 
 	public void setLastUpdateEventVec(Vector lastUpdateEventVec) {
 		this.lastUpdateEventVec = lastUpdateEventVec;
+	}
+
+	public boolean isSpeedLocked() {
+		return speedLocked;
+	}
+
+	public void setSpeedLocked(boolean speedLocked) {
+		this.speedLocked = speedLocked;
+	}
+
+	public long getSpeedLockTime() {
+		return speedLockTime;
+	}
+
+	public void setSpeedLockTime(long speedLockTime) {
+		this.speedLockTime = speedLockTime;
 	}
 }

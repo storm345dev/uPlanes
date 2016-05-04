@@ -15,6 +15,7 @@ import net.stormdev.uPlanes.utils.PEntityMeta;
 import net.stormdev.uPlanes.utils.PlaneUpdateEvent;
 import net.stormdev.uPlanes.utils.StatValue;
 
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Vehicle;
@@ -43,10 +44,12 @@ public class MotionManager {
 	public static class MovePacketInfo {
 		public float f = 0;
 		public float s = 0;
+		public boolean jumping = false;
 		
-		public MovePacketInfo(float f, float s){
+		public MovePacketInfo(float f, float s, boolean jumping){
 			this.f = f;
 			this.s = s;
+			this.jumping = jumping;
 		}
 	}
 	private static Map<UUID, MovePacketInfo> playerPacketUpdates = new HashMap<UUID, MovePacketInfo>();
@@ -55,22 +58,22 @@ public class MotionManager {
 		playerPacketUpdates.remove(player.getUniqueId());
 	}
 	
-	public static void onPacket(Player player, float f, float s){
+	public static void onPacket(Player player, float f, float s, boolean jumping){
 		if(!player.isOnline()){
 			return;
 		}
-		playerPacketUpdates.put(player.getUniqueId(), new MovePacketInfo(f, s));
+		playerPacketUpdates.put(player.getUniqueId(), new MovePacketInfo(f, s, jumping));
 	}
 	
 	public static MovePacketInfo getMostRecentPacketInfo(Player player){
 		MovePacketInfo m = playerPacketUpdates.get(player.getUniqueId());
 		if(m == null){
-			m = new MovePacketInfo(0, 0);
+			m = new MovePacketInfo(0, 0, false);
 		}
 		return m;
 	}
 	
-	public static void move(Player player, float f, float s) {
+	public static void move(Player player, float f, float s, boolean jumping) {
 		Vector vec = new Vector();
 		Entity ent = player.getVehicle();
 		if (ent == null) {
@@ -172,6 +175,19 @@ public class MotionManager {
 		}*/
 		int side = 0; // -1=left, 0=straight, 1=right
 		Boolean turning = false;
+		if(jumping && !pln.isHover()){
+			decel = false;
+			if(!pln.isSpeedLocked()){
+				pln.setSpeedLocked(true);
+				player.sendMessage(ChatColor.YELLOW+"Thrust locked at "+Math.round(AccelerationManager.getCurrentMultiplier(plane)*100)+"%. Unlock it again with w.");
+				pln.setSpeedLockTime(System.currentTimeMillis());
+			}
+		}
+		if(f != 0 && pln.isSpeedLocked() && !pln.isHover() && !jumping
+				&& System.currentTimeMillis()-pln.getSpeedLockTime() > 500){
+			pln.setSpeedLocked(false);
+			player.sendMessage(ChatColor.YELLOW+"Thrust unlocked. Lock it again with spacebar.");
+		}
 		if(f > 0){
 			speedModKey = Keypress.W;
 			decel = false;
@@ -189,7 +205,11 @@ public class MotionManager {
 		Boolean isRight = false;
 		Boolean isLeft = false;
 		
-		double accelMod = !decel ? AccelerationManager.getMultiplier(player, plane, pln) 
+		if(pln.isSpeedLocked()){
+			decel = false;
+		}
+		
+		double accelMod = !decel ? AccelerationManager.getMultiplier(player, plane, pln, pln.isSpeedLocked()) 
 				: (f == 0 ? AccelerationManager.decelerateAndGetMult(player, plane, pln) 
 						: AccelerationManager.decelerateAndGetMult(player, plane, pln));
 		if(f < 0 && pln.isHover()){
@@ -239,7 +259,7 @@ public class MotionManager {
 		}*/
 		
 		x *= accelMod;
-		z *= accelMod;	
+		z *= accelMod;
 		
 		boolean hasFlightSpeed = (new Vector(x, 0, z).lengthSquared() > 0.75 || accelMod > 0.75);
 		if(pln.isHover()){
