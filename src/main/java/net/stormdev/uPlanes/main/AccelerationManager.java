@@ -151,7 +151,7 @@ public class AccelerationManager {
 		if(speedLocked || current == 1){
 			return current;
 		}
-		float diff = 0.5f; //Fixed cus it looks better /*(float) (1-current)*/ //The difference between 1 (full speed) and the rate we want to accelerate by
+		float diff = 0.2f; //Fixed cus it looks better /*(float) (1-current)*/ //The difference between 1 (full speed) and the rate we want to accelerate by
 		current += (plane.getAccelMod()*getA(player, cart, plane)*diff); //Increase the speed by 'a' multiplied by the difference; eg. accelerates faster the slower the vehicle moves (Looks quite realistic)
 		setCurrentAccel(cart, current);
 		return current;
