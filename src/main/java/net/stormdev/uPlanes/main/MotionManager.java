@@ -212,7 +212,7 @@ public class MotionManager {
 		double accelMod = !decel ? AccelerationManager.getMultiplier(player, plane, pln, pln.isSpeedLocked()) 
 				: (f == 0 ? AccelerationManager.decelerateAndGetMult(player, plane, pln) 
 						: AccelerationManager.decelerateAndGetMult(player, plane, pln));
-		if(f < 0 && pln.isHover()){
+		if(f < 0 /*&& pln.isHover()*/){
 			accelMod = AccelerationManager.decelerateAndGetMult(player, plane, pln); //Decelerate faster by calling again
 		}
 		
@@ -261,8 +261,8 @@ public class MotionManager {
 		x *= accelMod;
 		z *= accelMod;
 		
-		double speedLength = pln.getSpeed() * accelMod; //TODO Use pln.getSpeed() * accelMod since this is bad
-		boolean hasFlightSpeed = (speedLength > 10 || accelMod > 0.75);
+		double speedLength = pln.getSpeed() * accelMod;
+		boolean hasFlightSpeed = (speedLength > 10 || accelMod > 0.87);
 		if(pln.isHover()){
 			double pitch = 20*accelMod;
 			if(pitch > 10){
