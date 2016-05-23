@@ -12,6 +12,7 @@ import net.stormdev.uPlanes.main.PlaneGenerator;
 import net.stormdev.uPlanes.main.PlaneItemMethods;
 import net.stormdev.uPlanes.main.main;
 import net.stormdev.uPlanes.presets.PlanePreset;
+import net.stormdev.uPlanes.utils.CartOrientationUtil;
 import net.stormdev.uPlanes.utils.Lang;
 import net.stormdev.uPlanes.utils.PEntityMeta;
 import net.stormdev.uPlanes.utils.StatValue;
@@ -25,6 +26,7 @@ import org.bukkit.entity.Vehicle;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 import org.bukkit.metadata.MetadataValue;
+import org.bukkit.util.Vector;
 
 /**
  * uPlaneManager is a section of the API for managing, creating
@@ -276,9 +278,10 @@ public class uPlaneManager {
 	 * 
 	 * @param plane The plane to place
 	 * @param loc The location to place it at
+	 * @param directionToFace The direction for the plane to rotate to face
 	 * @return Returns the placed entity
 	 */
-	public Vehicle placePlane(Plane plane, Location loc){
+	public Vehicle placePlane(Plane plane, Location loc, Vector directionToFace){
 		synchronized (uPlaneManager.class){
 			PlanePreset pp = plane.getPreset();
 			Vehicle ent;
@@ -314,12 +317,27 @@ public class uPlaneManager {
 				PEntityMeta.setMetadata(ent, "plane.hover", new StatValue(true, main.plugin));
 				plane.setHover(true);
 			}
+			PEntityMeta.setMetadata(ent, "plane.direction", new StatValue(directionToFace.clone(), main.plugin));
 			plane.setId(ent.getUniqueId());
 			plane.setRoll(0);
+			float vYaw = (float) Math.toDegrees(Math.atan2(directionToFace.getX() , -directionToFace.getZ()));
+			vYaw -= 90;
+			CartOrientationUtil.setYaw(ent, vYaw);
 			
 			main.plugin.planeManager.nowPlaced(plane);
 			return ent;
 		}
+	}
+	
+	/**
+	 * Place a plane at the given location and handle it all correctly
+	 * 
+	 * @param plane The plane to place
+	 * @param loc The location to place it at
+	 * @return Returns the placed entity
+	 */
+	public Vehicle placePlane(Plane plane, Location loc){
+		return placePlane(plane, loc, loc.getDirection());
 	}
 	
 	/**
