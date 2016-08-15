@@ -31,4 +31,14 @@ public class AutopilotManager {
 	
 		destination.autoPilotEngaged();
 	}
+	
+	/**
+	 * Forcefully stop an autopilot flying
+	 * @param planeVehicle The vehicle to stop autopilot for
+	 */
+	public void stopAutopilot(Vehicle planeVehicle){
+		PEntityMeta.removeMetadata(planeVehicle, "plane.destination");
+		PEntityMeta.removeMetadata(planeVehicle, "plane.autopilotData");
+		PEntityMeta.removeMetadata(planeVehicle, "plane.autopilotPosTracking");
+	}
 }

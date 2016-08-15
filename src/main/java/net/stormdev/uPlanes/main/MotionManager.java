@@ -97,6 +97,7 @@ public class MotionManager {
 			return;
 		}
 		
+		
 		boolean decel = true;
 		if(f == 0 && s == 0){
 			/*if(AccelerationManager.getCurrentMultiplier(plane) == 0){
@@ -112,7 +113,10 @@ public class MotionManager {
 		Vector playD = player.getEyeLocation().getDirection();
 		Vector planeDirection = null;
 		
-		if(!main.doTurningCircles){
+		if(PEntityMeta.hasMetadata(plane, "plane.destination")){
+			planeDirection = playD.clone().setY(0).normalize();
+		}
+		else if(!main.doTurningCircles){
 			if((AccelerationManager.getCurrentMultiplier(plane) >= 0.2 || pln.isHover()) && !PEntityMeta.hasMetadata(plane, "plane.destination")){
 				planeDirection = playD.clone().setY(0).normalize();
 				float vYaw = (float) Math.toDegrees(Math.atan2(planeDirection.getX() , -planeDirection.getZ()));
@@ -209,11 +213,15 @@ public class MotionManager {
 			decel = false;
 		}
 		
-		double accelMod = !decel ? AccelerationManager.getMultiplier(player, plane, pln, pln.isSpeedLocked()) 
-				: (f == 0 ? AccelerationManager.decelerateAndGetMult(player, plane, pln) 
-						: AccelerationManager.decelerateAndGetMult(player, plane, pln));
-		if(f < 0 /*&& pln.isHover()*/){
-			accelMod = AccelerationManager.decelerateAndGetMult(player, plane, pln); //Decelerate faster by calling again
+		double accelMod = 1;
+		
+		if(!PEntityMeta.hasMetadata(plane, "plane.destination")){
+			accelMod = !decel ? AccelerationManager.getMultiplier(player, plane, pln, pln.isSpeedLocked()) 
+					: (f == 0 ? AccelerationManager.decelerateAndGetMult(player, plane, pln) 
+							: AccelerationManager.decelerateAndGetMult(player, plane, pln));
+			if(f < 0 /*&& pln.isHover()*/){
+				accelMod = AccelerationManager.decelerateAndGetMult(player, plane, pln); //Decelerate faster by calling again
+			}
 		}
 		
 		float hoverAmount = (float) (0.0002 * pln.getSpeed());

@@ -419,15 +419,16 @@ public class uPlanesListener implements Listener {
 			}*/
 		}
 		
+		Plane pln = getPlane(car);
+		
 		if(PEntityMeta.hasMetadata(car, "plane.destination")){
 			//Autopilot
 			List<MetadataValue> metas = PEntityMeta.getMetadata(car, "plane.destination");
 			Location dest = (Location) metas.get(0).value();
-			FlightControl.route(dest, loc, car);
+			FlightControl.route(dest, loc, car, pln);
 			return;
-		}	
+		}
 		
-		Plane pln = getPlane(car);
 		if(pln == null){
 			return;
 		}

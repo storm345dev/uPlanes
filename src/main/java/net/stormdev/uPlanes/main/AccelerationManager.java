@@ -69,14 +69,27 @@ public class AccelerationManager {
 	}
 	
 	private static float getA(Player player, Vehicle cart, Plane plane){ //Get the multiplier for accelerating
-		return (float) (0.020*uPlanesAPI.getPlaneManager().getAlteredAccelerationMod(player, cart, plane)); //Our constant of 0.025 multiplied by whatever the API is asking for as a modification to the rate of acceleration
+		float d = 1;
+		if(PEntityMeta.hasMetadata(cart, "plane.destination")){
+			d = 1.2f; //Accel faster when autopilot
+		}
+		if(player == null){
+			return d*0.020f;
+		}
+		return (float) (d*0.020*uPlanesAPI.getPlaneManager().getAlteredAccelerationMod(player, cart, plane)); //Our constant of 0.025 multiplied by whatever the API is asking for as a modification to the rate of acceleration
 	}
 	
 	private static float getDA(Player player, Vehicle cart, Plane plane){ //Get the multiplier for accelerating
+		if(player == null){
+			return 0.030f;
+		}
 		return (float) (0.030*uPlanesAPI.getPlaneManager().getAlteredDecelerationMod(player, cart, plane)); //Our constant of 0.025 multiplied by whatever the API is asking for as a modification to the rate of acceleration
 	}
 	
 	private static float getGA(Player player, Vehicle cart, Plane plane){ //Get the multiplier for accelerating
+		if(player == null){
+			return 0.020f;
+		}
 		return (float) (0.020*uPlanesAPI.getPlaneManager().getAlteredDecelerationMod(player, cart, plane)); //Our constant of 0.025 multiplied by whatever the API is asking for as a modification to the rate of acceleration
 	}
 	
