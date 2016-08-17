@@ -1004,7 +1004,22 @@ public class uPlanesListener implements Listener {
 			}
 		}
 		
-		double health = plane.getHealth();
+		if(plane.isHover() && m.getVelocity().getY() < 0.001 && dmger == null){
+			return; //Don't damage helicopters landing
+		}
+		
+		plane.setLastDamager(dmger);
+		if(dmger != null && dmger instanceof Player){
+			uPlanesAPI.getPlaneManager().damagePlane(m, plane, punchDamage, (Player) dmger);
+		}
+		else {
+			uPlanesAPI.getPlaneManager().damagePlane(m, plane, event.getDamage(), "Damage");
+		}
+		
+		event.setDamage(-5.5);
+		event.setCancelled(true);
+		
+		/*double health = plane.getHealth();
 		if(PEntityMeta.hasMetadata(m, "plane.health")){
 			List<MetadataValue> ms = PEntityMeta.getMetadata(m, "plane.health");
 			health = (Double) ms.get(0).value();
@@ -1063,7 +1078,7 @@ public class uPlanesListener implements Listener {
 					}}, 2l);
 				
 			}
-		}
+		}*/
 		return;
 	}
 	

@@ -5,6 +5,18 @@ import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Vehicle;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.MaterialData;
+import org.bukkit.metadata.MetadataValue;
+import org.bukkit.util.Vector;
+
 import net.stormdev.uPlanes.hover.HoverCart;
 import net.stormdev.uPlanes.hover.HoverCartEntity;
 import net.stormdev.uPlanes.items.ItemPlaneValidation;
@@ -16,17 +28,6 @@ import net.stormdev.uPlanes.utils.CartOrientationUtil;
 import net.stormdev.uPlanes.utils.Lang;
 import net.stormdev.uPlanes.utils.PEntityMeta;
 import net.stormdev.uPlanes.utils.StatValue;
-
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Vehicle;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
-import org.bukkit.metadata.MetadataValue;
-import org.bukkit.util.Vector;
 
 /**
  * uPlaneManager is a section of the API for managing, creating
@@ -357,6 +358,12 @@ public class uPlaneManager {
 		return placePlane(plane, loc);
 	}
 	
+	private PlaneDamageEvent planeDamageEvent(Vehicle v, Plane p, double dmg, String cause){
+		PlaneDamageEvent pde = new PlaneDamageEvent(v, p, dmg, cause);
+		Bukkit.getPluginManager().callEvent(pde);
+		return pde;
+	}
+	
 	/**
 	 * Destroy the given plane safely and correctly
 	 * 
@@ -507,6 +514,12 @@ public class uPlaneManager {
 		if(m.hasMetadata("invincible") || PEntityMeta.hasMetadata(m, "invincible")){
 			return;
 		}
+		
+		PlaneDamageEvent evt1 = planeDamageEvent(m, plane, damage, cause);
+		if(evt1.isCancelled()){
+			return;
+		}
+		
 		double health = plane.getHealth();
 		if(PEntityMeta.hasMetadata(m, "plane.health")){
 			List<MetadataValue> ms = PEntityMeta.getMetadata(m, "plane.health");

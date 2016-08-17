@@ -12,6 +12,7 @@ import net.stormdev.uPlanes.utils.Colors;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.MaterialData;
@@ -44,6 +45,7 @@ public class Plane implements Serializable {
 	private transient Vector lastUpdateEventVec = null;
 	private transient boolean speedLocked = false;
 	private transient long speedLockTime = 0;
+	private transient Entity lastDamager;
 	
 	public static enum RollTarget {
 		LEFT(25), NONE(0), RIGHT(-25);
@@ -303,5 +305,13 @@ public class Plane implements Serializable {
 
 	public void setSpeedLockTime(long speedLockTime) {
 		this.speedLockTime = speedLockTime;
+	}
+
+	public Entity getLastDamager() {
+		return lastDamager;
+	}
+
+	public void setLastDamager(Entity lastDamager) {
+		this.lastDamager = lastDamager;
 	}
 }
