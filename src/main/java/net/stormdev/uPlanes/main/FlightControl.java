@@ -294,17 +294,20 @@ public class FlightControl {
 				//Arrived
 				AccelerationManager.setCurrentAccel(vehicle, 1.0);
 				vehicle.setVelocity(new Vector(0,0,0));
-				PEntityMeta.setMetadata(vehicle, "arrivedAtDest", new StatValue(null, main.plugin));
 				AccelerationManager.setCurrentAccel(vehicle, 0);
-				PEntityMeta.removeMetadata(vehicle, "plane.destination");
-				PEntityMeta.removeMetadata(vehicle, "plane.autopilotPosTracking");
-				Bukkit.getScheduler().runTaskLater(main.plugin, new Runnable(){
-
-					@Override
-					public void run() {
-						PEntityMeta.removeMetadata(vehicle, "arrivedAtDest");
-						return;
-					}}, 5l);
+				if(aData != null && aData.isEndedWhenArrive()){
+					PEntityMeta.setMetadata(vehicle, "arrivedAtDest", new StatValue(null, main.plugin));
+					
+					PEntityMeta.removeMetadata(vehicle, "plane.destination");
+					PEntityMeta.removeMetadata(vehicle, "plane.autopilotPosTracking");
+					Bukkit.getScheduler().runTaskLater(main.plugin, new Runnable(){
+	
+						@Override
+						public void run() {
+							PEntityMeta.removeMetadata(vehicle, "arrivedAtDest");
+							return;
+						}}, 5l);
+				}
 				
 				if(aData == null){
 					if(passenger instanceof Player){
@@ -312,9 +315,12 @@ public class FlightControl {
 					}
 				}
 				else{
+					posTracking.setLastMoveTime(System.currentTimeMillis());
 					aData.arrivedAtDestination();
-					PEntityMeta.removeMetadata(vehicle, "plane.autopilotData");
-					PEntityMeta.removeMetadata(vehicle, "plane.autopilotPosTracking");
+					if(aData.isEndedWhenArrive()){
+						PEntityMeta.removeMetadata(vehicle, "plane.autopilotData");
+						aData.onEnd();
+					}
 				}
 			}
 		}
