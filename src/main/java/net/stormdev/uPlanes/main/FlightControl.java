@@ -321,6 +321,9 @@ public class FlightControl {
 						PEntityMeta.removeMetadata(vehicle, "plane.autopilotData");
 						aData.onEnd();
 					}
+					else {
+						y = targetLoc.getY() - current.getY();
+					}
 				}
 			}
 		}

@@ -36,6 +36,9 @@ public class Plane implements Serializable {
 	private boolean hover = false;
 	private UUID id = UUID.randomUUID();
 	private boolean writtenOff = false;
+	private float hitboxX = -1;
+	private float hitboxZ = -1;
+	
 	private transient float currentPitch = 0;
 	private transient float roll = 0; //TODO
 	private transient RollTarget rollTarget = RollTarget.NONE;
@@ -313,5 +316,35 @@ public class Plane implements Serializable {
 
 	public void setLastDamager(Entity lastDamager) {
 		this.lastDamager = lastDamager;
+	}
+
+	public float getHitboxX() {
+		PlanePreset pp = getPreset();
+		if(hitboxX < 0 && pp != null){
+			return pp.getHitBoxX();
+		}
+		return hitboxX;
+	}
+
+	/**
+	 * Isn't saved when plane is destroyed and replaced
+	 */
+	public void setHitboxX(float hitboxX) {
+		this.hitboxX = hitboxX;
+	}
+
+	public float getHitboxZ() {
+		PlanePreset pp = getPreset();
+		if(hitboxZ < 0 && pp != null){
+			return pp.getHitBoxZ();
+		}
+		return hitboxZ;
+	}
+
+	/**
+	 * Isn't saved when plane is destroyed and replaced
+	 */
+	public void setHitboxZ(float hitboxZ) {
+		this.hitboxZ = hitboxZ;
 	}
 }
