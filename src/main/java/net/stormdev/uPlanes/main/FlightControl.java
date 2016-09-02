@@ -312,6 +312,7 @@ public class FlightControl {
 				if(aData == null){
 					if(passenger instanceof Player){
 						((Player)passenger).sendMessage(main.colors.getSuccess()+Lang.get("general.cmd.destinations.arrive"));
+						PEntityMeta.removeMetadata(vehicle, "plane.destination");
 					}
 				}
 				else{
@@ -320,6 +321,7 @@ public class FlightControl {
 					if(aData.isEndedWhenArrive()){
 						PEntityMeta.removeMetadata(vehicle, "plane.autopilotData");
 						aData.onEnd();
+						PEntityMeta.removeMetadata(vehicle, "plane.destination");
 					}
 					else {
 						y = targetLoc.getY() - current.getY();
@@ -327,13 +329,15 @@ public class FlightControl {
 				}
 			}
 		}
+		else {
+			float vYaw = (float) Math.toDegrees(Math.atan2(toGo.getX() , -toGo.getZ())); 
+			CartOrientationUtil.setYaw(vehicle, vYaw-90);
+		}
 		Vector vel = new Vector(x, y, z);
 		Vector behind = vel.clone().multiply(-2);
 		Location back = current.add(behind);
 		back.getWorld().playEffect(back, Effect.SMOKE, 1);
 		vehicle.setVelocity(vel.clone().multiply(0.5));
-		float vYaw = (float) Math.toDegrees(Math.atan2(toGo.getX() , -toGo.getZ())); 
-		CartOrientationUtil.setYaw(vehicle, vYaw-90);
 		if(asc){
 			posTracking.setLastAscPos(vehicle.getLocation().toVector().clone());
 		}
