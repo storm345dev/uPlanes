@@ -728,7 +728,7 @@ public class uPlanesListener implements Listener {
 		}
 		
 		if(crashing && !plane.isHover() && !PEntityMeta.hasMetadata(cart, "plane.destination") && !PEntityMeta.hasMetadata(cart, "arrivedAtDest")){
-			if((travel.getY() < -0.2 && plane.getCurrentPitch() > 22) || ((travel.getY() < -0.2 && new Vector(travel.getX(), 0, travel.getZ()).lengthSquared() < 0.8 && event.getAcceleration() < 0.8))){
+			if((travel.getY() < -0.2 && plane.getCurrentPitch() > 22) || ((travel.getY() < -0.5 && new Vector(travel.getX(), 0, travel.getZ()).lengthSquared() < 0.8 && event.getAcceleration() < 0.8))){
 				double y = Math.min(travel.getY(), cart.getVelocity().getY());
 				Location nextVertical = cart.getLocation().add(0, y, 0);
 				Block b = nextVertical.getBlock();
