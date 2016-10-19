@@ -2,25 +2,6 @@ package net.stormdev.uPlanes.main;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.regex.Pattern;
-
-import net.stormdev.uPlanes.api.AutopilotDestination;
-import net.stormdev.uPlanes.api.Keypress;
-import net.stormdev.uPlanes.api.Plane;
-import net.stormdev.uPlanes.api.PlaneDeathEvent;
-import net.stormdev.uPlanes.api.uPlanesAPI;
-import net.stormdev.uPlanes.hover.HoverCart;
-import net.stormdev.uPlanes.items.ItemPlaneValidation;
-import net.stormdev.uPlanes.main.MotionManager.MovePacketInfo;
-import net.stormdev.uPlanes.presets.PlanePreset;
-import net.stormdev.uPlanes.presets.PresetManager;
-import net.stormdev.uPlanes.utils.CartOrientationUtil;
-import net.stormdev.uPlanes.utils.Lang;
-import net.stormdev.uPlanes.utils.PEntityMeta;
-import net.stormdev.uPlanes.utils.PlaneUpdateEvent;
-import net.stormdev.uPlanes.utils.PrePlaneCrashEvent;
-import net.stormdev.uPlanes.utils.PrePlaneRoughLandingEvent;
-import net.stormdev.uPlanes.utils.StatValue;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -32,6 +13,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.Chest;
 import org.bukkit.block.DoubleChest;
 import org.bukkit.block.Sign;
+import org.bukkit.craftbukkit.v1_9_R1.CraftWorld;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Damageable;
 import org.bukkit.entity.Entity;
@@ -74,6 +56,23 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.util.Vector;
+
+import net.stormdev.uPlanes.api.AutopilotDestination;
+import net.stormdev.uPlanes.api.Keypress;
+import net.stormdev.uPlanes.api.Plane;
+import net.stormdev.uPlanes.api.uPlanesAPI;
+import net.stormdev.uPlanes.hover.HoverCart;
+import net.stormdev.uPlanes.items.ItemPlaneValidation;
+import net.stormdev.uPlanes.main.MotionManager.MovePacketInfo;
+import net.stormdev.uPlanes.presets.PlanePreset;
+import net.stormdev.uPlanes.presets.PresetManager;
+import net.stormdev.uPlanes.utils.CartOrientationUtil;
+import net.stormdev.uPlanes.utils.Lang;
+import net.stormdev.uPlanes.utils.PEntityMeta;
+import net.stormdev.uPlanes.utils.PlaneUpdateEvent;
+import net.stormdev.uPlanes.utils.PrePlaneCrashEvent;
+import net.stormdev.uPlanes.utils.PrePlaneRoughLandingEvent;
+import net.stormdev.uPlanes.utils.StatValue;
 
 public class uPlanesListener implements Listener {
 	private main plugin;
@@ -307,6 +306,7 @@ public class uPlanesListener implements Listener {
 				
 				if(aData != null && !aData.isAutopilotOverridenByControlInput()){
 					event.setCancelled(true);
+					exited.teleport(veh.getLocation());
 					return;
 				}
 	        }
@@ -371,15 +371,18 @@ public class uPlanesListener implements Listener {
 	    	return;
 	    }
 	
-	 @EventHandler(priority=EventPriority.HIGH)
+	@EventHandler(priority=EventPriority.HIGH)
 	void onVehTick(VehicleUpdateEvent event){
 		 if(event instanceof PlaneUpdateEvent){
 			 return;
 		 }
 		 
 		 Vehicle v = event.getVehicle();
-		 if(uPlanesAPI.getPlaneManager().isAPlane(v)){
+		 Plane pln = uPlanesAPI.getPlaneManager().getPlaneById(v.getUniqueId());
+		 if(pln != null){
+			 
 			 Entity pass = v.getPassenger();
+			 
 			 if(pass instanceof Player){
 				 Player pl = (Player) pass;
 				 MovePacketInfo mpi = MotionManager.getMostRecentPacketInfo(pl);
