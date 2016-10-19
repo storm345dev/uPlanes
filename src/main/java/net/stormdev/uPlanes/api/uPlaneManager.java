@@ -411,6 +411,7 @@ public class uPlaneManager {
 		if(health <= 0){
 			health = 0;
 		}
+		health = Math.round(health*10.0d)/10.0d;
 		msg = msg.replaceAll(Pattern.quote("%remainder%"), health+"HP");
 		msg = msg.replaceAll(Pattern.quote("%cause%"), "Fist");
 		((Player)damager).sendMessage(main.colors.getInfo()+msg);
@@ -444,6 +445,7 @@ public class uPlaneManager {
 		if(health <= 0){
 			health = 0;
 		}
+		health = Math.round(health*10.0d)/10.0d;
 		msg = msg.replaceAll(Pattern.quote("%remainder%"), (health)+"HP");
 		msg = msg.replaceAll(Pattern.quote("%cause%"), cause);
 		((Player)damager).sendMessage(main.colors.getInfo()+msg);
