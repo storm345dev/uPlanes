@@ -1012,6 +1012,10 @@ public class uPlanesListener implements Listener {
 		}
 		
 		plane.setLastDamager(dmger);
+		if(event.getDamage() <= 0){
+			return;
+		}
+		
 		if(dmger != null && dmger instanceof Player){
 			uPlanesAPI.getPlaneManager().damagePlane(m, plane, punchDamage, (Player) dmger);
 		}

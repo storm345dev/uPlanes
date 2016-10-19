@@ -4,15 +4,15 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.stormdev.uPlanes.api.Plane;
-import net.stormdev.uPlanes.main.main;
-import net.stormdev.uPlanes.utils.Colors;
-
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.MaterialData;
+
+import net.stormdev.uPlanes.api.Plane;
+import net.stormdev.uPlanes.main.main;
+import net.stormdev.uPlanes.utils.Colors;
 
 /**
  * Simple serializable format for plane data
