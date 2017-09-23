@@ -1020,7 +1020,9 @@ public class uPlanesListener implements Listener {
 			uPlanesAPI.getPlaneManager().damagePlane(m, plane, punchDamage, (Player) dmger);
 		}
 		else {
-			uPlanesAPI.getPlaneManager().damagePlane(m, plane, event.getDamage(), "Damage");
+			if(dmger != null || event.getDamage() >= 20){
+				uPlanesAPI.getPlaneManager().damagePlane(m, plane, event.getDamage(), "Damage");
+			}
 		}
 		
 		event.setDamage(-5.5);
