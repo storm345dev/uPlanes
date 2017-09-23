@@ -617,7 +617,7 @@ public class uPlanesListener implements Listener {
 			player.sendMessage(main.colors.getError()+Lang.get("general.heightLimit"));
 		}
 		
-		if((new Vector(travel.getX(), 0, travel.getZ()).lengthSquared() < 0.75 && event.getAcceleration() < 0.75) && !plane.isHover() && travel.getY() < 0.1){
+		if((new Vector(travel.getX(), 0, travel.getZ()).lengthSquared() < 0.75 && event.getAcceleration() < 0.75) && !plane.canFloat() && travel.getY() < 0.1){
 			travel.setY(-Math.abs(cart.getVelocity().getY()) * 1.015); //Need more speed to maintain flight!
 			/*float pitch = plane.getCurrentPitch();
 			pitch += 1;
@@ -1007,7 +1007,7 @@ public class uPlanesListener implements Listener {
 			}
 		}
 		
-		if(plane.isHover() && m.getVelocity().getY() < 0.001 && dmger == null){
+		if(plane.canFloat() && m.getVelocity().getY() < 0.001 && dmger == null){
 			return; //Don't damage helicopters landing
 		}
 		

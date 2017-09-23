@@ -83,6 +83,11 @@ public class PresetManager {
 				double accelMod = sect.getDouble("acceleration") / 10.0d;
 				double turnAmountPerTick = sect.getDouble("handling") / 10.0d;
 				boolean hover = sect.contains("hover") ? sect.getBoolean("hover") : false;
+				boolean hoverMidair = sect.contains("planeHover") ? sect.getBoolean("planeHover") : false;
+				if(sect.contains("helicopter")){
+					hoverMidair = hover;
+					hover = sect.getBoolean("helicopter");
+				}
 				double cost = sect.getDouble("cost");
 				
 				if(name == null || speed <= 0 || health <= 0 || accelMod <= 0 || turnAmountPerTick <= 0){
@@ -110,7 +115,7 @@ public class PresetManager {
 					hitBoxZ = (float) sect.getDouble("hitbox.z");
 				}
 				
-				PlanePreset pp = new PlanePreset(id, speed, name, health, accelMod, turnAmountPerTick, hover, cost, displayBlock, displayOffset, hitBoxX, hitBoxZ);
+				PlanePreset pp = new PlanePreset(id, speed, name, health, accelMod, turnAmountPerTick, hover, cost, displayBlock, displayOffset, hitBoxX, hitBoxZ, hoverMidair);
 				this.presets.add(pp);
 			} catch (Exception e) {
 				//Error loading this preset!

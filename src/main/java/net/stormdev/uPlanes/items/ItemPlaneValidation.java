@@ -5,6 +5,7 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 import net.stormdev.uPlanes.api.Plane;
+import net.stormdev.uPlanes.presets.PlanePreset;
 import net.stormdev.uPlanes.utils.Colors;
 
 import org.bukkit.Material;
@@ -30,6 +31,14 @@ public class ItemPlaneValidation {
 		}
 		
 		Plane c = getPlaneFromLore(im.getDisplayName(), lore);
+
+		PlanePreset preset = c.getPreset();
+		if(preset != null){
+			if(preset.canPlaneHoverMidair()){
+			    c.setCanPlaneHover(true);
+            }
+		}
+
 		return c;
 	}
 	
@@ -38,8 +47,12 @@ public class ItemPlaneValidation {
 			return null;
 		}
 		int i = 0;
+		boolean isHeli= false;
 		if(!Colors.strip((lore.get(i))).toLowerCase().contains("[speed:]")){
 			String firstLine = Colors.strip((lore.get(i))).toLowerCase();
+			if(firstLine.equalsIgnoreCase("helicopter")){
+				isHeli = true;
+			}
 			if(/*firstLine.equalsIgnoreCase("car")*/!firstLine.equalsIgnoreCase("plane") && !firstLine.equalsIgnoreCase("helicopter")){
 				return null;
 			}
@@ -82,7 +95,7 @@ public class ItemPlaneValidation {
 		
 		i++;
 		if(i >= lore.size()){ //Old item type
-			return new Plane(speed, name, health, 1, Plane.DEFAULT_TURN_AMOUNT, hover);
+			return new Plane(speed, name, health, 1, Plane.DEFAULT_TURN_AMOUNT, isHeli, isHeli?true:hover);
 		}
 		else {
 			line = Colors.strip(lore.get(i)).toLowerCase(); //[Hover:] Yes
@@ -105,7 +118,7 @@ public class ItemPlaneValidation {
 					
 					i++;
 					if(i >= lore.size()){ //Not hover
-						return new Plane(speed, name, health, accelMod, turnAmount, false);
+						return new Plane(speed, name, health, accelMod, turnAmount, isHeli, false);
 					}
 					
 					line = Colors.strip(lore.get(i)).toLowerCase(); //[Hover:] Yes
@@ -113,7 +126,7 @@ public class ItemPlaneValidation {
 					if(hoverRaw.equalsIgnoreCase("Yes")){
 						hover = true;
 					}
-					return new Plane(speed, name, health, accelMod, turnAmount, hover);
+					return new Plane(speed, name, health, accelMod, turnAmount, isHeli, hover);
 				} catch (Exception e) {
 					return null; //Invalid item!
 				}
@@ -124,6 +137,6 @@ public class ItemPlaneValidation {
 				hover = true;
 			}
 		}
-		return new Plane(speed, name, health, 1, Plane.DEFAULT_TURN_AMOUNT, hover);
+		return new Plane(speed, name, health, 1, Plane.DEFAULT_TURN_AMOUNT, isHeli, hover);
 	}
 }

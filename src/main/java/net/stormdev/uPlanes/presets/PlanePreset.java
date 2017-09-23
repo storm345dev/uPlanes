@@ -30,13 +30,18 @@ public class PlanePreset implements Serializable {
 	private double turnAmount = 2;
 	private double accelMod = 1;
 	private boolean hover = false;
+	private boolean canPlaneHoverMidair = false;
 	private double cost = 0;
 	private MaterialData displayBlock;
 	private double displayOffset = 0;
 	private float hitBoxX = -1;
 	private float hitBoxZ = -1;
-	
+
 	public PlanePreset(String presetID, double speed, String name, double health, double accelMod, double turnAmountPerTick, boolean hover, double cost, MaterialData displayBlock, double offset, float hitBoxX, float hitBoxZ){
+		this(presetID, speed, name, health, accelMod, turnAmountPerTick, hover, cost, displayBlock, offset, hitBoxX, hitBoxZ, hover);
+	}
+
+	public PlanePreset(String presetID, double speed, String name, double health, double accelMod, double turnAmountPerTick, boolean hover, double cost, MaterialData displayBlock, double offset, float hitBoxX, float hitBoxZ, boolean canPlaneHoverMidair){
 		this.setPresetID(presetID);
 		if(speed > main.maxSpeed){
 			speed = main.maxSpeed;
@@ -47,11 +52,20 @@ public class PlanePreset implements Serializable {
 		this.accelMod = accelMod;
 		this.turnAmount = turnAmountPerTick;
 		this.hover = hover;
+		this.canPlaneHoverMidair = canPlaneHoverMidair;
 		this.setCost(cost);
 		this.setDisplayBlock(displayBlock);
 		this.setDisplayOffset(offset);
 		this.hitBoxX = hitBoxX;
 		this.hitBoxZ = hitBoxZ;
+	}
+
+	public void setCanPlaneHoverMidair(boolean b){
+		this.canPlaneHoverMidair = b;
+	}
+
+	public boolean canPlaneHoverMidair(){
+		return this.canPlaneHoverMidair;
 	}
 	
 	public float getHitBoxX(){
@@ -72,20 +86,20 @@ public class PlanePreset implements Serializable {
 	}
 	
 	public Plane toPlane(){
-		return new Plane(getSpeed(), getName(), getHealth(), getAccelMod(), getTurnAmountPerTick(), isHover());
+		return new Plane(getSpeed(), getName(), getHealth(), getAccelMod(), getTurnAmountPerTick(), isHover(), canPlaneHoverMidair());
 	}
 	
 	public ItemStack toItemStack(){
 		ItemStack stack = new ItemStack(Material.MINECART);
 		List<String> lore = new ArrayList<String>();
 		ItemMeta meta = stack.getItemMeta();
-		lore.add(ChatColor.GRAY+"plane");
+		lore.add(ChatColor.GRAY+(hover?"helicopter":"plane"));
 		lore.add(main.colors.getTitle()+"[Speed:] "+main.colors.getInfo()+mutliplier);
 		lore.add(main.colors.getTitle()+"[Health:] "+main.colors.getInfo()+health);
 		lore.add(main.colors.getTitle()+"[Acceleration:] "+main.colors.getInfo()+accelMod*10.0d);
 		lore.add(main.colors.getTitle()+"[Handling:] "+main.colors.getInfo()+turnAmount*10.0d);
 		if(hover){
-			lore.add(main.colors.getTitle()+"[Hover:] "+main.colors.getInfo()+getHandleString(hover));
+			lore.add(main.colors.getTitle()+"[Hover:] "+main.colors.getInfo()+getHandleString(hover||canPlaneHoverMidair));
 		}
 		meta.setDisplayName(Colors.colorise(name));
 		meta.setLore(lore);

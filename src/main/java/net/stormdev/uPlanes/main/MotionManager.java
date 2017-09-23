@@ -15,6 +15,7 @@ import net.stormdev.uPlanes.utils.PEntityMeta;
 import net.stormdev.uPlanes.utils.PlaneUpdateEvent;
 import net.stormdev.uPlanes.utils.StatValue;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -157,7 +158,7 @@ public class MotionManager {
 			}
 			
 			double am = AccelerationManager.getCurrentMultiplier(plane);
-			if((am >= 0.2 || (pln.isHover()&&am>0)) && !PEntityMeta.hasMetadata(plane, "plane.destination")){
+			if((am >= 0.2 || ((pln.isHover()&&am>0)||(pln.canPlaneHoverMidair()&&!pln.isHover()&&!plane.isOnGround()))) && !PEntityMeta.hasMetadata(plane, "plane.destination")){
 				pln.updateRoll();
 				CartOrientationUtil.setRoll(plane, pln.getRoll());
 				planeDirection = rotateXZVector3dDegrees(planeDirection, yawDiff);
@@ -265,12 +266,20 @@ public class MotionManager {
 			x = 0;
 			z = 0;
 		}*/
-		
+
+		double xOriginal = x;
+		double zOriginal = z;
+
 		x *= accelMod;
 		z *= accelMod;
 		
 		double speedLength = pln.getSpeed() * accelMod;
 		boolean hasFlightSpeed = (speedLength > 10 || accelMod > 0.87);
+		boolean planeFloats = false;
+		if(pln.canPlaneHoverMidair()){
+		    planeFloats = !hasFlightSpeed;
+		    hasFlightSpeed = true;
+        }
 		if(pln.isHover()){
 			double pitch = 20*accelMod;
 			if(pitch > 10){
@@ -292,13 +301,13 @@ public class MotionManager {
 				if(pressedKeys.contains(Keypress.A)){
 					vertModKey = Keypress.A;
 				}
-				else if(pressedKeys.contains(Keypress.D)){
+				else if(pressedKeys.contains(Keypress.D) && (!plane.isOnGround() || pln.getCurrentPitch() > 0)){
 					vertModKey = Keypress.D;
 				}
 				
 				if(vertModKey != Keypress.NONE){
 					float pitch = pln.getCurrentPitch();
-					float change = (float) 2;
+					float change = (float) (planeFloats?0.5:2);
 					pitch += vertModKey.equals(Keypress.D) ? change : -change;
 					if(pitch > 89){
 						pitch = 89;
@@ -354,13 +363,29 @@ public class MotionManager {
 		}
 		
 		vec = new Vector(x, y, z);
-		
+
+		if(planeFloats && vec.clone().setY(0).lengthSquared() < 1){
+		    //Hover forwards / backwards in line with pitch
+            double m = Math.sin(pln.getCurrentPitch()*(Math.PI/180.0));
+            double yAmt = (m*m)*0.005;
+            if(m > 0){
+                yAmt = - yAmt;
+            }
+            if(Math.abs(pln.getCurrentPitch()) < 45){
+                yAmt = 0;
+            }
+            Vector floatVec = new Vector(xOriginal, 0, zOriginal);
+            floatVec.multiply(m);
+            floatVec.setY(yAmt);
+            vec.add(floatVec);
+        }
+
 		if(!speedModKey.equals(Keypress.NONE)){
 			pressedKeys.add(speedModKey);
 		}
-		
+
 		final PlaneUpdateEvent event = new PlaneUpdateEvent(plane, vec, player, pressedKeys, accelMod, pln);
-		
+
 		main.plugin.getServer().getScheduler()
 				.runTask(main.plugin, new Runnable() {
 					public void run() {

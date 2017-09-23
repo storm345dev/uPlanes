@@ -33,7 +33,8 @@ public class Plane implements Serializable {
 	private double health = 50;
 	private double turnAmount = DEFAULT_TURN_AMOUNT;
 	private double accelMod = 1;
-	private boolean hover = false;
+	private boolean hover = false; //If heli
+	private boolean canPlaneHover = false; //If plane that can hover in midair
 	private UUID id = UUID.randomUUID();
 	private boolean writtenOff = false;
 	private float hitboxX = -1;
@@ -114,7 +115,19 @@ public class Plane implements Serializable {
 		return this.roll;
 	}
 
+	public boolean canPlaneHoverMidair(){
+		return this.canPlaneHover;
+	}
+
+	public void setCanPlaneHover(boolean b){
+		this.canPlaneHover = b;
+	}
+
 	public Plane(double speed, String name, double health, double accelMod, double turnAmountPerTick, boolean hover){
+		this(speed, name, health, accelMod, turnAmountPerTick, hover, hover);
+	}
+
+	public Plane(double speed, String name, double health, double accelMod, double turnAmountPerTick, boolean hover, boolean canPlaneHoverMidair){
 		setCurrentPitch(0);
 		if(speed > main.maxSpeed){
 			speed = main.maxSpeed;
@@ -125,6 +138,7 @@ public class Plane implements Serializable {
 		this.accelMod = accelMod;
 		this.turnAmount = turnAmountPerTick;
 		this.hover = hover;
+		this.canPlaneHover = canPlaneHoverMidair;
 	}
 	
 	private String getHandleString(boolean b){
@@ -163,8 +177,8 @@ public class Plane implements Serializable {
 		lore.add(main.colors.getTitle()+"[Health:] "+main.colors.getInfo()+health);
 		lore.add(main.colors.getTitle()+"[Acceleration:] "+main.colors.getInfo()+accelMod*10.0d);
 		lore.add(main.colors.getTitle()+"[Handling:] "+main.colors.getInfo()+turnAmount*10.0d);
-		if(hover){
-			lore.add(main.colors.getTitle()+"[Hover:] "+main.colors.getInfo()+getHandleString(hover));
+		if(hover||canPlaneHover){
+			lore.add(main.colors.getTitle()+"[Hover:] "+main.colors.getInfo()+getHandleString(hover||canPlaneHover));
 		}
 		meta.setDisplayName(Colors.colorise(name));
 		meta.setLore(lore);
@@ -209,6 +223,10 @@ public class Plane implements Serializable {
 
 	public void setHealth(double health) {
 		this.health = health;
+	}
+
+	public boolean canFloat(){
+		return isHover() || canPlaneHoverMidair();
 	}
 
 	public boolean isHover() {
