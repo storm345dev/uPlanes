@@ -5,17 +5,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-import net.stormdev.uPlanes.hover.HoverCart;
-import net.stormdev.uPlanes.hover.HoverCartEntity;
-import net.stormdev.uPlanes.items.ItemPlaneValidation;
-import net.stormdev.uPlanes.main.PlaneGenerator;
-import net.stormdev.uPlanes.main.PlaneItemMethods;
-import net.stormdev.uPlanes.main.main;
-import net.stormdev.uPlanes.presets.PlanePreset;
-import net.stormdev.uPlanes.utils.Lang;
-import net.stormdev.uPlanes.utils.PEntityMeta;
-import net.stormdev.uPlanes.utils.StatValue;
-
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
@@ -25,6 +15,19 @@ import org.bukkit.entity.Vehicle;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 import org.bukkit.metadata.MetadataValue;
+import org.bukkit.util.Vector;
+
+import net.stormdev.uPlanes.hover.HoverCart;
+import net.stormdev.uPlanes.hover.HoverCartEntity;
+import net.stormdev.uPlanes.items.ItemPlaneValidation;
+import net.stormdev.uPlanes.main.PlaneGenerator;
+import net.stormdev.uPlanes.main.PlaneItemMethods;
+import net.stormdev.uPlanes.main.main;
+import net.stormdev.uPlanes.presets.PlanePreset;
+import net.stormdev.uPlanes.utils.CartOrientationUtil;
+import net.stormdev.uPlanes.utils.Lang;
+import net.stormdev.uPlanes.utils.PEntityMeta;
+import net.stormdev.uPlanes.utils.StatValue;
 
 /**
  * uPlaneManager is a section of the API for managing, creating
@@ -276,9 +279,10 @@ public class uPlaneManager {
 	 * 
 	 * @param plane The plane to place
 	 * @param loc The location to place it at
+	 * @param directionToFace The direction for the plane to rotate to face
 	 * @return Returns the placed entity
 	 */
-	public Vehicle placePlane(Plane plane, Location loc){
+	public Vehicle placePlane(Plane plane, Location loc, Vector directionToFace){
 		synchronized (uPlaneManager.class){
 			PlanePreset pp = plane.getPreset();
 			Vehicle ent;
@@ -299,10 +303,8 @@ public class uPlaneManager {
 			}
 			else {
 				HoverCartEntity hce = new HoverCartEntity(loc.clone().add(0, 0.3, 0));
-				if(pp != null){
-					hce.setHitBoxX(pp.getHitBoxX());
-					hce.setHitBoxZ(pp.getHitBoxZ());
-				}
+				hce.setHitBoxX(plane.getHitboxX());
+				hce.setHitBoxZ(plane.getHitboxZ());
 				HoverCart hc = hce.spawn();
 				ent = hc;
 				hc.setDisplay(new ItemStack(display.getItemType(), 1, display.getData()), offset);
@@ -314,12 +316,27 @@ public class uPlaneManager {
 				PEntityMeta.setMetadata(ent, "plane.hover", new StatValue(true, main.plugin));
 				plane.setHover(true);
 			}
+			PEntityMeta.setMetadata(ent, "plane.direction", new StatValue(directionToFace.clone(), main.plugin));
 			plane.setId(ent.getUniqueId());
 			plane.setRoll(0);
+			float vYaw = (float) Math.toDegrees(Math.atan2(directionToFace.getX() , -directionToFace.getZ()));
+			vYaw -= 90;
+			CartOrientationUtil.setYaw(ent, vYaw);
 			
 			main.plugin.planeManager.nowPlaced(plane);
 			return ent;
 		}
+	}
+	
+	/**
+	 * Place a plane at the given location and handle it all correctly
+	 * 
+	 * @param plane The plane to place
+	 * @param loc The location to place it at
+	 * @return Returns the placed entity
+	 */
+	public Vehicle placePlane(Plane plane, Location loc){
+		return placePlane(plane, loc, loc.getDirection());
 	}
 	
 	/**
@@ -337,6 +354,12 @@ public class uPlaneManager {
 		}
 		
 		return placePlane(plane, loc);
+	}
+	
+	private PlaneDamageEvent planeDamageEvent(Vehicle v, Plane p, double dmg, String cause){
+		PlaneDamageEvent pde = new PlaneDamageEvent(v, p, dmg, cause);
+		Bukkit.getPluginManager().callEvent(pde);
+		return pde;
 	}
 	
 	/**
@@ -388,6 +411,7 @@ public class uPlaneManager {
 		if(health <= 0){
 			health = 0;
 		}
+		health = Math.round(health*10.0d)/10.0d;
 		msg = msg.replaceAll(Pattern.quote("%remainder%"), health+"HP");
 		msg = msg.replaceAll(Pattern.quote("%cause%"), "Fist");
 		((Player)damager).sendMessage(main.colors.getInfo()+msg);
@@ -421,6 +445,7 @@ public class uPlaneManager {
 		if(health <= 0){
 			health = 0;
 		}
+		health = Math.round(health*10.0d)/10.0d;
 		msg = msg.replaceAll(Pattern.quote("%remainder%"), (health)+"HP");
 		msg = msg.replaceAll(Pattern.quote("%cause%"), cause);
 		((Player)damager).sendMessage(main.colors.getInfo()+msg);
@@ -489,6 +514,12 @@ public class uPlaneManager {
 		if(m.hasMetadata("invincible") || PEntityMeta.hasMetadata(m, "invincible")){
 			return;
 		}
+		
+		PlaneDamageEvent evt1 = planeDamageEvent(m, plane, damage, cause);
+		if(evt1.isCancelled()){
+			return;
+		}
+		
 		double health = plane.getHealth();
 		if(PEntityMeta.hasMetadata(m, "plane.health")){
 			List<MetadataValue> ms = PEntityMeta.getMetadata(m, "plane.health");

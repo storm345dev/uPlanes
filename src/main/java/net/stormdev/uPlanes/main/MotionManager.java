@@ -1,7 +1,10 @@
 package net.stormdev.uPlanes.main;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import net.stormdev.uPlanes.api.Keypress;
 import net.stormdev.uPlanes.api.Plane;
@@ -12,7 +15,8 @@ import net.stormdev.uPlanes.utils.PEntityMeta;
 import net.stormdev.uPlanes.utils.PlaneUpdateEvent;
 import net.stormdev.uPlanes.utils.StatValue;
 
-import org.bukkit.block.Block;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Vehicle;
@@ -38,7 +42,39 @@ public class MotionManager {
 	    return result;
 	}
 	
-	public static void move(Player player, float f, float s) {
+	public static class MovePacketInfo {
+		public float f = 0;
+		public float s = 0;
+		public boolean jumping = false;
+		
+		public MovePacketInfo(float f, float s, boolean jumping){
+			this.f = f;
+			this.s = s;
+			this.jumping = jumping;
+		}
+	}
+	private static Map<UUID, MovePacketInfo> playerPacketUpdates = new HashMap<UUID, MovePacketInfo>();
+	
+	public static void removePlayer(Player player){
+		playerPacketUpdates.remove(player.getUniqueId());
+	}
+	
+	public static void onPacket(Player player, float f, float s, boolean jumping){
+		if(!player.isOnline()){
+			return;
+		}
+		playerPacketUpdates.put(player.getUniqueId(), new MovePacketInfo(f, s, jumping));
+	}
+	
+	public static MovePacketInfo getMostRecentPacketInfo(Player player){
+		MovePacketInfo m = playerPacketUpdates.get(player.getUniqueId());
+		if(m == null){
+			m = new MovePacketInfo(0, 0, false);
+		}
+		return m;
+	}
+	
+	public static void move(Player player, float f, float s, boolean jumping) {
 		Vector vec = new Vector();
 		Entity ent = player.getVehicle();
 		if (ent == null) {
@@ -50,6 +86,7 @@ public class MotionManager {
 		if (!(ent instanceof Vehicle)) {
 			return;
 		}
+		
 		Vehicle plane = (Vehicle) ent;
 		Plane pln = main.plugin.listener.getPlane(plane);
 		if(pln == null){
@@ -60,6 +97,7 @@ public class MotionManager {
 		if(plane.hasMetadata("plane.frozen") || PEntityMeta.hasMetadata(plane, "plane.frozen")){
 			return;
 		}
+		
 		
 		boolean decel = true;
 		if(f == 0 && s == 0){
@@ -76,7 +114,10 @@ public class MotionManager {
 		Vector playD = player.getEyeLocation().getDirection();
 		Vector planeDirection = null;
 		
-		if(!main.doTurningCircles){
+		if(PEntityMeta.hasMetadata(plane, "plane.destination")){
+			planeDirection = playD.clone().setY(0).normalize();
+		}
+		else if(!main.doTurningCircles){
 			if((AccelerationManager.getCurrentMultiplier(plane) >= 0.2 || pln.isHover()) && !PEntityMeta.hasMetadata(plane, "plane.destination")){
 				planeDirection = playD.clone().setY(0).normalize();
 				float vYaw = (float) Math.toDegrees(Math.atan2(planeDirection.getX() , -planeDirection.getZ()));
@@ -117,7 +158,7 @@ public class MotionManager {
 			}
 			
 			double am = AccelerationManager.getCurrentMultiplier(plane);
-			if((am >= 0.2 || (pln.isHover()&&am>0)) && !PEntityMeta.hasMetadata(plane, "plane.destination")){
+			if((am >= 0.2 || ((pln.isHover()&&am>0)||(pln.canPlaneHoverMidair()&&!pln.isHover()&&!plane.isOnGround()))) && !PEntityMeta.hasMetadata(plane, "plane.destination")){
 				pln.updateRoll();
 				CartOrientationUtil.setRoll(plane, pln.getRoll());
 				planeDirection = rotateXZVector3dDegrees(planeDirection, yawDiff);
@@ -139,6 +180,19 @@ public class MotionManager {
 		}*/
 		int side = 0; // -1=left, 0=straight, 1=right
 		Boolean turning = false;
+		if(jumping && !pln.isHover()){
+			decel = false;
+			if(!pln.isSpeedLocked()){
+				pln.setSpeedLocked(true);
+				player.sendMessage(ChatColor.YELLOW+"Thrust locked at "+Math.round(AccelerationManager.getCurrentMultiplier(plane)*100)+"%. Unlock it again with w.");
+				pln.setSpeedLockTime(System.currentTimeMillis());
+			}
+		}
+		if(f != 0 && pln.isSpeedLocked() && !pln.isHover() && !jumping
+				&& System.currentTimeMillis()-pln.getSpeedLockTime() > 500){
+			pln.setSpeedLocked(false);
+			player.sendMessage(ChatColor.YELLOW+"Thrust unlocked. Lock it again with spacebar.");
+		}
 		if(f > 0){
 			speedModKey = Keypress.W;
 			decel = false;
@@ -156,11 +210,19 @@ public class MotionManager {
 		Boolean isRight = false;
 		Boolean isLeft = false;
 		
-		double accelMod = !decel ? AccelerationManager.getMultiplier(player, plane, pln) 
-				: (f == 0 ? AccelerationManager.decelerateAndGetMult(player, plane, pln) 
-						: AccelerationManager.decelerateAndGetMult(player, plane, pln));
-		if(f < 0 && pln.isHover()){
-			accelMod = AccelerationManager.decelerateAndGetMult(player, plane, pln); //Decelerate faster by calling again
+		if(pln.isSpeedLocked()){
+			decel = false;
+		}
+		
+		double accelMod = 1;
+		
+		if(!PEntityMeta.hasMetadata(plane, "plane.destination")){
+			accelMod = !decel ? AccelerationManager.getMultiplier(player, plane, pln, pln.isSpeedLocked()) 
+					: (f == 0 ? AccelerationManager.decelerateAndGetMult(player, plane, pln) 
+							: AccelerationManager.decelerateAndGetMult(player, plane, pln));
+			if(f < 0 /*&& pln.isHover()*/){
+				accelMod = AccelerationManager.decelerateAndGetMult(player, plane, pln); //Decelerate faster by calling again
+			}
 		}
 		
 		float hoverAmount = (float) (0.0002 * pln.getSpeed());
@@ -204,11 +266,20 @@ public class MotionManager {
 			x = 0;
 			z = 0;
 		}*/
-		
+
+		double xOriginal = x;
+		double zOriginal = z;
+
 		x *= accelMod;
-		z *= accelMod;	
+		z *= accelMod;
 		
-		boolean hasFlightSpeed = (new Vector(x, 0, z).lengthSquared() > 0.75 || accelMod > 0.75);
+		double speedLength = pln.getSpeed() * accelMod;
+		boolean hasFlightSpeed = (speedLength > 10 || accelMod > 0.87);
+		boolean planeFloats = false;
+		if(pln.canPlaneHoverMidair()){
+		    planeFloats = !hasFlightSpeed;
+		    hasFlightSpeed = true;
+        }
 		if(pln.isHover()){
 			double pitch = 20*accelMod;
 			if(pitch > 10){
@@ -230,13 +301,13 @@ public class MotionManager {
 				if(pressedKeys.contains(Keypress.A)){
 					vertModKey = Keypress.A;
 				}
-				else if(pressedKeys.contains(Keypress.D)){
+				else if(pressedKeys.contains(Keypress.D) && (!plane.isOnGround() || pln.getCurrentPitch() > 0)){
 					vertModKey = Keypress.D;
 				}
 				
 				if(vertModKey != Keypress.NONE){
 					float pitch = pln.getCurrentPitch();
-					float change = (float) 2;
+					float change = (float) (planeFloats?0.5:2);
 					pitch += vertModKey.equals(Keypress.D) ? change : -change;
 					if(pitch > 89){
 						pitch = 89;
@@ -292,13 +363,29 @@ public class MotionManager {
 		}
 		
 		vec = new Vector(x, y, z);
-		
+
+		if(planeFloats && vec.clone().setY(0).lengthSquared() < 1){
+		    //Hover forwards / backwards in line with pitch
+            double m = Math.sin(pln.getCurrentPitch()*(Math.PI/180.0));
+            double yAmt = (m*m)*0.005;
+            if(m > 0){
+                yAmt = - yAmt;
+            }
+            if(Math.abs(pln.getCurrentPitch()) < 45){
+                yAmt = 0;
+            }
+            Vector floatVec = new Vector(xOriginal, 0, zOriginal);
+            floatVec.multiply(m);
+            floatVec.setY(yAmt);
+            vec.add(floatVec);
+        }
+
 		if(!speedModKey.equals(Keypress.NONE)){
 			pressedKeys.add(speedModKey);
 		}
-		
+
 		final PlaneUpdateEvent event = new PlaneUpdateEvent(plane, vec, player, pressedKeys, accelMod, pln);
-		
+
 		main.plugin.getServer().getScheduler()
 				.runTask(main.plugin, new Runnable() {
 					public void run() {

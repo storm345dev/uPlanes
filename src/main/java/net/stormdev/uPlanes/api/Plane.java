@@ -12,6 +12,7 @@ import net.stormdev.uPlanes.utils.Colors;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.MaterialData;
@@ -32,9 +33,13 @@ public class Plane implements Serializable {
 	private double health = 50;
 	private double turnAmount = DEFAULT_TURN_AMOUNT;
 	private double accelMod = 1;
-	private boolean hover = false;
+	private boolean hover = false; //If heli
+	private boolean canPlaneHover = false; //If plane that can hover in midair
 	private UUID id = UUID.randomUUID();
 	private boolean writtenOff = false;
+	private float hitboxX = -1;
+	private float hitboxZ = -1;
+	
 	private transient float currentPitch = 0;
 	private transient float roll = 0; //TODO
 	private transient RollTarget rollTarget = RollTarget.NONE;
@@ -42,6 +47,9 @@ public class Plane implements Serializable {
 	private transient double offset;
 	private transient long lastUpdateEventTime = System.currentTimeMillis();
 	private transient Vector lastUpdateEventVec = null;
+	private transient boolean speedLocked = false;
+	private transient long speedLockTime = 0;
+	private transient Entity lastDamager;
 	
 	public static enum RollTarget {
 		LEFT(25), NONE(0), RIGHT(-25);
@@ -107,7 +115,19 @@ public class Plane implements Serializable {
 		return this.roll;
 	}
 
+	public boolean canPlaneHoverMidair(){
+		return this.canPlaneHover;
+	}
+
+	public void setCanPlaneHover(boolean b){
+		this.canPlaneHover = b;
+	}
+
 	public Plane(double speed, String name, double health, double accelMod, double turnAmountPerTick, boolean hover){
+		this(speed, name, health, accelMod, turnAmountPerTick, hover, hover);
+	}
+
+	public Plane(double speed, String name, double health, double accelMod, double turnAmountPerTick, boolean hover, boolean canPlaneHoverMidair){
 		setCurrentPitch(0);
 		if(speed > main.maxSpeed){
 			speed = main.maxSpeed;
@@ -118,6 +138,7 @@ public class Plane implements Serializable {
 		this.accelMod = accelMod;
 		this.turnAmount = turnAmountPerTick;
 		this.hover = hover;
+		this.canPlaneHover = canPlaneHoverMidair;
 	}
 	
 	private String getHandleString(boolean b){
@@ -156,8 +177,8 @@ public class Plane implements Serializable {
 		lore.add(main.colors.getTitle()+"[Health:] "+main.colors.getInfo()+health);
 		lore.add(main.colors.getTitle()+"[Acceleration:] "+main.colors.getInfo()+accelMod*10.0d);
 		lore.add(main.colors.getTitle()+"[Handling:] "+main.colors.getInfo()+turnAmount*10.0d);
-		if(hover){
-			lore.add(main.colors.getTitle()+"[Hover:] "+main.colors.getInfo()+getHandleString(hover));
+		if(hover||canPlaneHover){
+			lore.add(main.colors.getTitle()+"[Hover:] "+main.colors.getInfo()+getHandleString(hover||canPlaneHover));
 		}
 		meta.setDisplayName(Colors.colorise(name));
 		meta.setLore(lore);
@@ -202,6 +223,10 @@ public class Plane implements Serializable {
 
 	public void setHealth(double health) {
 		this.health = health;
+	}
+
+	public boolean canFloat(){
+		return isHover() || canPlaneHoverMidair();
 	}
 
 	public boolean isHover() {
@@ -285,5 +310,59 @@ public class Plane implements Serializable {
 
 	public void setLastUpdateEventVec(Vector lastUpdateEventVec) {
 		this.lastUpdateEventVec = lastUpdateEventVec;
+	}
+
+	public boolean isSpeedLocked() {
+		return speedLocked;
+	}
+
+	public void setSpeedLocked(boolean speedLocked) {
+		this.speedLocked = speedLocked;
+	}
+
+	public long getSpeedLockTime() {
+		return speedLockTime;
+	}
+
+	public void setSpeedLockTime(long speedLockTime) {
+		this.speedLockTime = speedLockTime;
+	}
+
+	public Entity getLastDamager() {
+		return lastDamager;
+	}
+
+	public void setLastDamager(Entity lastDamager) {
+		this.lastDamager = lastDamager;
+	}
+
+	public float getHitboxX() {
+		PlanePreset pp = getPreset();
+		if(hitboxX < 0 && pp != null){
+			return pp.getHitBoxX();
+		}
+		return hitboxX;
+	}
+
+	/**
+	 * Isn't saved when plane is destroyed and replaced
+	 */
+	public void setHitboxX(float hitboxX) {
+		this.hitboxX = hitboxX;
+	}
+
+	public float getHitboxZ() {
+		PlanePreset pp = getPreset();
+		if(hitboxZ < 0 && pp != null){
+			return pp.getHitBoxZ();
+		}
+		return hitboxZ;
+	}
+
+	/**
+	 * Isn't saved when plane is destroyed and replaced
+	 */
+	public void setHitboxZ(float hitboxZ) {
+		this.hitboxZ = hitboxZ;
 	}
 }

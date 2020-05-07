@@ -69,14 +69,27 @@ public class AccelerationManager {
 	}
 	
 	private static float getA(Player player, Vehicle cart, Plane plane){ //Get the multiplier for accelerating
-		return (float) (0.020*uPlanesAPI.getPlaneManager().getAlteredAccelerationMod(player, cart, plane)); //Our constant of 0.025 multiplied by whatever the API is asking for as a modification to the rate of acceleration
+		float d = 1;
+		if(PEntityMeta.hasMetadata(cart, "plane.destination")){
+			d = 1.2f; //Accel faster when autopilot
+		}
+		if(player == null){
+			return d*0.020f;
+		}
+		return (float) (d*0.020*uPlanesAPI.getPlaneManager().getAlteredAccelerationMod(player, cart, plane)); //Our constant of 0.025 multiplied by whatever the API is asking for as a modification to the rate of acceleration
 	}
 	
 	private static float getDA(Player player, Vehicle cart, Plane plane){ //Get the multiplier for accelerating
+		if(player == null){
+			return 0.030f;
+		}
 		return (float) (0.030*uPlanesAPI.getPlaneManager().getAlteredDecelerationMod(player, cart, plane)); //Our constant of 0.025 multiplied by whatever the API is asking for as a modification to the rate of acceleration
 	}
 	
 	private static float getGA(Player player, Vehicle cart, Plane plane){ //Get the multiplier for accelerating
+		if(player == null){
+			return 0.020f;
+		}
 		return (float) (0.020*uPlanesAPI.getPlaneManager().getAlteredDecelerationMod(player, cart, plane)); //Our constant of 0.025 multiplied by whatever the API is asking for as a modification to the rate of acceleration
 	}
 	
@@ -86,7 +99,7 @@ public class AccelerationManager {
 	
 	public static double stall(Player player, Vehicle cart, Plane plane){
 		if(!main.doAcceleration){
-			return 0d;
+			return 1d;
 		}
 		
 		double accel = getCurrentAccel(cart);
@@ -98,14 +111,11 @@ public class AccelerationManager {
 	
 	public static double decelerateAndGetMult(Player player, Vehicle cart, Plane plane){
 		if(!main.doAcceleration){
-			return 0d;
+			return 1d;
 		}
 		
 		double current = getCurrentAccel(cart);
-		float diff = (float) (1-current); //The difference between 1 (full speed) and the rate we want to accelerate by
-		if(diff > 0.99){
-			diff = 0.99f;
-		}
+		float diff = 0.2f; //Fixed value because looks better
 		current -= (plane.getAccelMod()*getDA(player, cart, plane)*diff); //Increase the speed by 'a' multiplied by the difference; eg. accelerates faster the slower the vehicle moves (Looks quite realistic)
 		if(current <= 0.05){ //Close enough to 0
 			current = 0;
@@ -116,7 +126,7 @@ public class AccelerationManager {
 	
 	public static double glideAndGetMult(Player player, Vehicle cart, Plane plane){
 		if(!main.doAcceleration){
-			return 0d;
+			return 1d;
 		}
 		
 		double current = getCurrentAccel(cart);
@@ -140,17 +150,21 @@ public class AccelerationManager {
 		return getCurrentAccel(cart);
 	}
 	
-	public static double getMultiplier(Player player, Vehicle cart, Plane plane){
+	public static double getMultiplier(Player player, Vehicle cart, Plane plane, boolean speedLocked){
 		if(!main.doAcceleration){
 			return 1.0d;
 		}
 		
 		double current = getCurrentAccel(cart);
-		if(current >= 0.97){ //Close enough to 1; so just be 1 or else you get infinitely close to 1 without getting to it (Wasting time calculating for no visible reason)
+		if(current >= 0.97 && current != 1){ //Close enough to 1; so just be 1 or else you get infinitely close to 1 without getting to it (Wasting time calculating for no visible reason)
 			current = 1;
+			setCurrentAccel(cart, 1);
 			return current;
 		}
-		float diff = (float) (1-current); //The difference between 1 (full speed) and the rate we want to accelerate by
+		if(speedLocked || current == 1){
+			return current;
+		}
+		float diff = 0.2f; //Fixed cus it looks better /*(float) (1-current)*/ //The difference between 1 (full speed) and the rate we want to accelerate by
 		current += (plane.getAccelMod()*getA(player, cart, plane)*diff); //Increase the speed by 'a' multiplied by the difference; eg. accelerates faster the slower the vehicle moves (Looks quite realistic)
 		setCurrentAccel(cart, current);
 		return current;

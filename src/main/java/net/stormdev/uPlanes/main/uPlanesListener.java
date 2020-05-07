@@ -2,24 +2,6 @@ package net.stormdev.uPlanes.main;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.regex.Pattern;
-
-import net.stormdev.uPlanes.api.AutopilotDestination;
-import net.stormdev.uPlanes.api.Keypress;
-import net.stormdev.uPlanes.api.Plane;
-import net.stormdev.uPlanes.api.PlaneDeathEvent;
-import net.stormdev.uPlanes.api.uPlanesAPI;
-import net.stormdev.uPlanes.hover.HoverCart;
-import net.stormdev.uPlanes.items.ItemPlaneValidation;
-import net.stormdev.uPlanes.presets.PlanePreset;
-import net.stormdev.uPlanes.presets.PresetManager;
-import net.stormdev.uPlanes.utils.CartOrientationUtil;
-import net.stormdev.uPlanes.utils.Lang;
-import net.stormdev.uPlanes.utils.PEntityMeta;
-import net.stormdev.uPlanes.utils.PlaneUpdateEvent;
-import net.stormdev.uPlanes.utils.PrePlaneCrashEvent;
-import net.stormdev.uPlanes.utils.PrePlaneRoughLandingEvent;
-import net.stormdev.uPlanes.utils.StatValue;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -31,6 +13,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.Chest;
 import org.bukkit.block.DoubleChest;
 import org.bukkit.block.Sign;
+import org.bukkit.craftbukkit.v1_9_R1.CraftWorld;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Damageable;
 import org.bukkit.entity.Entity;
@@ -58,6 +41,8 @@ import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerArmorStandManipulateEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerKickEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
 import org.bukkit.event.vehicle.VehicleDestroyEvent;
 import org.bukkit.event.vehicle.VehicleEntityCollisionEvent;
@@ -71,6 +56,23 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.util.Vector;
+
+import net.stormdev.uPlanes.api.AutopilotDestination;
+import net.stormdev.uPlanes.api.Keypress;
+import net.stormdev.uPlanes.api.Plane;
+import net.stormdev.uPlanes.api.uPlanesAPI;
+import net.stormdev.uPlanes.hover.HoverCart;
+import net.stormdev.uPlanes.items.ItemPlaneValidation;
+import net.stormdev.uPlanes.main.MotionManager.MovePacketInfo;
+import net.stormdev.uPlanes.presets.PlanePreset;
+import net.stormdev.uPlanes.presets.PresetManager;
+import net.stormdev.uPlanes.utils.CartOrientationUtil;
+import net.stormdev.uPlanes.utils.Lang;
+import net.stormdev.uPlanes.utils.PEntityMeta;
+import net.stormdev.uPlanes.utils.PlaneUpdateEvent;
+import net.stormdev.uPlanes.utils.PrePlaneCrashEvent;
+import net.stormdev.uPlanes.utils.PrePlaneRoughLandingEvent;
+import net.stormdev.uPlanes.utils.StatValue;
 
 public class uPlanesListener implements Listener {
 	private main plugin;
@@ -265,6 +267,16 @@ public class uPlanesListener implements Listener {
 			return;
 		}
 	
+	 @EventHandler (priority = EventPriority.MONITOR)
+	 void onQuit(PlayerQuitEvent event){
+		 MotionManager.removePlayer(event.getPlayer());
+	 }
+	 
+	 @EventHandler (priority = EventPriority.MONITOR)
+	 void onQuit(PlayerKickEvent event){
+		 MotionManager.removePlayer(event.getPlayer());
+	 }
+	 
 	 @EventHandler (priority = EventPriority.HIGHEST) //Call late
 	    void vehicleExit(VehicleExitEvent event){
 		 	if(event.isCancelled()){
@@ -294,6 +306,7 @@ public class uPlanesListener implements Listener {
 				
 				if(aData != null && !aData.isAutopilotOverridenByControlInput()){
 					event.setCancelled(true);
+					exited.teleport(veh.getLocation());
 					return;
 				}
 	        }
@@ -329,6 +342,9 @@ public class uPlanesListener implements Listener {
 				public void run() {
 					exited.teleport(loc.add(0, 0.5, 0));
 					exited.setVelocity(vel);
+					if(exited instanceof Player){
+						MotionManager.removePlayer((Player) exited);
+					}
 					return;
 				}}, 2l); //Teleport back to car loc after exit
 	        /*
@@ -355,6 +371,26 @@ public class uPlanesListener implements Listener {
 	    	return;
 	    }
 	
+	@EventHandler(priority=EventPriority.HIGH)
+	void onVehTick(VehicleUpdateEvent event){
+		 if(event instanceof PlaneUpdateEvent){
+			 return;
+		 }
+		 
+		 Vehicle v = event.getVehicle();
+		 Plane pln = uPlanesAPI.getPlaneManager().getPlaneById(v.getUniqueId());
+		 if(pln != null){
+			 
+			 Entity pass = v.getPassenger();
+			 
+			 if(pass instanceof Player){
+				 Player pl = (Player) pass;
+				 MovePacketInfo mpi = MotionManager.getMostRecentPacketInfo(pl);
+				 MotionManager.move(pl, mpi.f, mpi.s, mpi.jumping);
+			 }
+		 }
+	 }
+	 
 	@EventHandler
 	void vehicleUpdate(VehicleUpdateEvent event){
 		Vehicle car = event.getVehicle();
@@ -386,15 +422,16 @@ public class uPlanesListener implements Listener {
 			}*/
 		}
 		
+		Plane pln = getPlane(car);
+		
 		if(PEntityMeta.hasMetadata(car, "plane.destination")){
 			//Autopilot
 			List<MetadataValue> metas = PEntityMeta.getMetadata(car, "plane.destination");
 			Location dest = (Location) metas.get(0).value();
-			FlightControl.route(dest, loc, car);
+			FlightControl.route(dest, loc, car, pln);
 			return;
-		}	
+		}
 		
-		Plane pln = getPlane(car);
 		if(pln == null){
 			return;
 		}
@@ -580,7 +617,7 @@ public class uPlanesListener implements Listener {
 			player.sendMessage(main.colors.getError()+Lang.get("general.heightLimit"));
 		}
 		
-		if((new Vector(travel.getX(), 0, travel.getZ()).lengthSquared() < 0.75 && event.getAcceleration() < 0.75) && !plane.isHover() && travel.getY() < 0.1){
+		if((new Vector(travel.getX(), 0, travel.getZ()).lengthSquared() < 0.75 && event.getAcceleration() < 0.75) && !plane.canFloat() && travel.getY() < 0.1){
 			travel.setY(-Math.abs(cart.getVelocity().getY()) * 1.015); //Need more speed to maintain flight!
 			/*float pitch = plane.getCurrentPitch();
 			pitch += 1;
@@ -609,7 +646,7 @@ public class uPlanesListener implements Listener {
 				double az = z;
 				PlanePreset pp = plane.getPreset();
 				if(pp != null){
-					if(pp.getHitBoxX() > 0){ //TODO Does .length() lag too much
+					if(pp.getHitBoxX() > 0){
 						double length = new Vector(ax, 0, az).length();
 						double goodLength = length + pp.getHitBoxX()/2.0 + (plane.isHover()?0.5:0);
 						if(length != 0 && goodLength != 0){
@@ -622,9 +659,21 @@ public class uPlanesListener implements Listener {
 				Location nextHorizontal = cart.getLocation().clone().add(new Vector(ax, 0, az));
 				b = nextHorizontal.getBlock();
 				if(!b.isEmpty() && !b.isLiquid() && b.getType().isSolid() && !b.getType().equals(Material.CARPET) && !b.getType().equals(Material.BARRIER)){ //Crashed into something
+					boolean inside = true;
+					double relY = nextHorizontal.getY()-b.getY();
+					if(relY < 0){
+						relY = 0;
+					}
+					String name = b.getType().name().toLowerCase();
+					if(name.contains("step") && relY >= 0.4){
+						inside = false;
+					}
+					if(name.contains("carpet") && relY > 0){
+						inside = false;
+					}
 					/*b = b.getRelative(BlockFace.UP);
 					String bt = b.getType().name().toLowerCase();*/
-					if(true/*(!b.isEmpty() && !b.isLiquid() && b.getType().isSolid())
+					if(inside/*(!b.isEmpty() && !b.isLiquid() && b.getType().isSolid())
 							|| (!bt.contains("step")
 									&& !bt.contains("carpet")
 									&& (!bt.contains("grass") && !b.getType().equals(Material.GRASS))
@@ -679,26 +728,40 @@ public class uPlanesListener implements Listener {
 		}
 		
 		if(crashing && !plane.isHover() && !PEntityMeta.hasMetadata(cart, "plane.destination") && !PEntityMeta.hasMetadata(cart, "arrivedAtDest")){
-			if((travel.getY() < -0.2 && plane.getCurrentPitch() > 22) || ((travel.getY() < -0.2 && new Vector(travel.getX(), 0, travel.getZ()).lengthSquared() < 0.8 && event.getAcceleration() < 0.8))){
+			if((travel.getY() < -0.2 && plane.getCurrentPitch() > 22) || ((travel.getY() < -0.7 && new Vector(travel.getX(), 0, travel.getZ()).lengthSquared() < 0.8 && event.getAcceleration() < 0.8))){
 				double y = Math.min(travel.getY(), cart.getVelocity().getY());
 				Location nextVertical = cart.getLocation().add(0, y, 0);
 				Block b = nextVertical.getBlock();
 				if(!b.isEmpty() && !b.isLiquid() && b.getType().isSolid()){ //Crashed into something
-					double damage = 130.0 * Math.abs(y);
-					damage = Math.round(damage*10.0d)/10.0d;
-					if(damage < 1){
-						damage = 1;
+					boolean inside = true;
+					double relY = nextVertical.getY()-b.getY();
+					if(relY < 0){
+						relY = 0;
 					}
-					if(damage > 200){
-						damage = 200;
+					String name = b.getType().name().toLowerCase();
+					if(name.contains("step") && relY >= 0.4){
+						inside = false;
 					}
-					
-					PrePlaneRoughLandingEvent evt = new PrePlaneRoughLandingEvent(cart, player, event.getAcceleration(), plane, damage);
-					Bukkit.getPluginManager().callEvent(evt);
-					
-					if(!evt.isCancelled() && evt.getDamage() > 0){
-						uPlanesAPI.getPlaneManager().damagePlane(cart, plane, evt.getDamage(), "Rough Landing");
-						player.damage(20*(damage/200.0));
+					if(name.contains("carpet") && relY > 0){
+						inside = false;
+					}
+						if(inside){
+						double damage = 130.0 * Math.abs(y);
+						damage = Math.round(damage*10.0d)/10.0d;
+						if(damage < 1){
+							damage = 1;
+						}
+						if(damage > 200){
+							damage = 200;
+						}
+						
+						PrePlaneRoughLandingEvent evt = new PrePlaneRoughLandingEvent(cart, player, event.getAcceleration(), plane, damage);
+						Bukkit.getPluginManager().callEvent(evt);
+						
+						if(!evt.isCancelled() && evt.getDamage() > 0){
+							uPlanesAPI.getPlaneManager().damagePlane(cart, plane, evt.getDamage(), "Rough Landing");
+							player.damage(20*(damage/200.0));
+						}
 					}
 				}
 			}
@@ -708,21 +771,35 @@ public class uPlanesListener implements Listener {
 				Location nextVertical = cart.getLocation().add(0, cart.getVelocity().getY(), 0);
 				Block b = nextVertical.getBlock();
 				if(!b.isEmpty() && !b.isLiquid() && b.getType().isSolid()){ //Crashed into something
-					double damage = 110.0 * new Vector(travel.getX(), 0, travel.getZ()).lengthSquared();
-					damage = Math.round(damage*10.0d)/10.0d;
-					if(damage < 1){
-						damage = 1;
+					boolean inside = true;
+					double relY = nextVertical.getY()-b.getY();
+					if(relY < 0){
+						relY = 0;
 					}
-					if(damage > 200){
-						damage = 200;
+					String name = b.getType().name().toLowerCase();
+					if(name.contains("step") && relY >= 0.4){
+						inside = false;
 					}
-					
-					PrePlaneRoughLandingEvent evt = new PrePlaneRoughLandingEvent(cart, player, event.getAcceleration(), plane, damage);
-					Bukkit.getPluginManager().callEvent(evt);
-					
-					if(!evt.isCancelled() && evt.getDamage() > 0){
-						uPlanesAPI.getPlaneManager().damagePlane(cart, plane, evt.getDamage(), "Rough Landing");
-						player.damage(20*(damage/200.0));
+					if(name.contains("carpet") && relY > 0){
+						inside = false;
+					}
+					if(inside){
+						double damage = 110.0 * new Vector(travel.getX(), 0, travel.getZ()).lengthSquared();
+						damage = Math.round(damage*10.0d)/10.0d;
+						if(damage < 1){
+							damage = 1;
+						}
+						if(damage > 200){
+							damage = 200;
+						}
+						
+						PrePlaneRoughLandingEvent evt = new PrePlaneRoughLandingEvent(cart, player, event.getAcceleration(), plane, damage);
+						Bukkit.getPluginManager().callEvent(evt);
+						
+						if(!evt.isCancelled() && evt.getDamage() > 0){
+							uPlanesAPI.getPlaneManager().damagePlane(cart, plane, evt.getDamage(), "Rough Landing");
+							player.damage(20*(damage/200.0));
+						}
 					}
 				}
 			}
@@ -930,7 +1007,28 @@ public class uPlanesListener implements Listener {
 			}
 		}
 		
-		double health = plane.getHealth();
+		if(plane.canFloat() && m.getVelocity().getY() < 0.001 && dmger == null){
+			return; //Don't damage helicopters landing
+		}
+		
+		plane.setLastDamager(dmger);
+		if(event.getDamage() <= 0){
+			return;
+		}
+		
+		if(dmger != null && dmger instanceof Player){
+			uPlanesAPI.getPlaneManager().damagePlane(m, plane, punchDamage, (Player) dmger);
+		}
+		else {
+			if(dmger != null || event.getDamage() >= 24){
+				uPlanesAPI.getPlaneManager().damagePlane(m, plane, event.getDamage(), "Damage");
+			}
+		}
+		
+		event.setDamage(-5.5);
+		event.setCancelled(true);
+		
+		/*double health = plane.getHealth();
 		if(PEntityMeta.hasMetadata(m, "plane.health")){
 			List<MetadataValue> ms = PEntityMeta.getMetadata(m, "plane.health");
 			health = (Double) ms.get(0).value();
@@ -989,7 +1087,7 @@ public class uPlanesListener implements Listener {
 					}}, 2l);
 				
 			}
-		}
+		}*/
 		return;
 	}
 	

@@ -1,8 +1,11 @@
 package net.stormdev.uPlanes.hover;
 
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_8_R3.CraftServer;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftArmorStand;
+import org.bukkit.craftbukkit.v1_9_R1.CraftServer;
+import org.bukkit.craftbukkit.v1_9_R1.entity.CraftArmorStand;
+import org.bukkit.entity.Arrow;
+import org.bukkit.entity.Egg;
+import org.bukkit.entity.Snowball;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.EulerAngle;
@@ -13,6 +16,21 @@ public class CraftHoverCart extends CraftArmorStand implements HoverCart {
 		super(server, entity);
 		this.setVisible(false);
 		this.setGravity(true);
+	}
+	
+	@Override
+	public Arrow shootArrow(){
+		return null;
+	}
+	
+	@Override
+	public Snowball throwSnowball(){
+		return null;
+	}
+	
+	@Override
+	public Egg throwEgg(){
+		return null;
 	}
 	
 	@Override
@@ -27,11 +45,11 @@ public class CraftHoverCart extends CraftArmorStand implements HoverCart {
 	
 	@Override
 	 public boolean teleport(Location location, PlayerTeleportEvent.TeleportCause cause) {
-		    if ((this.entity.passenger != null) || (this.entity.dead)) {
+		    if ((this.entity.passengers.size() > 0) || (this.entity.dead)) {
 		      return false;
 		    }
 
-		    this.entity.mount(null);
+		    /*this.entity.mount(null);*/
 
 		    if (!location.getWorld().equals(getWorld())) {
 		      this.entity.teleportTo(location, cause.equals(PlayerTeleportEvent.TeleportCause.NETHER_PORTAL));
