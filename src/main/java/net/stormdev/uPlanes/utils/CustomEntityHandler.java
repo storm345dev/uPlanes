@@ -1,14 +1,13 @@
 package net.stormdev.uPlanes.utils;
 
+import net.minecraft.server.v1_12_R1.BiomeBase;
+import net.minecraft.server.v1_12_R1.EntityTypes;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import net.minecraft.server.v1_9_R1.BiomeBase;
-import net.minecraft.server.v1_9_R1.BiomeBase.BiomeMeta;
-import net.minecraft.server.v1_9_R1.EntityTypes;
 
 public class CustomEntityHandler {
 	
@@ -75,7 +74,7 @@ public class CustomEntityHandler {
                             if (list.getType().getSimpleName().equals(List.class.getSimpleName())) {
                                 list.setAccessible(true);
                                 @SuppressWarnings("unchecked")
-                                List<BiomeMeta> metaList = (List<BiomeMeta>) list.get(f.get(null));
+                                List<BiomeBase.BiomeMeta> metaList = (List<BiomeBase.BiomeMeta>) list.get(f.get(null));
  
                                 /*
                                 * now we are almost done. This peace of code
@@ -86,8 +85,8 @@ public class CustomEntityHandler {
                                 * EntitySkeleton) we will change it to our
                                 * custom entity class
                                 */
-                                for (BiomeMeta meta : metaList) {
-                                    Field clazz = BiomeMeta.class.getDeclaredFields()[0];
+                                for (BiomeBase.BiomeMeta meta : metaList) {
+                                    Field clazz = BiomeBase.BiomeMeta.class.getDeclaredFields()[0];
                                     if (clazz.get(meta).equals(nmsClass)) {
                                         clazz.set(meta, customClass);
                                     }
