@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import net.stormdev.uPlanes.main.main;
 
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Minecart;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -23,7 +24,7 @@ public class uCarsCompatibility {
 		
 		api.registerCarCheck(main.plugin, new CarCheck(){
 
-			public Boolean isACar(Minecart car) {
+			public Boolean isACar(Entity car) {
 				if(main.plugin.planeManager.isPlaneInUse(car.getUniqueId())){
 					PEntityMeta.setMetadata(car, "ucars.ignore", new StatValue(true, main.plugin));
 					return false;
