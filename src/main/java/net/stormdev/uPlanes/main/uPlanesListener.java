@@ -832,9 +832,9 @@ public class uPlanesListener implements Listener {
 		final Player player = event.getPlayer();
 		final ItemStack inHand = player.getItemInHand();
 		
-		if(inHand.getType() != Material.MINECART){
+		/*if(inHand.getType() != Material.MINECART){
 			return;
-		}
+		}*/
 		final Plane plane = main.plugin.planeManager.getPlane(inHand);
 		if(plane == null){
 			return; //Just a minecart
@@ -892,7 +892,7 @@ public class uPlanesListener implements Listener {
 			public void run() {
 				synchronized(uPlanesListener.class){
 					ItemStack inHand = player.getItemInHand();
-					if(inHand == null || !(inHand.getType().equals(Material.MINECART)) || inHand.getAmount() < 1){
+					if(inHand == null /*|| !(inHand.getType().equals(Material.MINECART))*/ || inHand.getAmount() < 1){
 						return;
 					}
 					Plane pln = main.plugin.planeManager.getPlane(inHand);
@@ -1200,17 +1200,18 @@ public class uPlanesListener implements Listener {
 			}
 			return;
 		}
-		if(!(item.getType() == Material.MINECART) || 
+		if(/*!(item.getType() == Material.MINECART) || */
 				item.getItemMeta().getLore().size() < 2){
 			return; //Not a plane
 		}
-		//Anvil contains a car in first slot.
+		//Anvil contains a vehicle in first slot.
 		ItemMeta meta = item.getItemMeta();
-		List<String> lore = meta.getLore();
+
 		Plane plane = ItemPlaneValidation.getPlane(item);
 		if(plane == null){
 			return;
 		}
+		List<String> lore = meta.getLore();
         if(save && slotNumber ==2){
         	if(!PresetManager.usePresets || !PresetManager.disableItemRenaming){
         		//They are renaming it

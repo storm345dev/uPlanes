@@ -133,7 +133,10 @@ public class PlaneShop {
 
 							@Override
 							public ItemStack getDisplayItem() {
-								return new ItemStack(Material.MINECART);
+								ItemStack it = pp.toItemStack();
+								ItemStack res = new ItemStack(it.getType());
+								res.setData(it.getData());
+								return res;
 							}
 
 							@Override

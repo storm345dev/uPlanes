@@ -14,7 +14,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 public class ItemPlaneValidation {
 	public static Plane getPlane(ItemStack item){
-		if(item == null || !item.getType().equals(Material.MINECART)){
+		if(item == null /*|| !item.getType().equals(Material.MINECART)*/){
 			return null;
 		}
 		
@@ -31,6 +31,9 @@ public class ItemPlaneValidation {
 		}
 		
 		Plane c = getPlaneFromLore(im.getDisplayName(), lore);
+
+		if(c == null)
+			return null;
 
 		PlanePreset preset = c.getPreset();
 		if(preset != null){

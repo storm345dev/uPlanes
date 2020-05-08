@@ -169,7 +169,18 @@ public class Plane implements Serializable {
 	}
 	
 	public ItemStack toItemStack(){
-		ItemStack stack = new ItemStack(Material.MINECART);
+		ItemStack stack;
+		MaterialData displayBlock = getCartDisplayBlock();
+		if(getPreset() != null){
+			displayBlock = getPreset().getDisplayBlock();
+		}
+		if(main.config.getBoolean("general.planes.renderAsModelledBlockWhenExist") && displayBlock != null){
+			stack = new ItemStack(displayBlock.getItemType());
+			stack.setData(displayBlock);
+		}
+		else {
+			stack = new ItemStack(Material.MINECART);
+		}
 		List<String> lore = new ArrayList<String>();
 		ItemMeta meta = stack.getItemMeta();
 		lore.add(ChatColor.GRAY+(isHover()?"helicopter":"plane"));

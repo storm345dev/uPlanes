@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -86,11 +87,22 @@ public class PlanePreset implements Serializable {
 	}
 	
 	public Plane toPlane(){
-		return new Plane(getSpeed(), getName(), getHealth(), getAccelMod(), getTurnAmountPerTick(), isHover(), canPlaneHoverMidair());
+		Plane p =  new Plane(getSpeed(), getName(), getHealth(), getAccelMod(), getTurnAmountPerTick(), isHover(), canPlaneHoverMidair());
+		p.setCartDisplayBlock(this.getDisplayBlock());
+		p.setDisplayOffset(this.getDisplayOffset());
+		return p;
 	}
 	
 	public ItemStack toItemStack(){
-		ItemStack stack = new ItemStack(Material.MINECART);
+		ItemStack stack;
+		if(main.config.getBoolean("general.planes.renderAsModelledBlockWhenExist") && getDisplayBlock() != null){
+			MaterialData md = this.getDisplayBlock();
+			stack = new ItemStack(md.getItemType());
+			stack.setData(md);
+		}
+		else {
+			stack = new ItemStack(Material.MINECART);
+		}
 		List<String> lore = new ArrayList<String>();
 		ItemMeta meta = stack.getItemMeta();
 		lore.add(ChatColor.GRAY+(hover?"helicopter":"plane"));

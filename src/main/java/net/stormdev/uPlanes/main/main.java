@@ -266,6 +266,9 @@ public class main extends JavaPlugin {
         	if(!config.contains("general.planes.maxSpeed")){
         		config.set("general.planes.maxSpeed", 200.0d);
         	}
+        	if(!config.contains("general.planes.renderAsModelledBlockWhenExist")){
+        		config.set("general.planes.renderAsModelledBlockWhenExist",true);
+			}
         	maxSpeed = config.getDouble("general.planes.maxSpeed");
         	if(!config.contains("general.planes.doAcceleration")){
         		config.set("general.planes.doAcceleration", true);
