@@ -44,6 +44,9 @@ public class uCarsCompatibility {
 				try {
 					uuid = UUID.fromString(id);
 				} catch (Exception e) {
+					return true;
+				}
+				if(main.plugin.planeManager.isAPlane(carStack)){
 					return false;
 				}
 				if(main.plugin.planeManager.isPlaneInUse(uuid)){
