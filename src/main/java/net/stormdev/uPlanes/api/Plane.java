@@ -39,6 +39,8 @@ public class Plane implements Serializable {
 	private boolean writtenOff = false;
 	private float hitboxX = -1;
 	private float hitboxZ = -1;
+	private int maxPassengers = 1;
+	private double boatRotationOffsetDegrees = 0;
 	
 	private transient float currentPitch = 0;
 	private transient float roll = 0; //TODO
@@ -140,7 +142,29 @@ public class Plane implements Serializable {
 		this.hover = hover;
 		this.canPlaneHover = canPlaneHoverMidair;
 	}
-	
+
+	public int getMaxPassengers() {
+		if(getPreset() != null){
+			return getPreset().getMaxPassengers();
+		}
+		return maxPassengers;
+	}
+
+	public void setMaxPassengers(int maxPassengers) {
+		this.maxPassengers = maxPassengers;
+	}
+
+	public double getBoatRotationOffsetDegrees() {
+		if(getPreset() != null){
+			return getPreset().getBoatRotationOffsetDeg();
+		}
+		return boatRotationOffsetDegrees;
+	}
+
+	public void setBoatRotationOffsetDegrees(double boatRotationOffsetDegrees) {
+		this.boatRotationOffsetDegrees = boatRotationOffsetDegrees;
+	}
+
 	private String getHandleString(boolean b){
 		if(b){
 			return "Yes";
@@ -190,6 +214,9 @@ public class Plane implements Serializable {
 		lore.add(main.colors.getTitle()+"[Handling:] "+main.colors.getInfo()+turnAmount*10.0d);
 		if(hover||canPlaneHover){
 			lore.add(main.colors.getTitle()+"[Hover:] "+main.colors.getInfo()+getHandleString(hover||canPlaneHover));
+		}
+		if(getMaxPassengers() > 1){
+			lore.add(main.colors.getTitle()+"[Passengers:] "+main.colors.getInfo()+getMaxPassengers());
 		}
 		meta.setDisplayName(Colors.colorise(name));
 		meta.setLore(lore);

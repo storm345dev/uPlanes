@@ -305,6 +305,8 @@ public class uPlaneManager {
 				HoverCartEntity hce = new HoverCartEntity(loc.clone().add(0, 0.3, 0));
 				hce.setHitBoxX(plane.getHitboxX());
 				hce.setHitBoxZ(plane.getHitboxZ());
+				hce.setMaxPassengers(plane.getMaxPassengers());
+				hce.setBoatOffsetDeg(plane.getBoatRotationOffsetDegrees());
 				HoverCart hc = hce.spawn();
 				ent = hc;
 				hc.setDisplay(new ItemStack(display.getItemType(), 1, display.getData()), offset);

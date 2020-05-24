@@ -37,6 +37,8 @@ public class PlanePreset implements Serializable {
 	private double displayOffset = 0;
 	private float hitBoxX = -1;
 	private float hitBoxZ = -1;
+	private int maxPassengers = 1;
+	private double boatRotationOffsetDeg = 0;
 
 	public PlanePreset(String presetID, double speed, String name, double health, double accelMod, double turnAmountPerTick, boolean hover, double cost, MaterialData displayBlock, double offset, float hitBoxX, float hitBoxZ){
 		this(presetID, speed, name, health, accelMod, turnAmountPerTick, hover, cost, displayBlock, offset, hitBoxX, hitBoxZ, hover);
@@ -59,6 +61,22 @@ public class PlanePreset implements Serializable {
 		this.setDisplayOffset(offset);
 		this.hitBoxX = hitBoxX;
 		this.hitBoxZ = hitBoxZ;
+	}
+
+	public int getMaxPassengers() {
+		return maxPassengers;
+	}
+
+	public void setMaxPassengers(int maxPassengers) {
+		this.maxPassengers = maxPassengers;
+	}
+
+	public double getBoatRotationOffsetDeg() {
+		return boatRotationOffsetDeg;
+	}
+
+	public void setBoatRotationOffsetDeg(double boatRotationOffsetDeg) {
+		this.boatRotationOffsetDeg = boatRotationOffsetDeg;
 	}
 
 	public void setCanPlaneHoverMidair(boolean b){

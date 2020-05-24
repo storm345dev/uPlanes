@@ -8,6 +8,7 @@ import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Vehicle;
@@ -205,7 +206,6 @@ public class FlightControl {
 		boolean desc = false;
 		
 		posTracking.pitchForward = true;
-		
 		if(current.getY()<targetHeight){
 			asc = true;
 			desc = false;
@@ -267,16 +267,18 @@ public class FlightControl {
 				)
 				){
 			desc = false;
-			y = 0;
+			asc = true;
+			y = ascSpeed;
 		}
 		if(asc
 				&& (!next.getRelative(BlockFace.UP).isEmpty()
 						|| !next.getRelative(BlockFace.UP, 2).isEmpty()
 						|| !next.getRelative(BlockFace.UP, 3).isEmpty()
 						|| !next.getRelative(BlockFace.UP, 4).isEmpty()
-				|| !left.isEmpty()
-				|| !right.isEmpty())){
+				/*|| !left.isEmpty()
+				|| !right.isEmpty()*/)){
 			desc = false;
+			asc = false;
 			z = -toGo.getZ();
 			x = -toGo.getX();
 			posTracking.pitchForward = false;
@@ -290,7 +292,7 @@ public class FlightControl {
 			if(current.getY() < targetLoc.getY()){
 				y = ascSpeed; //Ascend
 			}
-			else if(current.getY() - targetLoc.getY() < 2){
+			else if(Math.abs(current.getY() - targetLoc.getY()) < 2){
 				//Arrived
 				AccelerationManager.setCurrentAccel(vehicle, 1.0);
 				vehicle.setVelocity(new Vector(0,0,0));
@@ -337,7 +339,8 @@ public class FlightControl {
 		Vector behind = vel.clone().multiply(-2);
 		Location back = current.add(behind);
 		back.getWorld().playEffect(back, Effect.SMOKE, 1);
-		vehicle.setVelocity(vel.clone().multiply(0.5));
+		Vector toMove = vel.clone().multiply(0.5);
+		vehicle.setVelocity(toMove);
 		if(asc){
 			posTracking.setLastAscPos(vehicle.getLocation().toVector().clone());
 		}

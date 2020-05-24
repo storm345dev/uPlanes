@@ -1,5 +1,6 @@
 package net.stormdev.uPlanes.hover;
 
+import net.minecraft.server.v1_12_R1.EntityArmorStand;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.v1_12_R1.CraftServer;
@@ -11,8 +12,10 @@ import org.bukkit.entity.Snowball;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.EulerAngle;
+import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
@@ -98,6 +101,23 @@ public class CraftHoverCart extends CraftArmorStand implements HoverCart {
 	}
 
 	@Override
+	public Entity getPassenger(){
+		List<Entity> pass = getPassengers();
+		if(pass.size() < 1){
+			return null;
+		}
+		return pass.get(0);
+	}
+
+	@Override
+	public List<Entity> getPassengers(){
+		List<Entity> le = new ArrayList<>(super.getPassengers());
+		//Reverse it so that first in vehicle is first, not last
+		Collections.reverse(le);
+		return le;
+	}
+
+	@Override
 	public double getDisplayOffset() {
 		return getHandle().getHeightOffset();
 	}
@@ -136,10 +156,15 @@ public class CraftHoverCart extends CraftArmorStand implements HoverCart {
 	}
 
 	@Override
+	public void setVelocity(Vector vel){
+		super.setVelocity(vel);
+	}
+
+	@Override
 	public void setPitch(float pitch) {
 		double y = pitch;
 		while(y < 0){
-			y = 360 + y;
+			y = Math.PI*2 + y;
 		}
 		
 		setHeadPose(new EulerAngle(Math.toRadians(y), getHeadPose().getY(), getHeadPose().getZ())); 
@@ -149,6 +174,16 @@ public class CraftHoverCart extends CraftArmorStand implements HoverCart {
 	public void setYawPitch(float yaw, float pitch) {
 		setYaw(yaw);
 		setPitch(pitch);
+	}
+
+	@Override
+	public double getMaxPassengers() {
+		return getHandle().getMaxPassengers();
+	}
+
+	@Override
+	public double getBoatRotationOffsetDegrees() {
+		return getHandle().getBoatOffsetDeg();
 	}
 
 	@Override

@@ -13,11 +13,13 @@ import net.stormdev.uPlanes.guis.IconMenuListener;
 import net.stormdev.uPlanes.hover.HoverCart;
 import net.stormdev.uPlanes.hover.HoverCartEntity;
 import net.stormdev.uPlanes.presets.PresetManager;
+import net.stormdev.uPlanes.protocolMagic.ProtocolManipulator;
 import net.stormdev.uPlanes.shops.PlaneShop;
 import net.stormdev.uPlanes.utils.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.craftbukkit.v1_12_R1.CraftWorld;
@@ -57,6 +59,8 @@ public class main extends JavaPlugin {
 	public Random random = new Random();
 	public DestinationManager destinationManager = null;
 	public uPlanesAPI api = null;
+
+	public ProtocolManipulator protocolManipulator;
 	
 	public PlaneShop planeShop = null;
 	public static Economy economy = null;
@@ -517,99 +521,8 @@ public class main extends JavaPlugin {
 									}});
 						  }
 					});
-			
-			try { //These 2 translate our custom entity for rendering display blocks to look in the right place!
-				((ProtocolManager) this.protocolManager).addPacketListener(new PacketAdapter(this, PacketType.Play.Server.ENTITY_TELEPORT){
-							@Override
-							public void onPacketSending(PacketEvent event){
-								int entityId = event.getPacket().getIntegers().read(0);
-								
-								HoverCart hce = null;
-								for(World w:Bukkit.getServer().getWorlds()){
-									for(net.minecraft.server.v1_12_R1.Entity e:((CraftWorld)w).getHandle().entityList){
-										if(entityId == e.getId()){
-											HoverCart hc = HoverCartEntity.getCart(e.getBukkitEntity());
-											if(hc == null){
-												return;
-											}
-											hce = hc;
-										}
-									}
-								}
-								if(hce == null){
-									return;
-								}
-								
-								double y = hce.getLocation().getY()/*(double)event.getPacket().getIntegers().read(2) / 32.0*/;
-								/*Block b = hce.getLocation().getBlock();*/
-								y+= hce.getDisplayOffset()-0.9;
-								event.getPacket().getDoubles().write(1, y);
-							}
-					
-				});
-				/*((ProtocolManager) this.protocolManager).addPacketListener(new PacketAdapter(this, PacketType.Play.Server.SPAWN_ENTITY){
-					@Override
-					public void onPacketSending(PacketEvent event){
-						int entityId = event.getPacket().getIntegers().read(0);
-						
-						HoverCart hce = null;
-						for(World w:Bukkit.getServer().getWorlds()){
-							for(net.minecraft.server.v1_8_R3.Entity e:((CraftWorld)w).getHandle().entityList){
-								if(entityId == e.getId()){
-									HoverCart hc = HoverCartEntity.getCart(e.getBukkitEntity());
-									if(hc == null){
-										return;
-									}
-									hce = hc;
-								}
-							}
-						}
-						if(hce == null){
-							return;
-						}
-						
-						double y = (double)event.getPacket().getIntegers().read(2) / 32.0;
-						Block b = hce.getLocation().getBlock();
-						if(b.isEmpty() || b.isLiquid()){
-							y+= hce.getDisplayOffset()-0.9;
-						}
-						event.getPacket().getIntegers().write(2, (int) (y * 32));
-					}
-			
-		});*/
-				
-				/*((ProtocolManager) this.protocolManager).addPacketListener(new PacketAdapter(this, PacketType.Play.Server.SPAWN_ENTITY_LIVING){
-					@Override
-					public void onPacketSending(PacketEvent event){
-						int entityId = event.getPacket().getIntegers().read(0);
-						
-						HoverCart hce = null;
-						for(World w:Bukkit.getServer().getWorlds()){
-							for(net.minecraft.server.v1_8_R3.Entity e:((CraftWorld)w).getHandle().entityList){
-								if(entityId == e.getId()){
-									HoverCart hc = HoverCartEntity.getCart(e.getBukkitEntity());
-									if(hc == null){
-										return;
-									}
-									hce = hc;
-								}
-							}
-						}
-						if(hce == null){
-							return;
-						}
-						
-						double y = (double)event.getPacket().getIntegers().read(2) / 32.0;
-						Block b = hce.getLocation().getBlock();
-						if(b.isEmpty() || b.isLiquid()){
-							y+= hce.getDisplayOffset()-0.9;
-						}
-						event.getPacket().getIntegers().write(2, (int) (y * 32));
-					}
-			
-		});*/
-			} catch (Exception e) {
-			}
+			protocolManipulator = new ProtocolManipulator(this.protocolManager);
+			protocolManipulator.registerManipulations();
 		} catch (Exception e) {
 			return false;
 		}

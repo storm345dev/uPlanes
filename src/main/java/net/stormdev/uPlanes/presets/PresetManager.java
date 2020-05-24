@@ -114,8 +114,17 @@ public class PresetManager {
 				if(sect.contains("hitbox.z")){
 					hitBoxZ = (float) sect.getDouble("hitbox.z");
 				}
+				if(!sect.contains("passengers.max")){
+					sect.set("passengers.max",1);
+				}
+				if(!sect.contains("passengers.boatRotationOffsetDeg")){
+					sect.set("passengers.boatRotationOffsetDeg",0.0d);
+				}
 				
 				PlanePreset pp = new PlanePreset(id, speed, name, health, accelMod, turnAmountPerTick, hover, cost, displayBlock, displayOffset, hitBoxX, hitBoxZ, hoverMidair);
+				pp.setMaxPassengers(sect.getInt("passengers.max"));
+				pp.setBoatRotationOffsetDeg(sect.getDouble("passengers.boatRotationOffsetDeg"));
+
 				this.presets.add(pp);
 			} catch (Exception e) {
 				//Error loading this preset!
