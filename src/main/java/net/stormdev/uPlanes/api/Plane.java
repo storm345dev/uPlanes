@@ -144,8 +144,13 @@ public class Plane implements Serializable {
 	}
 
 	public int getMaxPassengers() {
-		if(getPreset() != null){
-			return getPreset().getMaxPassengers();
+		if(this.maxPassengers < 0){
+			if(isFromPreset()) {
+				return getPreset().getMaxPassengers();
+			}
+			else {
+				maxPassengers = 1;
+			}
 		}
 		return maxPassengers;
 	}
@@ -155,7 +160,7 @@ public class Plane implements Serializable {
 	}
 
 	public double getBoatRotationOffsetDegrees() {
-		if(getPreset() != null){
+		if(this.maxPassengers < 0 && isFromPreset()) {
 			return getPreset().getBoatRotationOffsetDeg();
 		}
 		return boatRotationOffsetDegrees;
