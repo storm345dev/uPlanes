@@ -13,7 +13,7 @@ import org.bukkit.event.vehicle.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HoverCartEntity extends EntityArmorStand {	 //TODO Stop it falling out of the world
+public class HoverCartEntity extends EntityArmorStand {
 	public static final double OFFSET_AMOUNT = /*-1*/0;
 	
 	public float getHitBoxX() {

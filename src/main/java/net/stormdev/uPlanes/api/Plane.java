@@ -39,7 +39,7 @@ public class Plane implements Serializable {
 	private boolean writtenOff = false;
 	private float hitboxX = -1;
 	private float hitboxZ = -1;
-	private int maxPassengers = 1;
+	private int maxPassengers = -1;
 	private double boatRotationOffsetDegrees = 0;
 	
 	private transient float currentPitch = 0;
@@ -149,7 +149,7 @@ public class Plane implements Serializable {
 				return getPreset().getMaxPassengers();
 			}
 			else {
-				maxPassengers = 1;
+				return 1;
 			}
 		}
 		return maxPassengers;
