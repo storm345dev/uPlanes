@@ -38,7 +38,7 @@ public class ProtocolManipulator implements Listener {
     @EventHandler
     void logout(PlayerQuitEvent event){
         for(World w: Bukkit.getServer().getWorlds()) {
-            for (net.minecraft.server.v1_12_R1.Entity e : ((CraftWorld) w).getHandle().entityList) {
+            for(net.minecraft.server.v1_12_R1.Entity e:new ArrayList<>(((CraftWorld)w).getHandle().entityList)){
                 HoverCart hc = HoverCartEntity.getCart(e.getBukkitEntity());
                 if (hc == null) {
                     continue;
@@ -205,14 +205,13 @@ public class ProtocolManipulator implements Listener {
                 }
 
             });
-            //TODO HANDLE ROTATING BOAT WITH HELI/PLANE
             this.protocolManager.addPacketListener(new PacketAdapter(main.plugin,PacketType.Play.Client.USE_ENTITY) {
                 @Override
                 public void onPacketReceiving(PacketEvent event) {
                     int entityId = event.getPacket().getIntegers().read(0);
                     //Translate interacting with fake boat or arrows into interacting with real armor stand
                     for(World w:Bukkit.getServer().getWorlds()){
-                        for(net.minecraft.server.v1_12_R1.Entity e:((CraftWorld)w).getHandle().entityList){
+                        for(net.minecraft.server.v1_12_R1.Entity e:new ArrayList<>(((CraftWorld)w).getHandle().entityList)){
                             if(e instanceof HoverCartEntity){
                                 if(((HoverCartEntity) e).hasFakeBoat()){
                                     if(entityId == ((HoverCartEntity) e).getFakeBoat().getId()
@@ -227,32 +226,6 @@ public class ProtocolManipulator implements Listener {
                     }
                 }
             });
-            /*this.protocolManager.addPacketListener(new PacketAdapter(main.plugin,PacketType.Play.Server.ENTITY) {
-                @Override
-                public void onPacketSending(PacketEvent event) {
-                    int entityId = event.getPacket().getIntegers().read(0);HoverCart hce = null;
-                    HoverCartEntity nmsEntity = null;
-                    for(World w:Bukkit.getServer().getWorlds()){
-                        for(net.minecraft.server.v1_12_R1.Entity e:((CraftWorld)w).getHandle().entityList){
-                            if(entityId == e.getId()){
-                                //Bukkit.broadcastMessage("(name: "+e.getName()+")");
-                                HoverCart hc = HoverCartEntity.getCart(e.getBukkitEntity());
-                                if(hc == null){
-                                    return;
-                                }
-                                nmsEntity = (HoverCartEntity) e;
-                                hce = hc;
-                            }
-                        }
-                    }
-                    if(hce == null){
-                        return;
-                    }
-                    Bukkit.broadcastMessage("ROTATE PACKET FOR: "+entityId);
-                    Bukkit.broadcastMessage(event.getPacket().getBytes().read(0)+"");
-                    //Bukkit.broadcastMessage(event.getPacket().getBytes().read(1)+"");
-                }
-            });*/
             this.protocolManager.addPacketListener(new PacketAdapter(main.plugin,PacketType.Play.Server.MOUNT) {
                 @Override
                 public void onPacketSending(PacketEvent event){
@@ -263,7 +236,7 @@ public class ProtocolManipulator implements Listener {
                     HoverCart hce = null;
                     HoverCartEntity nmsEntity = null;
                     for(World w:Bukkit.getServer().getWorlds()){
-                        for(net.minecraft.server.v1_12_R1.Entity e:((CraftWorld)w).getHandle().entityList){
+                        for(net.minecraft.server.v1_12_R1.Entity e:new ArrayList<>(((CraftWorld)w).getHandle().entityList)){
                             if(entityId == e.getId()){
                                 //Bukkit.broadcastMessage("(name: "+e.getName()+")");
                                 HoverCart hc = HoverCartEntity.getCart(e.getBukkitEntity());
@@ -319,7 +292,7 @@ public class ProtocolManipulator implements Listener {
                     HoverCart hce = null;
                     HoverCartEntity nmsEntity = null;
                     for(World w:Bukkit.getServer().getWorlds()){
-                        for(net.minecraft.server.v1_12_R1.Entity e:((CraftWorld)w).getHandle().entityList){
+                        for(net.minecraft.server.v1_12_R1.Entity e:new ArrayList<>(((CraftWorld)w).getHandle().entityList)){
                             if(entityId == e.getId()){
                                 HoverCart hc = HoverCartEntity.getCart(e.getBukkitEntity());
                                 if(hc == null){
@@ -336,9 +309,7 @@ public class ProtocolManipulator implements Listener {
 
                     double y = (double)event.getPacket().getDoubles().read(2) /*/ 32.0*/;
                     Block b = hce.getLocation().getBlock();
-                    if(b.isEmpty() || b.isLiquid()){
-                        y+= hce.getDisplayOffset()-0.9;
-                    }
+                    y+= hce.getDisplayOffset()-0.9;
                     event.getPacket().getDoubles().write(2, /*(int) (*/y/* * 32)*/);
                     sendFakeBoatAndArrowSpawns(nmsEntity,hce,event.getPlayer());
                     /*System.out.println("Packet integers:");
