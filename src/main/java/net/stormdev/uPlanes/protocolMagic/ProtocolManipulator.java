@@ -307,7 +307,7 @@ public class ProtocolManipulator implements Listener {
                         return;
                     }
 
-                    double y = (double)event.getPacket().getDoubles().read(1) /*/ 32.0*/;
+                    double y = hce.getLocation().getY();//(double)event.getPacket().getDoubles().read(1) /*/ 32.0*/;
                     Block b = hce.getLocation().getBlock();
                     y+= hce.getDisplayOffset()-0.9;
                     event.getPacket().getDoubles().write(1, /*(int) (*/y/* * 32)*/);
