@@ -28,46 +28,6 @@ public class CraftHoverCart extends CraftArmorStand implements HoverCart {
 	}
 	
 	@Override
-	public Arrow shootArrow(){
-		return null;
-	}
-
-	@Override
-	public int _INVALID_getLastDamage() {
-		return 0;
-	}
-
-	@Override
-	public void _INVALID_setLastDamage(int i) {
-
-	}
-
-	@Override
-	public Snowball throwSnowball(){
-		return null;
-	}
-
-	@Override
-	public List<Block> getLineOfSight(HashSet<Byte> hashSet, int i) {
-		return new ArrayList<>();
-	}
-
-	@Override
-	public Block getTargetBlock(HashSet<Byte> hashSet, int i) {
-		return null;
-	}
-
-	@Override
-	public List<Block> getLastTwoTargetBlocks(HashSet<Byte> hashSet, int i) {
-		return new ArrayList<>();
-	}
-
-	@Override
-	public Egg throwEgg(){
-		return null;
-	}
-	
-	@Override
 	public HoverCartEntity getHandle(){
 		return (HoverCartEntity) super.getHandle();
 	}
@@ -212,33 +172,4 @@ public class CraftHoverCart extends CraftArmorStand implements HoverCart {
 		getHandle().setHitBoxZ(z);
 	}
 
-	@Override
-	public void _INVALID_damage(int i) {
-
-	}
-
-	@Override
-	public void _INVALID_damage(int i, Entity entity) {
-
-	}
-
-	@Override
-	public int _INVALID_getHealth() {
-		return 0;
-	}
-
-	@Override
-	public void _INVALID_setHealth(int i) {
-
-	}
-
-	@Override
-	public int _INVALID_getMaxHealth() {
-		return 0;
-	}
-
-	@Override
-	public void _INVALID_setMaxHealth(int i) {
-
-	}
 }

@@ -25,7 +25,8 @@ public class uCarsCompatibility {
 		api.registerCarCheck(main.plugin, new CarCheck(){
 
 			public Boolean isACar(Entity car) {
-				if(main.plugin.planeManager.isPlaneInUse(car.getUniqueId())){
+				if(main.plugin.planeManager.isPlaneInUse(car.getUniqueId())
+					|| main.plugin.boatsManager.isBoatInUse(car.getUniqueId())){
 					PEntityMeta.setMetadata(car, "ucars.ignore", new StatValue(true, main.plugin));
 					return false;
 				}
@@ -53,6 +54,12 @@ public class uCarsCompatibility {
 					return false;
 				}
 				if(main.plugin.planeManager.isPlaneInUse(uuid)){
+					return false;
+				}
+				if(main.plugin.boatsManager.isABoat(carStack)){
+					return false;
+				}
+				if(main.plugin.boatsManager.isBoatInUse(uuid)){
 					return false;
 				}
 				return true;

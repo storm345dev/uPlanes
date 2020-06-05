@@ -8,7 +8,6 @@ import net.stormdev.uPlanes.api.Plane;
 import net.stormdev.uPlanes.presets.PlanePreset;
 import net.stormdev.uPlanes.utils.Colors;
 
-import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 

@@ -4,6 +4,7 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 import net.stormdev.uPlanes.api.Plane;
+import net.stormdev.uPlanes.api.uPlanesVehicle;
 import net.stormdev.uPlanes.utils.Colors;
 import net.stormdev.uPlanes.utils.Lang;
 
@@ -15,7 +16,7 @@ import org.bukkit.inventory.ItemStack;
 
 public class UpgradeManager {
 	@SuppressWarnings("deprecation")
-	public static void applyUpgrades(ItemStack upgrade, Plane plane,
+	public static void applyUpgrades(ItemStack upgrade, uPlanesVehicle plane,
 			boolean update, boolean save, Player player, Inventory inv, UUID id){
 		//TODO Apply it
 		String upgradeMsg = Lang.get("general.upgrade.msg");
@@ -106,7 +107,7 @@ public class UpgradeManager {
 		//Perform actions to clear up what we've done
 		inv.clear(1);
 		if(update){
-			inv.setItem(0, PlaneItemMethods.getItem(plane));
+			inv.setItem(0, plane.toItemStack());
 			player.updateInventory();
 		}
 	}

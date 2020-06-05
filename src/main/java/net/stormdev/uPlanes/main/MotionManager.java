@@ -1,26 +1,20 @@
 package net.stormdev.uPlanes.main;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
 import net.stormdev.uPlanes.api.Keypress;
 import net.stormdev.uPlanes.api.Plane;
-import net.stormdev.uPlanes.api.Plane.RollTarget;
+import net.stormdev.uPlanes.api.RollTarget;
 import net.stormdev.uPlanes.api.uPlanesAPI;
 import net.stormdev.uPlanes.utils.CartOrientationUtil;
 import net.stormdev.uPlanes.utils.PEntityMeta;
 import net.stormdev.uPlanes.utils.PlaneUpdateEvent;
 import net.stormdev.uPlanes.utils.StatValue;
-
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.util.Vector;
+
+import java.util.*;
 
 public class MotionManager {
 	

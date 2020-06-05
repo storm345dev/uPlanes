@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -21,62 +20,20 @@ import net.stormdev.uPlanes.utils.Colors;
  * Do not manipulate this directly if avoidable, use the API
  *
  */
-public class PlanePreset implements Serializable {
+public class PlanePreset extends uPlanesVehiclePresetBase<Plane> implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
-	private String presetID = "";
-	private double mutliplier = 30;
-	private String name = "Plane";
-	private double health = 50;
-	private double turnAmount = 2;
-	private double accelMod = 1;
 	private boolean hover = false;
 	private boolean canPlaneHoverMidair = false;
-	private double cost = 0;
-	private MaterialData displayBlock;
-	private double displayOffset = 0;
-	private float hitBoxX = -1;
-	private float hitBoxZ = -1;
-	private int maxPassengers = 1;
-	private double boatRotationOffsetDeg = 0;
 
 	public PlanePreset(String presetID, double speed, String name, double health, double accelMod, double turnAmountPerTick, boolean hover, double cost, MaterialData displayBlock, double offset, float hitBoxX, float hitBoxZ){
 		this(presetID, speed, name, health, accelMod, turnAmountPerTick, hover, cost, displayBlock, offset, hitBoxX, hitBoxZ, hover);
 	}
 
 	public PlanePreset(String presetID, double speed, String name, double health, double accelMod, double turnAmountPerTick, boolean hover, double cost, MaterialData displayBlock, double offset, float hitBoxX, float hitBoxZ, boolean canPlaneHoverMidair){
-		this.setPresetID(presetID);
-		if(speed > main.maxSpeed){
-			speed = main.maxSpeed;
-		}
-		this.mutliplier = speed;
-		this.name = name;
-		this.health = health;
-		this.accelMod = accelMod;
-		this.turnAmount = turnAmountPerTick;
+		super(presetID,speed,name,health,accelMod,turnAmountPerTick,cost,displayBlock,offset,hitBoxX,hitBoxZ);
 		this.hover = hover;
 		this.canPlaneHoverMidair = canPlaneHoverMidair;
-		this.setCost(cost);
-		this.setDisplayBlock(displayBlock);
-		this.setDisplayOffset(offset);
-		this.hitBoxX = hitBoxX;
-		this.hitBoxZ = hitBoxZ;
-	}
-
-	public int getMaxPassengers() {
-		return maxPassengers;
-	}
-
-	public void setMaxPassengers(int maxPassengers) {
-		this.maxPassengers = maxPassengers;
-	}
-
-	public double getBoatRotationOffsetDeg() {
-		return boatRotationOffsetDeg;
-	}
-
-	public void setBoatRotationOffsetDeg(double boatRotationOffsetDeg) {
-		this.boatRotationOffsetDeg = boatRotationOffsetDeg;
 	}
 
 	public void setCanPlaneHoverMidair(boolean b){
@@ -87,30 +44,19 @@ public class PlanePreset implements Serializable {
 		return this.canPlaneHoverMidair;
 	}
 	
-	public float getHitBoxX(){
-		return this.hitBoxX;
-	}
-	
-	public float getHitBoxZ(){
-		return this.hitBoxZ;
-	}
-	
-	private String getHandleString(boolean b){
-		if(b){
-			return "Yes";
-		}
-		else {
-			return "No";
-		}
-	}
-	
 	public Plane toPlane(){
 		Plane p =  new Plane(getSpeed(), getName(), getHealth(), getAccelMod(), getTurnAmountPerTick(), isHover(), canPlaneHoverMidair());
 		p.setCartDisplayBlock(this.getDisplayBlock());
 		p.setDisplayOffset(this.getDisplayOffset());
 		return p;
 	}
-	
+
+	@Override
+	public Plane toVehicle() {
+		return toPlane();
+	}
+
+	@Override
 	public ItemStack toItemStack(){
 		ItemStack stack;
 		if(main.config.getBoolean("general.planes.renderAsModelledBlockWhenExist") && getDisplayBlock() != null){
@@ -137,36 +83,6 @@ public class PlanePreset implements Serializable {
 		return stack;
 	}
 
-	public double getSpeed() {
-		if(this.mutliplier > main.maxSpeed){
-			this.mutliplier = main.maxSpeed;
-		}
-		return mutliplier;
-	}
-
-	public void setSpeed(double speed) {
-		if(speed > main.maxSpeed){
-			speed = main.maxSpeed;
-		}
-		this.mutliplier = speed;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public double getHealth() {
-		return health;
-	}
-
-	public void setHealth(double health) {
-		this.health = health;
-	}
-
 	public boolean isHover() {
 		return hover;
 	}
@@ -174,39 +90,8 @@ public class PlanePreset implements Serializable {
 	public void setHover(boolean hover) {
 		this.hover = hover;
 	}
-	
-	public void setTurnAmountPerTick(double d){
-		this.turnAmount = d;
-	}
 
-	public double getTurnAmountPerTick() {
-		return turnAmount;
-	}
-
-	public double getAccelMod() {
-		return accelMod;
-	}
-
-	public void setAccelMod(double accelMod) {
-		this.accelMod = accelMod;
-	}
-
-	public String getPresetID() {
-		return presetID;
-	}
-
-	public void setPresetID(String presetID) {
-		this.presetID = presetID;
-	}
-
-	public double getCost() {
-		return cost;
-	}
-
-	public void setCost(double cost) {
-		this.cost = cost;
-	}
-
+	@Override
 	public String[] getSellLore() {
 		String currency = main.config.getString("general.currencySign");
 		List<String> lore = new ArrayList<String>();
@@ -219,25 +104,5 @@ public class PlanePreset implements Serializable {
 			lore.add(main.colors.getTitle()+"[Hover:] "+main.colors.getInfo()+getHandleString(hover));
 		}
 		return lore.toArray(new String[]{});
-	}
-	
-	public boolean hasDisplayBlock(){
-		return this.displayBlock != null;
-	}
-
-	public MaterialData getDisplayBlock() {
-		return displayBlock;
-	}
-
-	public void setDisplayBlock(MaterialData displayBlock) {
-		this.displayBlock = displayBlock;
-	}
-
-	public double getDisplayOffset() {
-		return displayOffset;
-	}
-
-	public void setDisplayOffset(double displayOffset) {
-		this.displayOffset = displayOffset;
 	}
 }

@@ -10,7 +10,6 @@ import net.milkbowl.vault.economy.Economy;
 import net.stormdev.uPlanes.api.uPlanesAPI;
 import net.stormdev.uPlanes.commands.*;
 import net.stormdev.uPlanes.guis.IconMenuListener;
-import net.stormdev.uPlanes.hover.HoverCart;
 import net.stormdev.uPlanes.hover.HoverCartEntity;
 import net.stormdev.uPlanes.presets.PresetManager;
 import net.stormdev.uPlanes.protocolMagic.ProtocolManipulator;
@@ -18,11 +17,8 @@ import net.stormdev.uPlanes.shops.PlaneShop;
 import net.stormdev.uPlanes.utils.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.craftbukkit.v1_12_R1.CraftWorld;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
@@ -56,6 +52,7 @@ public class main extends JavaPlugin {
 	public ProtocolManager protocolManager = null;
 	public uPlanesListener listener = null;
 	public PlanesManager planeManager = null;
+	public BoatsManager boatsManager = null;
 	public Random random = new Random();
 	public DestinationManager destinationManager = null;
 	public uPlanesAPI api = null;
@@ -102,6 +99,8 @@ public class main extends JavaPlugin {
 				+ File.separator + "lang.yml");
 		File planesSaveFile = new File(getDataFolder().getAbsolutePath()
 				+ File.separator + "Data" + File.separator + "uplanes.data");
+		File boatsSaveFile = new File(getDataFolder().getAbsolutePath()
+				+ File.separator + "Data" + File.separator + "uplanesBoats.data");
 		File destinationSaveFile = new File(getDataFolder().getAbsolutePath()
 				+ File.separator + "Data" + File.separator + "destinations.locationdata");
 		if (langFile.exists() == false
@@ -367,6 +366,7 @@ public class main extends JavaPlugin {
 		}
 		
 		this.planeManager = new PlanesManager(planesSaveFile);
+		this.boatsManager = new BoatsManager(boatsSaveFile);
 		getServer().getPluginManager().registerEvents(listener, this);
 		
 		//Create a blank plane item
@@ -409,6 +409,7 @@ public class main extends JavaPlugin {
 		
 		getCommand("uPlanes").setExecutor(new InfoCommandExecutor());
 		getCommand("plane").setExecutor(new AdminCommandExecutor());
+		getCommand("boat").setExecutor(new BoatAdminCommandExecutor());
 		AutoPilotCommandExecutor apce = new AutoPilotCommandExecutor();
 		getCommand("destination").setExecutor(apce);
 		getCommand("destinations").setExecutor(apce);

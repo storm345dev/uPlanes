@@ -3,6 +3,9 @@ package net.stormdev.uPlanes.main;
 import java.util.List;
 import java.util.UUID;
 
+import net.stormdev.uPlanes.api.*;
+import net.stormdev.uPlanes.presets.BoatPreset;
+import net.stormdev.uPlanes.utils.*;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Effect;
@@ -56,22 +59,11 @@ import org.bukkit.metadata.MetadataValue;
 import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.util.Vector;
 
-import net.stormdev.uPlanes.api.AutopilotDestination;
-import net.stormdev.uPlanes.api.Keypress;
-import net.stormdev.uPlanes.api.Plane;
-import net.stormdev.uPlanes.api.uPlanesAPI;
 import net.stormdev.uPlanes.hover.HoverCart;
 import net.stormdev.uPlanes.items.ItemPlaneValidation;
 import net.stormdev.uPlanes.main.MotionManager.MovePacketInfo;
 import net.stormdev.uPlanes.presets.PlanePreset;
 import net.stormdev.uPlanes.presets.PresetManager;
-import net.stormdev.uPlanes.utils.CartOrientationUtil;
-import net.stormdev.uPlanes.utils.Lang;
-import net.stormdev.uPlanes.utils.PEntityMeta;
-import net.stormdev.uPlanes.utils.PlaneUpdateEvent;
-import net.stormdev.uPlanes.utils.PrePlaneCrashEvent;
-import net.stormdev.uPlanes.utils.PrePlaneRoughLandingEvent;
-import net.stormdev.uPlanes.utils.StatValue;
 
 public class uPlanesListener implements Listener {
 	private main plugin;
@@ -109,7 +101,7 @@ public class uPlanesListener implements Listener {
 		if(m == null){
 			return;
 		}
-		Plane plane = getPlane(m);
+		uPlanesVehicle<?> plane = getPluginVehicle(m);
 		if(plane == null){ //Not a plane
 			return;
 		}
@@ -136,14 +128,19 @@ public class uPlanesListener implements Listener {
 		}
 		if(collided instanceof Damageable){
 			if(collided instanceof Player){
-				((Player)collided).sendMessage(ChatColor.RED+"You collided with a plane!");
+				((Player)collided).sendMessage(ChatColor.RED+"You collided with a "+plane.getTypeName()+"!");
 			}
-			if(!plane.isHover()){
+			if(!(plane instanceof Plane) || !((Plane) plane).isHover()){
 				collided.setVelocity(m.getVelocity().clone().setY(0.5));
 			}
 			((Damageable) collided).damage(damage, m);
 		}
-		uPlanesAPI.getPlaneManager().damagePlane(m, plane, damage, "Crash");
+		if(plane instanceof Plane) {
+			uPlanesAPI.getPlaneManager().damagePlane(m, (Plane)plane, damage, "Crash");
+		}
+		else if(plane instanceof Boat){
+			uPlanesAPI.getBoatManager().damageBoat(m, (Boat)plane, damage, "Crash");
+		}
 	}
 	
 	@EventHandler(priority = EventPriority.MONITOR)
@@ -152,6 +149,17 @@ public class uPlanesListener implements Listener {
 			return;
 		}
 		plugin.planeManager.noLongerPlaced(event.getEntity().getUniqueId());
+		if(!PEntityMeta.USING_UCARS && !(event.getEntity() instanceof Player)){
+			PEntityMeta.removeAllMeta(event.getEntity());
+		}
+	}
+
+	@EventHandler(priority = EventPriority.MONITOR)
+	void despawnBoats(EntityDeathEvent event){
+		if(!plugin.boatsManager.isBoatInUse(event.getEntity().getUniqueId())){
+			return;
+		}
+		plugin.boatsManager.noLongerPlaced(event.getEntity().getUniqueId());
 		if(!PEntityMeta.USING_UCARS && !(event.getEntity() instanceof Player)){
 			PEntityMeta.removeAllMeta(event.getEntity());
 		}
@@ -186,7 +194,7 @@ public class uPlanesListener implements Listener {
 			}
 		}
 	}
-	
+
 	@EventHandler
 	void protectInPlane(EntityDamageEvent event){
 		Entity e = event.getEntity();
@@ -197,7 +205,7 @@ public class uPlanesListener implements Listener {
 		if(v == null || !(v instanceof Vehicle)){
 			return;
 		}
-		if(isAPlane(((Vehicle)v))){
+		if(isPluginEntity(((Vehicle)v))){
 			event.setDamage(-2.5);
 			event.setCancelled(true);
 		}
@@ -206,7 +214,7 @@ public class uPlanesListener implements Listener {
 	 @EventHandler
 	 void signWrite(SignChangeEvent event){
 		 String[] lines = event.getLines();
-			if(ChatColor.stripColor(lines[0]).equalsIgnoreCase("[Shop]")){
+			if(ChatColor.stripColor(lines[0]).equalsIgnoreCase("[Shop]") && lines.length > 1){
 				lines[0] = ChatColor.GREEN+"[Shop]".trim();
 				lines[1] = ChatColor.RED + ChatColor.stripColor(lines[1].trim());
 				lines[2] = "Place chest";
@@ -287,7 +295,7 @@ public class uPlanesListener implements Listener {
 		 	if(!(exited instanceof Player) || !(veh instanceof Vehicle)){
 	        	return;
 	        }
-	        if(!plugin.planeManager.isPlaneInUse(veh.getUniqueId())){
+	        if(!isPluginEntity(veh)){
 	        	return;
 	        }
 	        
@@ -372,13 +380,13 @@ public class uPlanesListener implements Listener {
 	
 	@EventHandler(priority=EventPriority.HIGH)
 	void onVehTick(VehicleUpdateEvent event){
-		 if(event instanceof PlaneUpdateEvent){
+		 if(event instanceof PlaneUpdateEvent || event instanceof BoatUpdateEvent){
 			 return;
 		 }
 		 
 		 Vehicle v = event.getVehicle();
-		 Plane pln = uPlanesAPI.getPlaneManager().getPlaneById(v.getUniqueId());
-		 if(pln != null){
+		 //Plane pln = uPlanesAPI.getPlaneManager().getPlaneById(v.getUniqueId());
+		 if(isPluginEntity(v)){
 			 
 			 Entity pass = v.getPassenger();
 			 
@@ -421,13 +429,13 @@ public class uPlanesListener implements Listener {
 			}*/
 		}
 		
-		Plane pln = getPlane(car);
+		uPlanesVehicle<?> pln = getPluginVehicle(car);
 		
-		if(PEntityMeta.hasMetadata(car, "plane.destination")){
+		if(PEntityMeta.hasMetadata(car, "plane.destination") && pln instanceof Plane){
 			//Autopilot
 			List<MetadataValue> metas = PEntityMeta.getMetadata(car, "plane.destination");
 			Location dest = (Location) metas.get(0).value();
-			FlightControl.route(dest, loc, car, pln);
+			FlightControl.route(dest, loc, car, (Plane) pln);
 			return;
 		}
 		
@@ -436,8 +444,8 @@ public class uPlanesListener implements Listener {
 		}
 		
 		CartOrientationUtil.setPitch(car, pln.getCurrentPitch());
-		
-		if(!pln.isHover()){
+
+		if(!(pln instanceof Plane) || !((Plane) pln).isHover()){
 			if(pln.getTimeSinceLastUpdateEvent() >= 150 && pln.getLastUpdateEventVec() != null){
 				car.setVelocity(pln.getLastUpdateEventVec());
 			}
@@ -485,7 +493,176 @@ public class uPlanesListener implements Listener {
 		}*/
 		return;
 	}
-	
+
+	@EventHandler
+	void boatControl(BoatUpdateEvent event){
+		Vehicle cart = event.getVehicle();
+		Player player = event.getPlayer();
+
+		if(!(cart instanceof Vehicle)){
+			return;
+		}
+
+		if(main.perms){
+			if(!player.hasPermission("uplanes.fly")){
+				player.sendMessage(main.colors.getError()+"You don't have the permission 'uplanes.fly' required to fly a plane!");
+				return;
+			}
+		}
+
+		Boat boat = event.getBoat();
+
+		if(boat == null){ //Not a plane, just a Minecart
+			return;
+		}
+
+		if (fuel
+				&& !player.hasPermission(fuelBypassPerm)) {
+			double fuel = 0;
+			if (main.fuel.containsKey(player.getName())) {
+				fuel = main.fuel.get(player.getName());
+			}
+			if (fuel < 0.1) {
+				player.sendMessage(main.colors.getError()
+						+ Lang.get("lang.fuel.empty"));
+				return;
+			}
+			int amount = 0 + (int) (Math.random() * 250);
+			if (amount == 10) {
+				fuel = fuel - 0.1;
+				fuel = (double) Math.round(fuel * 10) / 10;
+				main.fuel.put(player.getName(), fuel);
+			}
+		}
+
+		if(perms){
+			if(!player.hasPermission(perm)){
+				return;
+			}
+		}
+
+		if(cart.hasMetadata("plane.frozen") || PEntityMeta.hasMetadata(cart, "plane.frozen")){
+			if(cart instanceof ArmorStand){
+				((ArmorStand)cart).setGravity(false);
+			}
+			else {
+				cart.setVelocity(new Vector(0,0.04,0));
+			}
+			return;
+		}
+		else {
+			if(cart instanceof ArmorStand && !((ArmorStand)cart).hasGravity()){
+				((ArmorStand)cart).setGravity(true);
+			}
+		}
+
+		if(cart instanceof Minecart){
+			((Minecart)cart).setMaxSpeed(5); //Don't crash the server...
+		}
+
+		Location loc = cart.getLocation();
+		Vector travel = event.getTravelVector();
+		double multiplier = boat.getSpeed();
+		if(multiplier > 15){
+			multiplier = 15 + ((multiplier-15) * 0.5);
+		}
+
+		travel.multiply(multiplier);
+
+		if(loc.getY() >= heightLimit){
+			travel.setY(-1);
+			float pitch = 1;
+			boat.setCurrentPitch(pitch);
+			//Send message it's too high
+			player.sendMessage(main.colors.getError()+Lang.get("general.heightLimit"));
+		}
+
+		if(crashing){
+			//Check if they crashed xD
+			/*Block current = cart.getLocation().getBlock();*/
+			Block b = null;
+			double x = travel.getX();
+			double z = travel.getZ();
+			double vx = cart.getVelocity().getX();
+			double vz = cart.getVelocity().getZ();
+			if(Math.abs(vx) > Math.abs(x)){
+				x = vx;
+			}
+			if(Math.abs(vz) > Math.abs(z)){
+				z = vz;
+			}
+			double ax = x;
+			double az = z;
+			BoatPreset pp = boat.getPreset();
+			if(pp != null){
+				if(pp.getHitBoxX() > 0){
+					double length = new Vector(ax, 0, az).length();
+					double goodLength = length + pp.getHitBoxX()/2.0;
+					if(length != 0 && goodLength != 0){
+						double mult = goodLength/length;
+						ax *= mult;
+						az *= mult;
+					}
+				}
+			}
+			Location nextHorizontal = cart.getLocation().clone().add(new Vector(ax, 0, az));
+			b = nextHorizontal.getBlock();
+			if(!b.isEmpty() && !b.isLiquid() && b.getType().isSolid() && !b.getType().equals(Material.CARPET) && !b.getType().equals(Material.BARRIER)){ //Crashed into something
+				boolean inside = true;
+				double relY = nextHorizontal.getY()-b.getY();
+				if(relY < 0){
+					relY = 0;
+				}
+				String name = b.getType().name().toLowerCase();
+				if(name.contains("step") && relY >= 0.4){
+					inside = false;
+				}
+				if(name.contains("carpet") && relY > 0){
+					inside = false;
+				}
+					/*b = b.getRelative(BlockFace.UP);
+					String bt = b.getType().name().toLowerCase();*/
+				if(inside/*(!b.isEmpty() && !b.isLiquid() && b.getType().isSolid())
+							|| (!bt.contains("step")
+									&& !bt.contains("carpet")
+									&& (!bt.contains("grass") && !b.getType().equals(Material.GRASS))
+									)*/){ //Crashed into definitely a wall or something bad
+					double speedSq = new Vector(x, 0, z).lengthSquared();
+					if(true){ //Going v. slow
+						speedSq *= 1.5;
+						double damage = 150.0 * speedSq;
+						damage = Math.round(damage*10.0d)/10.0d;
+						if(damage < 1){
+							damage = 1;
+						}
+						if(damage > 100){
+							damage = 100;
+						}
+
+						PreBoatCrashEvent evt = new PreBoatCrashEvent(cart, player, event.getAcceleration(), boat, damage);
+						Bukkit.getPluginManager().callEvent(evt);
+
+						if(!evt.isCancelled() && evt.getDamage() > 0){
+							uPlanesAPI.getBoatManager().damageBoat(cart, boat, evt.getDamage(), "Crash");
+						}
+					}
+				}
+			}
+		}
+
+		/*if(plane.isHover() && !event.wasKeypressed(Keypress.A) && !event.wasKeypressed(Keypress.D)){
+			travel.setY(cart.getVelocity().getY());
+		}*/
+
+		Vector behind = travel.clone().multiply(-1); //Behind the plane
+		Location exhaust = loc.add(behind);
+		exhaust.getWorld().playEffect(exhaust, Effect.SMOKE, 1);
+
+		cart.setVelocity(travel);
+		boat.postBoatUpdateEvent(travel);
+		return;
+	}
+
 	@EventHandler
 	void planeFlightControl(PlaneUpdateEvent event){
 		Vehicle cart = event.getVehicle();
@@ -818,7 +995,12 @@ public class uPlanesListener implements Listener {
 		}
 		return;
 	}
-	
+
+	public uPlanesVehicle getPluginVehicle(ItemStack stack){
+		Plane pl = main.plugin.planeManager.getPlane(stack);
+		return pl == null ? main.plugin.boatsManager.getBoat(stack) : pl;
+	}
+
 	@EventHandler
 	void placePlane(PlayerInteractEvent event){
 		Action a = event.getAction();
@@ -835,13 +1017,13 @@ public class uPlanesListener implements Listener {
 		/*if(inHand.getType() != Material.MINECART){
 			return;
 		}*/
-		final Plane plane = main.plugin.planeManager.getPlane(inHand);
+		final uPlanesVehicle plane = getPluginVehicle(inHand);
 		if(plane == null){
 			return; //Just a minecart
 		}
 		if(main.perms){
 			if(!player.hasPermission("uplanes.place")){
-				player.sendMessage(main.colors.getError()+"You don't have the permission 'uplanes.place' required to place a plane!");
+				player.sendMessage(main.colors.getError()+"You don't have the permission 'uplanes.place' required to place a "+plane.getTypeName()+"!");
 				return;
 			}
 		}
@@ -895,7 +1077,7 @@ public class uPlanesListener implements Listener {
 					if(inHand == null /*|| !(inHand.getType().equals(Material.MINECART))*/ || inHand.getAmount() < 1){
 						return;
 					}
-					Plane pln = main.plugin.planeManager.getPlane(inHand);
+					uPlanesVehicle pln = getPluginVehicle(inHand);
 					if(pln == null){
 						return; //Just a minecart
 					}
@@ -907,8 +1089,14 @@ public class uPlanesListener implements Listener {
 						yaw = yaw - 360;
 					}
 					toSpawn.setYaw(player.getLocation().getYaw());
-					
-					Vehicle ent = uPlanesAPI.getPlaneManager().placePlane(plane, toSpawn);
+
+					Vehicle ent = null;
+					if(pln instanceof Plane) {
+						ent = uPlanesAPI.getPlaneManager().placePlane((Plane) plane, toSpawn);
+					}
+					else if(pln instanceof Boat) {
+						ent = uPlanesAPI.getBoatManager().placeBoat((Boat) plane,toSpawn);
+					}
 					CartOrientationUtil.setYaw(ent, yaw);
 					
 					Block in = ent.getLocation().getBlock();
@@ -940,7 +1128,7 @@ public class uPlanesListener implements Listener {
 	@EventHandler
 	void vehicleDestroy(VehicleDestroyEvent event){
 		Vehicle v = event.getVehicle();
-		if(!isAPlane(v)){
+		if(!isPluginEntity(v)){
 			return;
 		}
 		event.setCancelled(true); //Don't allow, let health handle it
@@ -980,7 +1168,7 @@ public class uPlanesListener implements Listener {
 			return;
 		}
 		final Vehicle m = event.getVehicle();
-		final Plane plane = getPlane(m);
+		final uPlanesVehicle plane = getPluginVehicle(m);
 		if(plane == null){
 			return;
 		}
@@ -1006,7 +1194,7 @@ public class uPlanesListener implements Listener {
 			}
 		}
 		
-		if(plane.canFloat() && m.getVelocity().getY() < 0.001 && dmger == null){
+		if(plane instanceof Plane && ((Plane) plane).canFloat() && m.getVelocity().getY() < 0.001 && dmger == null){
 			return; //Don't damage helicopters landing
 		}
 		
@@ -1016,11 +1204,20 @@ public class uPlanesListener implements Listener {
 		}
 		
 		if(dmger != null && dmger instanceof Player){
-			uPlanesAPI.getPlaneManager().damagePlane(m, plane, punchDamage, (Player) dmger);
+			if(plane instanceof Plane) {
+				uPlanesAPI.getPlaneManager().damagePlane(m, (Plane) plane, punchDamage, (Player) dmger);
+			} else if(plane instanceof Boat){
+				uPlanesAPI.getBoatManager().damageBoat(m, (Boat) plane,punchDamage,(Player) dmger);
+			}
 		}
 		else {
 			if(dmger != null || event.getDamage() >= 24){
-				uPlanesAPI.getPlaneManager().damagePlane(m, plane, event.getDamage(), "Damage");
+				if(plane instanceof Plane) {
+					uPlanesAPI.getPlaneManager().damagePlane(m, (Plane) plane, event.getDamage(), "Damage");
+				}
+				else if(plane instanceof Boat){
+					uPlanesAPI.getBoatManager().damageBoat(m, (Boat) plane,event.getDamage(),"Damage");
+				}
 			}
 		}
 		
@@ -1183,7 +1380,7 @@ public class uPlanesListener implements Listener {
 		if(item == null){
 			if(!pickup && i.getItem(1) != null){ //Put down item and already an upgrade in slot 2...
 				ItemStack held = event.getCursor();
-				Plane plane = ItemPlaneValidation.getPlane(held);
+				uPlanesVehicle plane = getPluginVehicle(held);
 				if(plane == null){
 					return;
 				}
@@ -1207,7 +1404,7 @@ public class uPlanesListener implements Listener {
 		//Anvil contains a vehicle in first slot.
 		ItemMeta meta = item.getItemMeta();
 
-		Plane plane = ItemPlaneValidation.getPlane(item);
+		uPlanesVehicle plane = getPluginVehicle(item);
 		if(plane == null){
 			return;
 		}
@@ -1218,7 +1415,7 @@ public class uPlanesListener implements Listener {
             	ItemStack result = event.getCurrentItem();
             	String name = ChatColor.stripColor(result.getItemMeta().getDisplayName());
             	plane.setName(name);
-            	player.sendMessage(main.colors.getSuccess()+"+"+main.colors.getInfo()+" Renamed plane to: '"+name+"'");
+            	player.sendMessage(main.colors.getSuccess()+"+"+main.colors.getInfo()+" Renamed "+plane.getTypeName()+" to: '"+name+"'");
             	return;
         	}
         	//Display item naming
@@ -1232,7 +1429,7 @@ public class uPlanesListener implements Listener {
 		final ItemStack up = upgrade;
 		final Boolean updat = update;
 		final Boolean sav = save;
-		final Plane ca = plane;
+		final uPlanesVehicle ca = plane;
 		if(slotNumber == 1 && (a==InventoryAction.PLACE_ALL || a==InventoryAction.PLACE_ONE || a==InventoryAction.PLACE_SOME) && event.getCursor().getType()!=Material.AIR){
 			//upgrade = event.getCursor().clone();
 			plugin.getServer().getScheduler().runTaskLater(plugin, new Runnable(){
@@ -1321,9 +1518,77 @@ public class uPlanesListener implements Listener {
 		//Remove plane and get back item
 		return;
 	}
-	
+
+	public void killBoat(Vehicle vehicle, Boat plane){
+		//Kill plane
+		UUID id = vehicle.getUniqueId();
+		if(!PEntityMeta.USING_UCARS){
+			PEntityMeta.removeAllMeta(vehicle);
+		}
+		plugin.boatsManager.noLongerPlaced(id);
+		final Location loc = vehicle.getLocation();
+		Entity top = vehicle.getPassenger();
+		if(top instanceof Player){
+			top.eject();
+			top.setVelocity(vehicle.getVelocity());
+			if(safeExit){
+				final Player pl = (Player) top;
+				final Vector vel = vehicle.getVelocity();
+				main.plugin.getServer().getScheduler().runTaskLater(main.plugin, new Runnable(){
+
+					public void run() {
+						pl.teleport(loc.clone().add(0, 0.5, 0));
+						pl.setVelocity(vel);
+						/*if(Bukkit.getServer().getPluginManager().getPlugin("AntiCheat") != null){
+			    			AntiCheatAPI.unexemptPlayer(pl, CheckType.FLY);
+					 	}*/
+						return;
+					}}, 2l); //Teleport back to car loc after exit
+			}
+		}
+		synchronized(uPlanesListener.class){
+			if(vehicle.isDead() || !vehicle.isValid() || (vehicle.getCustomName() != null && vehicle.getCustomName().equals("broken"))){
+				return;
+			}
+			vehicle.setCustomName("broken");
+			List<Entity> near = vehicle.getNearbyEntities(5, 5, 5);
+			for(Entity e:near){
+				if(e.getEntityId() == vehicle.getEntityId()){
+					continue;
+				}
+				if(!(e instanceof Vehicle)){
+					continue;
+				}
+			}
+			vehicle.eject();
+			vehicle.remove();
+			if(!plane.isWrittenOff()){
+				loc.getWorld().dropItem(loc, new ItemStack(plane.toItemStack()));
+			}
+		}
+		//Remove plane and get back item
+		return;
+	}
+
+	public uPlanesVehicle<?> getPluginVehicle(Vehicle m){
+		Plane pl = getPlane(m);
+		return pl == null ? getBoat(m) : pl;
+	}
+
+	public Boat getBoat(Vehicle m){
+		return plugin.boatsManager.getBoat(m.getUniqueId());
+	}
+
 	public Plane getPlane(Vehicle m){
 		return plugin.planeManager.getPlane(m.getUniqueId());
+	}
+
+	public boolean isPluginEntity(Vehicle m){
+		return uPlanesAPI.isPluginControlledEntity(m);
+	}
+
+	public boolean isABoat(Vehicle m){
+		return plugin.boatsManager.isBoatInUse(m.getUniqueId());
 	}
 	
 	public Boolean isAPlane(Vehicle m){
