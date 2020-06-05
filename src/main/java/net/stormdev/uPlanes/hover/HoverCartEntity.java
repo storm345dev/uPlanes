@@ -98,7 +98,11 @@ public class HoverCartEntity extends EntityArmorStand {
 		}
 	    return true; //Say our size is set
 	}*/
-	
+
+	public float getBukkitYaw() {
+		return this.yaw;
+	}
+
 	private void setSize(){
 		setSize(hitBoxX<0?0.98F:hitBoxX, hitBoxZ<0?0.7F:hitBoxZ);
 	}
