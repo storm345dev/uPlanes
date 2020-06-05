@@ -1,14 +1,9 @@
 package net.stormdev.uPlanes.hover;
 
-import net.minecraft.server.v1_12_R1.EntityArmorStand;
 import org.bukkit.Location;
-import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.v1_12_R1.CraftServer;
 import org.bukkit.craftbukkit.v1_12_R1.entity.CraftArmorStand;
-import org.bukkit.entity.Arrow;
-import org.bukkit.entity.Egg;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.Snowball;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.EulerAngle;
@@ -16,7 +11,6 @@ import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 
 public class CraftHoverCart extends CraftArmorStand implements HoverCart {
@@ -170,75 +164,5 @@ public class CraftHoverCart extends CraftArmorStand implements HoverCart {
 	@Override
 	public void setHitBoxZ(float z) {
 		getHandle().setHitBoxZ(z);
-	}
-
-	@Override
-	public List<Block> getLineOfSight(HashSet<Byte> hashSet, int i) {
-		return null;
-	}
-
-	@Override
-	public Block getTargetBlock(HashSet<Byte> hashSet, int i) {
-		return null;
-	}
-
-	@Override
-	public List<Block> getLastTwoTargetBlocks(HashSet<Byte> hashSet, int i) {
-		return null;
-	}
-
-	@Override
-	public Egg throwEgg() {
-		return null;
-	}
-
-	@Override
-	public Snowball throwSnowball() {
-		return null;
-	}
-
-	@Override
-	public Arrow shootArrow() {
-		return null;
-	}
-
-	@Override
-	public int _INVALID_getLastDamage() {
-		return 0;
-	}
-
-	@Override
-	public void _INVALID_setLastDamage(int i) {
-
-	}
-
-	@Override
-	public void _INVALID_damage(int i) {
-
-	}
-
-	@Override
-	public void _INVALID_damage(int i, Entity entity) {
-
-	}
-
-	@Override
-	public int _INVALID_getHealth() {
-		return 0;
-	}
-
-	@Override
-	public void _INVALID_setHealth(int i) {
-
-	}
-
-	@Override
-	public int _INVALID_getMaxHealth() {
-		return 0;
-	}
-
-	@Override
-	public void _INVALID_setMaxHealth(int i) {
-
 	}
 }
