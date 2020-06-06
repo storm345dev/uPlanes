@@ -15,7 +15,7 @@ public class BoatState {
     private Vector vel = new Vector(0,0,0); //In blocks per sec NOT per tick
     private double throttleAmt = 0; //Between -1 and 1
     private double dragConstant = 250; //0.5*rho*Cd*S in aerodynamics... Arbitrary since thrust force will scale with config defined max velocity
-   /* private double sideslipDragConstant = 150; //Normalized by vehicle length*/
+    //private double sideslipDragConstant = 150; //Normalized by vehicle length
     private double thrustYawOffsetAngleDeg = 0; //0 is inline with forwards direction, positive CLOCKWISE
     private double yawRateDeg = 0; //Current rate yawing, positive CLOCKWISE. PER SECOND, not per tick
     private double planingSpeed = 1; //Blocks/tick
@@ -82,11 +82,12 @@ public class BoatState {
         Vector thrustForce = travelDir.clone().multiply(getThrustForce()*(floating?1:0));
         Vector toTheRightOfDir = travelDir.crossProduct(new Vector(0,1,0));
         double forwardVel = vel.clone().setY(0).dot(directionVector);
-        /*double sideSlipVel = toTheRightOfDir.dot(vel.clone().setY(0));*/
+        double sideSlipVel = toTheRightOfDir.dot(vel.clone().setY(0));
         //Exactly nullify sideslip...
         //Vector sideslipDragForce = toTheRightOfDir.clone().multiply(-sideSlipVel*boa);
-        /*Vector sideslipDragForce = toTheRightOfDir.clone().multiply(getSideslipDragForce(sideSlipVel));
-        if(forwardVel < 0.001 || sideSlipVel < 0.001 || true){
+        //Vector sideslipDragForce = toTheRightOfDir.clone().multiply(getSideslipDragForce(sideSlipVel));
+        Vector sideslipDragForce = toTheRightOfDir.clone().multiply(-0.2*sideSlipVel*boat.getMass());
+        /*if(forwardVel < 0.001 || sideSlipVel < 0.001 || true){
             //Exactly cancel sideslip
             sideslipDragForce = toTheRightOfDir.clone().multiply(-0.8*sideSlipVel*boat.getMass());
         }*/
@@ -110,11 +111,11 @@ public class BoatState {
         double errorY = yCoord-targetY;
 
         //Attempt to make it bob about...
-        /*Vector verticalPerturbForce = new Vector(0,-0.5+main.plugin.random.nextDouble()*mass*4+(-0.5+main.plugin.random.nextDouble()*mass*40)*forwardVel,0);
+        Vector verticalPerturbForce = new Vector(0,-0.5+main.plugin.random.nextDouble()*mass*4+(-0.5+main.plugin.random.nextDouble()*mass*40)*forwardVel,0);
         if(!floating || Math.abs(errorY) > 0.1){
             verticalPerturbForce = verticalPerturbForce.multiply(0);
-        }*/
-        Vector totalForce = thrustForce.clone().add(forwardDragForce);//.add(verticalPerturbForce);
+        }
+        Vector totalForce = thrustForce.clone().add(forwardDragForce).add(sideslipDragForce).add(verticalPerturbForce);
 
         Vector accel = totalForce.multiply(1/mass); //F = ma
         vel = vel.add(accel.multiply(1/20.0)); //20 ticks per sec
@@ -307,8 +308,12 @@ public class BoatState {
             dragMultiplier*=(1/velRatio);
         }
         if(velRatio < 0.75){
-            dragMultiplier*=(1/(velRatio+0.25));
+            dragMultiplier*=(1/(velRatio+0.75));
         }
+        if(dragMultiplier < 0.2){
+            dragMultiplier = 0.2;
+        }
+        //Bukkit.broadcastMessage(dragMultiplier+"");
         return sign * Math.abs(Math.cos(Math.toRadians(pitchDeg))) * dragMultiplier*this.dragConstant * Math.pow(vel,2);
     }
 
