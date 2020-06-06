@@ -1,5 +1,6 @@
 package net.stormdev.uPlanes.api;
 
+import net.stormdev.uPlanes.main.BoatState;
 import net.stormdev.uPlanes.main.main;
 import net.stormdev.uPlanes.presets.BoatPreset;
 import net.stormdev.uPlanes.presets.PlanePreset;
@@ -25,11 +26,13 @@ import java.util.UUID;
  *
  */
 public class Boat extends uPlanesVehicleBase<BoatPreset> implements Serializable {
-	public static final double DEFAULT_TURN_AMOUNT = 2;
+	public static final double DEFAULT_TURN_AMOUNT = 4;
 	private static final long serialVersionUID = 2L;
 	private double turnAmount = DEFAULT_TURN_AMOUNT;
+	private double mass = 1000; //in kg so 1 ton
 	private transient boolean steeringKeyboard = false;
 	private transient long speedLockTime = 0;
+	private transient BoatState boatState;
 
 	public void postBoatUpdateEvent(Vector vec) {
 		this.lastUpdateEventTime = System.currentTimeMillis();
@@ -40,6 +43,7 @@ public class Boat extends uPlanesVehicleBase<BoatPreset> implements Serializable
 		super();
 		setCurrentPitch(0);
 		setRoll(0);
+		this.boatState = new BoatState(this);
 	}
 
 	public Boat(double speed, String name, double health, double accelMod, double turnAmountPerTick) {
@@ -50,6 +54,23 @@ public class Boat extends uPlanesVehicleBase<BoatPreset> implements Serializable
 		super(speed, name, health, accelMod);
 		this.turnAmount = turnAmountPerTick;
 		this.steeringKeyboard = steeringKeyboard;
+		this.boatState = new BoatState(this);
+	}
+
+	public double getMass() {
+		return mass;
+	}
+
+	public void setMass(double mass) {
+		this.mass = mass;
+	}
+
+	public BoatState getBoatState() {
+		return boatState;
+	}
+
+	public void setBoatState(BoatState boatState) {
+		this.boatState = boatState;
 	}
 
 	public int getMaxPassengers() {

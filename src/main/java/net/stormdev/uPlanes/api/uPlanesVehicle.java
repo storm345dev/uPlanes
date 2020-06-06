@@ -27,7 +27,7 @@ public interface uPlanesVehicle<P extends uPlanesVehiclePreset> {
 
     public  void postUpdateEvent(Vector vec);
 
-    public  void setRoll(int i);
+    public  void setRoll(double i);
 
     public RollTarget getRollTarget();
 

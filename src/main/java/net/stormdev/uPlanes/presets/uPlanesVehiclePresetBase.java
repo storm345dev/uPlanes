@@ -70,11 +70,17 @@ public abstract class uPlanesVehiclePresetBase<T extends uPlanesVehicle> impleme
 
 	@Override
 	public float getHitBoxX(){
+		if(this.hitBoxX < 0){
+			return 1;
+		}
 		return this.hitBoxX;
 	}
 
 	@Override
 	public float getHitBoxZ(){
+		if(this.hitBoxZ < 0){
+			return 1;
+		}
 		return this.hitBoxZ;
 	}
 	

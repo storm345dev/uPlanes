@@ -1,13 +1,8 @@
 package net.stormdev.uPlanes.main;
 
-import net.stormdev.uPlanes.api.Keypress;
-import net.stormdev.uPlanes.api.Plane;
-import net.stormdev.uPlanes.api.RollTarget;
-import net.stormdev.uPlanes.api.uPlanesAPI;
-import net.stormdev.uPlanes.utils.CartOrientationUtil;
-import net.stormdev.uPlanes.utils.PEntityMeta;
-import net.stormdev.uPlanes.utils.PlaneUpdateEvent;
-import net.stormdev.uPlanes.utils.StatValue;
+import net.stormdev.uPlanes.api.*;
+import net.stormdev.uPlanes.utils.*;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -67,6 +62,108 @@ public class MotionManager {
 		}
 		return m;
 	}
+
+	public static void moveBoat(Vehicle vehicle, Boat boat, boolean hasPassenger){
+		//Called every single game tick
+		//Bobbing and vehicle dynamics
+		BoatState state = boat.getBoatState();
+		if(state == null){
+			state = new BoatState(boat);
+			boat.setBoatState(state);
+		}
+		if(!hasPassenger){
+			state.setThrottleAmt(0); //No need to throttle
+		}
+
+		state.updateVelocitiesYawForThisGameTick(vehicle);
+
+		//Update yaw, pitch, roll
+		CartOrientationUtil.setYaw(vehicle, (float) state.getCurYaw()+90);
+		//Bukkit.broadcastMessage("Setting pitch to "+boat.getCurrentPitch());
+		CartOrientationUtil.setPitch(vehicle,boat.getCurrentPitch());
+		CartOrientationUtil.setRoll(vehicle,boat.getRoll());
+
+		//Update velocity
+		Vector vel = state.getVelBlocksPerSec().clone().multiply(1/20.0);
+		vehicle.setVelocity(vel);
+	}
+
+	private static void moveBoat(Player player, Vehicle vehicle, Boat boat, List<Keypress> keysPressed){
+		BoatState state = boat.getBoatState();
+		//Throttle control
+		if(keysPressed.contains(Keypress.W)){
+			double newThrottle = state.getThrottleAmt()+0.1;
+			if(newThrottle > 1){
+				newThrottle = 1;
+			}
+			state.setThrottleAmt(newThrottle);
+		}
+		else if(keysPressed.contains(Keypress.S)){
+			double newThrottle = state.getThrottleAmt()-0.1;
+			if(newThrottle < -0.5){
+				newThrottle = -0.5;
+			}
+			state.setThrottleAmt(newThrottle);
+		}
+		else { //No key pressed
+			double newThrottle = state.getThrottleAmt();
+			if(newThrottle > 0.1){
+				newThrottle = newThrottle-0.1;
+			}
+			else if(newThrottle < -0.1){
+				newThrottle = newThrottle+0.1;
+			}
+			else {
+				newThrottle = 0;
+			}
+			state.setThrottleAmt(newThrottle);
+		}
+
+		//Steering control
+		double newSteeringAngle = state.getThrustYawOffsetAngleDeg(); //Positive anticlockwise
+		double maxSteeringAngle = BoatState.MAX_STEERING_ANGLE; //25 degrees
+		double steerPerTick = (uPlanesAPI.getBoatManager().getAlteredRotationAmountPerTick(player,vehicle,boat)/boat.getTurnAmountPerTick())*10/20.0;
+		if(keysPressed.contains(Keypress.D)){
+			newSteeringAngle = newSteeringAngle + steerPerTick;
+			if(newSteeringAngle > maxSteeringAngle){
+				newSteeringAngle = maxSteeringAngle;
+			}
+		} else if(keysPressed.contains(Keypress.A)){
+			newSteeringAngle = newSteeringAngle - steerPerTick;
+			if(newSteeringAngle < -maxSteeringAngle){
+				newSteeringAngle = -maxSteeringAngle;
+			}
+		} else {
+			if(newSteeringAngle > steerPerTick){
+				newSteeringAngle = newSteeringAngle-steerPerTick;
+			}
+			else if(newSteeringAngle < -steerPerTick){
+				newSteeringAngle = newSteeringAngle+steerPerTick;
+			}
+			else {
+				newSteeringAngle = 0;
+			}
+		}
+		state.setThrustYawOffsetAngleDeg(newSteeringAngle);
+
+		//Called every single game tick when player is inside
+		moveBoat(vehicle,boat, true);
+
+		final BoatUpdateEvent event = new BoatUpdateEvent(vehicle, boat.getBoatState().getVelBlocksPerSec().clone().multiply(1/20.0), player, keysPressed, boat);
+
+		main.plugin.getServer().getScheduler()
+				.runTask(main.plugin, new Runnable() {
+					public void run() {
+						if(main.fireUpdateEvent){
+							main.plugin.getServer().getPluginManager()
+									.callEvent(event);
+						}
+						else {
+							main.plugin.listener.boatControl(event);
+						}
+					}
+				});
+	}
 	
 	public static void move(Player player, float f, float s, boolean jumping) {
 		Vector vec = new Vector();
@@ -82,18 +179,71 @@ public class MotionManager {
 		}
 		
 		Vehicle plane = (Vehicle) ent;
+		uPlanesVehicle pluginVehicle = main.plugin.listener.getPluginVehicle(plane);
 		Plane pln = main.plugin.listener.getPlane(plane);
-		if(pln == null){
-			//Not a plane
+		if(pluginVehicle == null){
 			return;
 		}
 		
 		if(plane.hasMetadata("plane.frozen") || PEntityMeta.hasMetadata(plane, "plane.frozen")){
 			return;
 		}
-		
-		
+
+		List<Keypress> pressedKeys = new ArrayList<Keypress>();
+		if(jumping){
+			pressedKeys.add(Keypress.JUMP);
+		}
+		Keypress speedModKey = Keypress.NONE;
+		int side = 0; // -1=left, 0=straight, 1=right
+		boolean turning = false;
 		boolean decel = true;
+		if(f > 0){
+			speedModKey = Keypress.W;
+			pressedKeys.add(speedModKey);
+			decel = false;
+		}
+		if (s > 0) {
+			side = -1;
+			turning = true;
+		}
+		if (s < 0) {
+			side = 1;
+			turning = true;
+		}
+
+		double y = -0.0; // Don't succumb to gravity
+		boolean isRight = false;
+		boolean isLeft = false;
+		if (turning) {
+			if (side < 0) {// do left action
+				isLeft = true;
+				pressedKeys.add(Keypress.A);
+				PEntityMeta.setMetadata(plane, "plane.left", new StatValue(true, main.plugin));
+			} else if (side > 0) {// do right action
+				isRight = true;
+				pressedKeys.add(Keypress.D);
+				PEntityMeta.setMetadata(plane, "plane.right", new StatValue(true, main.plugin));
+			}
+		}
+		if (!isRight) {
+			PEntityMeta.removeMetadata(plane, "plane.right");
+		}
+		if (!isLeft) {
+			PEntityMeta.removeMetadata(plane, "plane.left");
+		}
+		if(f < 0 && (pln == null || pln.isHover())){
+			speedModKey = Keypress.S;
+			pressedKeys.add(Keypress.S);
+		}
+
+		if(pln == null){ //Not a plane
+			if(pluginVehicle.getType().equals(uPlanesVehicle.VehicleType.BOAT)){
+				moveBoat(player,plane,(Boat) pluginVehicle,pressedKeys);
+			}
+			return;
+		}
+		
+
 		if(f == 0 && s == 0){
 			/*if(AccelerationManager.getCurrentMultiplier(plane) == 0){
 				
@@ -167,13 +317,11 @@ public class MotionManager {
 			PEntityMeta.setMetadata(plane, "plane.direction", new StatValue(planeDirection.clone().normalize(), main.plugin));
 		}
 		
-		List<Keypress> pressedKeys = new ArrayList<Keypress>();
-		Keypress speedModKey = Keypress.NONE;
+
 		/*if(f==0 && pln.isHover()){
 			forwardMotion = false;
 		}*/
-		int side = 0; // -1=left, 0=straight, 1=right
-		Boolean turning = false;
+
 		if(jumping && !pln.isHover()){
 			decel = false;
 			if(!pln.isSpeedLocked()){
@@ -187,23 +335,9 @@ public class MotionManager {
 			pln.setSpeedLocked(false);
 			player.sendMessage(ChatColor.YELLOW+"Thrust unlocked. Lock it again with spacebar.");
 		}
-		if(f > 0){
-			speedModKey = Keypress.W;
-			decel = false;
-		}
-		if (s > 0) {
-			side = -1;
-			turning = true;
-		}
-		if (s < 0) {
-			side = 1;
-			turning = true;
-		}
-		double y = -0.0; // Don't succumb to gravity
+
 		double d = 27; // A number that happens to get realistic motion
-		Boolean isRight = false;
-		Boolean isLeft = false;
-		
+
 		if(pln.isSpeedLocked()){
 			decel = false;
 		}
@@ -226,19 +360,13 @@ public class MotionManager {
 		if(hoverAmount > 0.02){
 			hoverAmount = 0.02f;
 		}
-		
+
 		if (turning) {
 			if (side < 0) {// do left action
-				isLeft = true;
-				pressedKeys.add(Keypress.A);
-				PEntityMeta.setMetadata(plane, "plane.left", new StatValue(true, main.plugin));
 				if(pln.isHover()){
 					y = hoverAmount;
 				}
 			} else if (side > 0) {// do right action
-				isRight = true;
-				pressedKeys.add(Keypress.D);
-				PEntityMeta.setMetadata(plane, "plane.right", new StatValue(true, main.plugin));
 				if(pln.isHover()){
 					y = -hoverAmount;
 				}
@@ -247,15 +375,7 @@ public class MotionManager {
 		
 		double x = planeDirection.getX() / d;
 		double z = planeDirection.getZ() / d;
-		if (!isRight) {
-			PEntityMeta.removeMetadata(plane, "plane.right");
-		}
-		if (!isLeft) {
-			PEntityMeta.removeMetadata(plane, "plane.left");
-		}
-		if(f < 0 && pln.isHover()){
-			speedModKey = Keypress.S;
-		}
+
 		/*if(!forwardMotion && pln.isHover()){
 			x = 0;
 			z = 0;
@@ -374,9 +494,9 @@ public class MotionManager {
             vec.add(floatVec);
         }
 
-		if(!speedModKey.equals(Keypress.NONE)){
+		/*if(!speedModKey.equals(Keypress.NONE)){
 			pressedKeys.add(speedModKey);
-		}
+		}*/
 
 		final PlaneUpdateEvent event = new PlaneUpdateEvent(plane, vec, player, pressedKeys, accelMod, pln);
 

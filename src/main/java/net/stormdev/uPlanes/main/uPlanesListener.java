@@ -57,6 +57,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.projectiles.ProjectileSource;
+import org.bukkit.util.BlockIterator;
 import org.bukkit.util.Vector;
 
 import net.stormdev.uPlanes.hover.HoverCart;
@@ -394,6 +395,8 @@ public class uPlanesListener implements Listener {
 				 Player pl = (Player) pass;
 				 MovePacketInfo mpi = MotionManager.getMostRecentPacketInfo(pl);
 				 MotionManager.move(pl, mpi.f, mpi.s, mpi.jumping);
+			 } else if(isABoat(v)){
+			 	MotionManager.moveBoat(v,getBoat(v), false);
 			 }
 		 }
 	 }
@@ -438,7 +441,7 @@ public class uPlanesListener implements Listener {
 			FlightControl.route(dest, loc, car, (Plane) pln);
 			return;
 		}
-		
+
 		if(pln == null){
 			return;
 		}
@@ -562,12 +565,12 @@ public class uPlanesListener implements Listener {
 
 		Location loc = cart.getLocation();
 		Vector travel = event.getTravelVector();
-		double multiplier = boat.getSpeed();
+		/*double multiplier = boat.getSpeed();
 		if(multiplier > 15){
 			multiplier = 15 + ((multiplier-15) * 0.5);
 		}
 
-		travel.multiply(multiplier);
+		travel.multiply(multiplier);*/
 
 		if(loc.getY() >= heightLimit){
 			travel.setY(-1);
@@ -639,7 +642,7 @@ public class uPlanesListener implements Listener {
 							damage = 100;
 						}
 
-						PreBoatCrashEvent evt = new PreBoatCrashEvent(cart, player, event.getAcceleration(), boat, damage);
+						PreBoatCrashEvent evt = new PreBoatCrashEvent(cart, player, travel.length(), boat, damage);
 						Bukkit.getPluginManager().callEvent(evt);
 
 						if(!evt.isCancelled() && evt.getDamage() > 0){
@@ -1004,12 +1007,14 @@ public class uPlanesListener implements Listener {
 	@EventHandler
 	void placePlane(PlayerInteractEvent event){
 		Action a = event.getAction();
-		if(!(a == Action.RIGHT_CLICK_BLOCK)){
+		if(!(a == Action.RIGHT_CLICK_BLOCK || a == Action.RIGHT_CLICK_AIR)){
 			return;
 		}
+		/*Bukkit.broadcastMessage("Interact event");
 		if(event.isCancelled()){
+			Bukkit.broadcastMessage("EVENT CANCELLED");
 			return; //Worldguard says no
-		}
+		}*/
 		
 		final Player player = event.getPlayer();
 		final ItemStack inHand = player.getItemInHand();
@@ -1030,6 +1035,28 @@ public class uPlanesListener implements Listener {
 		
 		//Now place the car
 		Block b = event.getClickedBlock();
+
+		if(!(a == Action.RIGHT_CLICK_BLOCK)){
+			if(!plane.getType().equals(uPlanesVehicle.VehicleType.BOAT)) {
+				return;
+			}
+			//Right clicked air
+			b = null;
+			Vector eyeDir = player.getEyeLocation().getDirection();/*
+			Bukkit.broadcastMessage("Searching for water to place boat in eye-line");*/
+			BlockIterator bi = new BlockIterator(player.getWorld(),player.getLocation().toVector(),eyeDir,player.getEyeHeight(),7);
+			while(bi.hasNext()){
+				Block nextB = bi.next();
+				if(nextB.isLiquid()){
+					b = nextB;
+					break;
+				}
+			}
+			if(b == null){
+				return;
+			}
+		}
+
 		final Location toSpawn = b.getLocation().clone().add(0,1.5,0);
 		
 		if(toSpawn.getY() >= toSpawn.getWorld().getMaxHeight()){

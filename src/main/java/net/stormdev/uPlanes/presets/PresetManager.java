@@ -158,7 +158,7 @@ public class PresetManager {
 				double speed = sect.getDouble("speed");
 				double health = sect.getDouble("health");
 				double accelMod = sect.getDouble("acceleration") / 10.0d;
-				double turnAmountPerTick = sect.getDouble("handling") / 10.0d;
+				double turnAmountPerTick = sect.getDouble("handling") / 3.0d;
 				double cost = sect.getDouble("cost");
 
 				if(name == null || speed <= 0 || health <= 0 || accelMod <= 0 || turnAmountPerTick <= 0){
@@ -191,8 +191,12 @@ public class PresetManager {
 				if(!sect.contains("passengers.boatRotationOffsetDeg")){
 					sect.set("passengers.boatRotationOffsetDeg",0.0d);
 				}
+				if(!sect.contains("mass")){
+					sect.set("mass",1000.0d);
+				}
 
 				BoatPreset pp = new BoatPreset(id, speed, name, health, accelMod, turnAmountPerTick, cost, displayBlock, displayOffset, hitBoxX, hitBoxZ);
+				pp.setMass(sect.getDouble("mass"));
 				pp.setMaxPassengers(sect.getInt("passengers.max"));
 				pp.setBoatRotationOffsetDeg(sect.getDouble("passengers.boatRotationOffsetDeg"));
 

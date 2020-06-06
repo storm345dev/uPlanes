@@ -50,9 +50,9 @@ public abstract class uPlanesVehicleBase<P extends uPlanesVehiclePreset> impleme
     }
 
     @Override
-    public void setRoll(int i) {
+    public void setRoll(double i) {
         this.rollTarget = RollTarget.NONE;
-        this.roll = i;
+        this.roll = (float) i;
     }
 
     @Override

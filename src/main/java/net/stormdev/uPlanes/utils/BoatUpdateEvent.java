@@ -13,19 +13,16 @@ import java.util.List;
 
 public class BoatUpdateEvent extends VehicleUpdateEvent implements Cancellable {
 	private Vector toTravel;
-	private Boolean changePlayerYaw = false;
 	private Boolean cancelled = false;
 	private Player player;
 	private List<Keypress> pressed;
-	private double acceleration;
 	private Boat boat;
 
-	public BoatUpdateEvent(Vehicle vehicle, Vector toTravel, Player player, List<Keypress> pressed, double accelMod, Boat pln) {
+	public BoatUpdateEvent(Vehicle vehicle, Vector toTravel, Player player, List<Keypress> pressed, Boat pln) {
 		super(vehicle);
 		this.toTravel = toTravel;
 		this.player = player;
 		this.pressed = pressed;
-		this.acceleration = accelMod;
 		this.boat = pln;
 	}
 	
@@ -49,25 +46,12 @@ public class BoatUpdateEvent extends VehicleUpdateEvent implements Cancellable {
 		return this.toTravel;
 	}
 
-	public void setChangePlayerYaw(Boolean change) {
-		this.changePlayerYaw = change;
-		return;
-	}
-
-	public Boolean getChangePlayerYaw() {
-		return this.changePlayerYaw;
-	}
-
 	public boolean isCancelled() {
 		return this.cancelled;
 	}
 
 	public void setCancelled(boolean arg0) {
 		this.cancelled = arg0;
-	}
-
-	public double getAcceleration() {
-		return acceleration;
 	}
 
 }

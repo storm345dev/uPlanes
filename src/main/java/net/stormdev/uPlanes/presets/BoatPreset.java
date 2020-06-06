@@ -17,6 +17,7 @@ import java.util.List;
 public class BoatPreset extends uPlanesVehiclePresetBase<Boat> implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+	private double mass = 1000; //In kg
 
 	public BoatPreset(String presetID, double speed, String name, double health, double accelMod, double turnAmountPerTick, double cost, MaterialData displayBlock, double offset, float hitBoxX, float hitBoxZ){
 		super(presetID,speed,name,health,accelMod,turnAmountPerTick,cost,displayBlock,offset,hitBoxX,hitBoxZ);
@@ -24,9 +25,18 @@ public class BoatPreset extends uPlanesVehiclePresetBase<Boat> implements Serial
 	
 	public Boat toBoat(){
 		Boat p =  new Boat(getSpeed(), getName(), getHealth(), getAccelMod(), getTurnAmountPerTick(), false);
+		p.setMass(this.mass);
 		p.setCartDisplayBlock(this.getDisplayBlock());
 		p.setDisplayOffset(this.getDisplayOffset());
 		return p;
+	}
+
+	public double getMass() {
+		return mass;
+	}
+
+	public void setMass(double mass) {
+		this.mass = mass;
 	}
 
 	@Override

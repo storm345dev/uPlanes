@@ -10,18 +10,17 @@ import org.bukkit.event.HandlerList;
 
 public class PreBoatCrashEvent extends Event implements Cancellable {
 	private static final HandlerList handlers = new HandlerList();
-	private Boolean changePlayerYaw = false;
 	private Boolean cancelled = false;
 	private Player player;
-	private double acceleration;
+	private double speed;
 	private Vehicle vehicle;
 	private Boat boat;
 	private double damage;
 
-	public PreBoatCrashEvent(Vehicle cart, Player player, double accelMod, Boat pln, double damage) {
+	public PreBoatCrashEvent(Vehicle cart, Player player, double speed, Boat pln, double damage) {
 	    this.vehicle = cart;
 		this.player = player;
-		this.acceleration = accelMod;
+		this.speed = speed;
 		this.boat = pln;
 		this.setDamage(damage);
 	}
@@ -38,15 +37,6 @@ public class PreBoatCrashEvent extends Event implements Cancellable {
 		return player;
 	}
 
-	public void setChangePlayerYaw(Boolean change) {
-		this.changePlayerYaw = change;
-		return;
-	}
-
-	public Boolean getChangePlayerYaw() {
-		return this.changePlayerYaw;
-	}
-
 	public boolean isCancelled() {
 		return this.cancelled;
 	}
@@ -55,8 +45,8 @@ public class PreBoatCrashEvent extends Event implements Cancellable {
 		this.cancelled = arg0;
 	}
 
-	public double getAcceleration() {
-		return acceleration;
+	public double getSpeed() {
+		return speed;
 	}
 
 	public double getDamage() {

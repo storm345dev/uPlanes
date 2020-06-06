@@ -252,6 +252,10 @@ public class uPlanesBoatManager {
 				offset = pp.getDisplayOffset();
 			}
 
+			float vYaw = (float) Math.toDegrees(Math.atan2(directionToFace.getX() , -directionToFace.getZ()));
+			vYaw -= 90;
+			plane.getBoatState().setCurYaw(vYaw);
+
 			if(display == null){
 				ent = (Vehicle) loc.getWorld().spawnEntity(loc, EntityType.MINECART);
 			}
@@ -271,8 +275,7 @@ public class uPlanesBoatManager {
 			PEntityMeta.setMetadata(ent, "plane.direction", new StatValue(directionToFace.clone(), main.plugin));
 			plane.setId(ent.getUniqueId());
 			plane.setRoll(0);
-			float vYaw = (float) Math.toDegrees(Math.atan2(directionToFace.getX() , -directionToFace.getZ()));
-			vYaw -= 90;
+
 			CartOrientationUtil.setYaw(ent, vYaw);
 
 			main.plugin.boatsManager.nowPlaced(plane);

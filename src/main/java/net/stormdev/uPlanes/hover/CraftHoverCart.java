@@ -118,7 +118,7 @@ public class CraftHoverCart extends CraftArmorStand implements HoverCart {
 	public void setPitch(float pitch) {
 		double y = pitch;
 		while(y < 0){
-			y = Math.PI*2 + y;
+			y = 360 + y;
 		}
 		
 		setHeadPose(new EulerAngle(Math.toRadians(y), getHeadPose().getY(), getHeadPose().getZ())); 
