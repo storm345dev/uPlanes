@@ -92,14 +92,14 @@ public class MotionManager {
 		BoatState state = boat.getBoatState();
 		//Throttle control
 		if(keysPressed.contains(Keypress.W)){
-			double newThrottle = state.getThrottleAmt()+0.1;
+			double newThrottle = state.getThrottleAmt()+0.025;
 			if(newThrottle > 1){
 				newThrottle = 1;
 			}
 			state.setThrottleAmt(newThrottle);
 		}
 		else if(keysPressed.contains(Keypress.S)){
-			double newThrottle = state.getThrottleAmt()-0.1;
+			double newThrottle = state.getThrottleAmt()-0.025;
 			if(newThrottle < -0.5){
 				newThrottle = -0.5;
 			}

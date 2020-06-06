@@ -10,6 +10,7 @@ import net.stormdev.uPlanes.main.PlaneItemMethods;
 import net.stormdev.uPlanes.main.main;
 import net.stormdev.uPlanes.presets.BoatPreset;
 import net.stormdev.uPlanes.presets.PlanePreset;
+import net.stormdev.uPlanes.protocolMagic.ProtocolManipulator;
 import net.stormdev.uPlanes.utils.CartOrientationUtil;
 import net.stormdev.uPlanes.utils.Lang;
 import net.stormdev.uPlanes.utils.PEntityMeta;
@@ -268,6 +269,7 @@ public class uPlanesBoatManager {
 				HoverCart hc = hce.spawn();
 				ent = hc;
 				hc.setDisplay(new ItemStack(display.getItemType(), 1, display.getData()), offset);
+				main.plugin.protocolManipulator.sendSpawns(hce,hc);
 			}
 
 			PEntityMeta.setMetadata(ent, "ucars.ignore", new StatValue(true, main.plugin));

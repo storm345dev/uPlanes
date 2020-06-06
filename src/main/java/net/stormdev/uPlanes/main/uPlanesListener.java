@@ -1146,6 +1146,8 @@ public class uPlanesListener implements Listener {
 					if(inHand.getAmount() < 1){
 						player.setItemInHand(new ItemStack(Material.AIR)); //Remove from their hand
 					}
+
+					ent.teleport(ent.getLocation());
 				}
 				return;
 			}});

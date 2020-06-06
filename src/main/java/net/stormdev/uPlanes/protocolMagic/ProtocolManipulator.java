@@ -118,6 +118,12 @@ public class ProtocolManipulator implements Listener {
         }
     }
 
+    public void sendSpawns(HoverCartEntity hce, HoverCart hc){
+        for(Player pl:Bukkit.getOnlinePlayers()){
+            sendFakeBoatAndArrowSpawns(hce,hc,pl);
+        }
+    }
+
     protected void sendFakeBoatAndArrowSpawns(HoverCartEntity hce, HoverCart hc, Player player){
         if(!hce.hasFakeBoat()){
             return;
@@ -267,9 +273,11 @@ public class ProtocolManipulator implements Listener {
                     final int[] passenger2 = passengers.length > 1 ? ArrayUtils.subarray(passengers,1,passengers.length) : new int[0];
 
                     final HoverCartEntity nm = nmsEntity;
+                    //sendFakeBoatAndArrowSpawns(nmsEntity,hce,event.getPlayer());
                     //Bukkit.broadcastMessage("Sending mounted passengers to "+event.getPlayer().getName());
                     //sendFakeEntityPassengers(event.getPlayer(),nm.getFakeArrow(),passenger1);
                     sendFakeEntityPassengers(event.getPlayer(),nm.getFakeArrow2(),passenger2);
+
                    Bukkit.getScheduler().runTaskLater(main.plugin, new Runnable() {
                         @Override
                         public void run() {
