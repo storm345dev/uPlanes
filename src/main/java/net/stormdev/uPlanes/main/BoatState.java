@@ -39,26 +39,6 @@ public class BoatState {
             this.dragConstant = 250*boat.getAccelMod();
         }
 
-        //Update yaw and yaw rate
-        // I*wdot = M -> wdot = M/I
-        //Bukkit.broadcastMessage("ROT: "+this.yawRateDeg+" "+getDragYawingMoment()+" "+getThrustYawingMoment()+" "+yawMomentOfInertia());
-        double totalMoment = getDragYawingMoment(maxTurnRatePerTick)+getThrustYawingMoment();
-        double wdot = totalMoment / yawMomentOfInertia(); //rad/sec
-        this.yawRateDeg = this.yawRateDeg+Math.toDegrees(wdot);
-        if(this.yawRateDeg > 50){
-            this.yawRateDeg = 50;
-        }
-        if(this.yawRateDeg < -50){
-            this.yawRateDeg = -50;
-        }
-        this.curYaw = this.curYaw + this.yawRateDeg*(1/20.0); //Update vehicle yaw, 20 ticks per sec
-        while(this.curYaw > 180){
-            this.curYaw -= 360;
-        }
-        while(this.curYaw < -180){
-            this.curYaw += 360;
-        }
-
         boolean floating = false;
         double yCoord = vehicle.getLocation().getY();
         Block under = vehicle.getLocation().getBlock().getRelative(BlockFace.DOWN);
@@ -83,6 +63,28 @@ public class BoatState {
         Vector toTheRightOfDir = travelDir.crossProduct(new Vector(0,1,0));
         double forwardVel = vel.clone().setY(0).dot(directionVector);
         double sideSlipVel = toTheRightOfDir.dot(vel.clone().setY(0));
+
+        //Update yaw and yaw rate
+        // I*wdot = M -> wdot = M/I
+        //Bukkit.broadcastMessage("ROT: "+this.yawRateDeg+" "+getDragYawingMoment(maxTurnRatePerTick)+" "+getThrustYawingMoment()+" "+yawMomentOfInertia()+" "+getRudderYawingMoment(forwardVel));
+        double totalMoment = getDragYawingMoment(maxTurnRatePerTick)+getThrustYawingMoment()+getRudderYawingMoment(forwardVel);
+
+        double wdot = totalMoment / yawMomentOfInertia(); //rad/sec
+        this.yawRateDeg = this.yawRateDeg+Math.toDegrees(wdot);
+        if(this.yawRateDeg > 80){
+            this.yawRateDeg = 80;
+        }
+        if(this.yawRateDeg < -80){
+            this.yawRateDeg = -80;
+        }
+        this.curYaw = this.curYaw + this.yawRateDeg*(1/20.0); //Update vehicle yaw, 20 ticks per sec
+        while(this.curYaw > 180){
+            this.curYaw -= 360;
+        }
+        while(this.curYaw < -180){
+            this.curYaw += 360;
+        }
+
         //Exactly nullify sideslip...
         //Vector sideslipDragForce = toTheRightOfDir.clone().multiply(-sideSlipVel*boa);
         //Vector sideslipDragForce = toTheRightOfDir.clone().multiply(getSideslipDragForce(sideSlipVel));
@@ -96,7 +98,7 @@ public class BoatState {
             mass = 1000;
         }
         mass = mass*3.5; //Give it more inertia
-        Vector forwardDragForce = vel.clone().multiply(-Math.abs(getDragForce(forwardVel,getNominalPitch(forwardVel))));
+        Vector forwardDragForce = vel.clone().multiply(-Math.abs(getDragForce(forwardVel,boat.getCurrentPitch()/*getNominalPitch(forwardVel)*/)));
         if(Math.abs(forwardVel)<0.00001){
             forwardDragForce = vel.clone().setY(0).multiply(-mass);
         }
@@ -162,15 +164,16 @@ public class BoatState {
             vel.setY(yV);
         }
 
-        float targetPitch = (float) ((float) getNominalPitch(forwardVel));
+        float targetPitch = (float) ((float) ((float) getNominalPitch(forwardVel))+ (-0.5+main.plugin.random.nextDouble())*forwardVel);
         float curPitch = boat.getCurrentPitch();
         //Bukkit.broadcastMessage(forwardVel+" "+targetPitch+" throttle: "+this.throttleAmt);
-        boat.setCurrentPitch((float) ((float) curPitch-0.1*(curPitch-targetPitch)));
+        boat.setCurrentPitch((float) ((float) curPitch-0.2*(curPitch-targetPitch)));
 
         double targetRoll = getNominalRoll(forwardVel, this.yawRateDeg,maxTurnRatePerTick) + (-0.5+main.plugin.random.nextDouble())*2;
         double currentRoll = boat.getRoll();
         double errorRoll = currentRoll-targetRoll;
         boat.setRoll((float) (currentRoll-0.095*errorRoll));
+        //Bukkit.broadcastMessage(this.throttleAmt+" "+this.thrustYawOffsetAngleDeg);
     }
 
     public double getDragYawingMoment(double maxTurnRatePerTick){
@@ -179,9 +182,9 @@ public class BoatState {
             sign = -1;
         }
         double maxYawRate = maxTurnRatePerTick*20;
-        double equilibriumVal = getMaxThrustYawingMoment();
-        double k = equilibriumVal / (Math.abs(Math.pow(maxYawRate,1))*Math.cos(Math.toRadians(getNominalPitch(Math.pow(getBoatMaxRealSpeed(),2)))));
-        double dragMoment = sign * k * Math.abs(Math.pow(yawRateDeg,1))*Math.cos(Math.toRadians(boat.getCurrentPitch()));
+        double equilibriumVal = getMaxThrustYawingMoment()+getMaxRudderYawingMoment();
+        double k = equilibriumVal / (Math.abs(Math.pow(maxYawRate,2))*Math.cos(Math.toRadians(getNominalPitch(Math.pow(getBoatMaxRealSpeed(),2)))));
+        double dragMoment = sign * k * Math.abs(Math.pow(yawRateDeg,2))*Math.cos(Math.toRadians(boat.getCurrentPitch()));
         if(Math.abs(dragMoment) > Math.abs(yawMomentOfInertia()*yawRateDeg)){ //Prevent overshoot
             dragMoment = sign*yawMomentOfInertia()*Math.abs(yawRateDeg);
         }
@@ -226,14 +229,30 @@ public class BoatState {
         this.thrustYawOffsetAngleDeg = thrustYawOffsetAngleDeg;
     }
 
+    public double getRudderYawingMoment(double forwardVel){
+        double speedMultiplier = Math.abs(forwardVel)/getBoatMaxRealSpeed();//Math.log(1+Math.pow(Math.abs(forwardVel)/getBoatMaxRealSpeed(),1)) / Math.log(2);
+        if(speedMultiplier < 0.3){
+            speedMultiplier = Math.abs(forwardVel) / 0.5;
+            if(speedMultiplier > 0.3){
+                speedMultiplier = 0.3;
+            }
+        }
+        return speedMultiplier*0.1*boat.getHitboxX() * Math.sin(Math.toRadians(thrustYawOffsetAngleDeg)) * getMaxThrustForce();/*Math.cos(Math.toRadians(thrustYawOffsetAngleDeg))*/
+    }
+
+    public double getMaxRudderYawingMoment(){
+        return 0.1*boat.getHitboxX() * Math.sin(Math.toRadians(MAX_STEERING_ANGLE)) * getMaxThrustForce()*Math.cos(Math.toRadians(MAX_STEERING_ANGLE));
+    }
+
     public double getThrustYawingMoment(){
         //Assume thrust force acting at half of boat length from center of rotation at vehicle center
-        return boat.getHitboxX() * Math.sin(Math.toRadians(thrustYawOffsetAngleDeg)) * getThrustForce();
+        /*double speedMultiplier = Math.log(1+Math.pow(getThrustMultiplier(),0.5)) / Math.log(2);*/
+        return 0.9*boat.getHitboxX() * Math.sin(Math.toRadians(thrustYawOffsetAngleDeg)) * getMaxThrustForce()*getThrustMultiplier();
     }
 
     public double getMaxThrustYawingMoment(){
         //Assume thrust force acting at half of boat length from center of rotation at vehicle center
-        return boat.getHitboxX() * Math.sin(Math.toRadians(MAX_STEERING_ANGLE)) * getMaxThrustForce()*Math.cos(Math.toRadians(MAX_STEERING_ANGLE));
+        return 0.9*boat.getHitboxX() * Math.sin(Math.toRadians(MAX_STEERING_ANGLE)) * getMaxThrustForce();
     }
 
     public double yawMomentOfInertia(){ //Calculate an approx moment of inertia in yaw
@@ -275,9 +294,9 @@ public class BoatState {
         /*if(Math.abs(speed) < planingSpeed){
             return 0; //No pitch required
         }*/
-        double pitch = speed*(15/Math.pow(getBoatMaxRealSpeed()*0.7,1)); //At 2 blocks per sec above planing speed should be 10 degrees pitch
-        if(pitch > 15){ //Max 15 degrees pitch
-            pitch = 15;
+        double pitch = speed*(20/Math.pow(getBoatMaxRealSpeed()*0.7,1)); //At 2 blocks per sec above planing speed should be 10 degrees pitch
+        if(pitch > 20){ //Max 15 degrees pitch
+            pitch = 20;
         }
         if(pitch < -5){ //Min -5 degrees pitch
             pitch = -5;
@@ -308,7 +327,7 @@ public class BoatState {
             dragMultiplier*=(1/velRatio);
         }
         if(velRatio < 0.75){
-            dragMultiplier*=(1/(velRatio+0.75));
+            dragMultiplier*=(1/(velRatio+0.25));
         }
         if(dragMultiplier < 0.2){
             dragMultiplier = 0.2;

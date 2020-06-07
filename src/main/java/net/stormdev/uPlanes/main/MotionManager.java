@@ -92,14 +92,14 @@ public class MotionManager {
 		BoatState state = boat.getBoatState();
 		//Throttle control
 		if(keysPressed.contains(Keypress.W)){
-			double newThrottle = state.getThrottleAmt()+0.025;
+			double newThrottle = state.getThrottleAmt()+(state.getThrottleAmt()<0?0.125:0.025);
 			if(newThrottle > 1){
 				newThrottle = 1;
 			}
 			state.setThrottleAmt(newThrottle);
 		}
 		else if(keysPressed.contains(Keypress.S)){
-			double newThrottle = state.getThrottleAmt()-0.025;
+			double newThrottle = state.getThrottleAmt()-(state.getThrottleAmt()>0?0.125:0.025);
 			if(newThrottle < -0.5){
 				newThrottle = -0.5;
 			}
@@ -122,7 +122,7 @@ public class MotionManager {
 		//Steering control
 		double newSteeringAngle = state.getThrustYawOffsetAngleDeg(); //Positive anticlockwise
 		double maxSteeringAngle = BoatState.MAX_STEERING_ANGLE; //25 degrees
-		double steerPerTick = (uPlanesAPI.getBoatManager().getAlteredRotationAmountPerTick(player,vehicle,boat)/boat.getTurnAmountPerTick())*10/20.0;
+		double steerPerTick = (uPlanesAPI.getBoatManager().getAlteredRotationAmountPerTick(player,vehicle,boat)/boat.getTurnAmountPerTick())*20/20.0;
 		if(keysPressed.contains(Keypress.D)){
 			newSteeringAngle = newSteeringAngle + steerPerTick;
 			if(newSteeringAngle > maxSteeringAngle){
