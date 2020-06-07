@@ -112,7 +112,7 @@ public class BoatState {
         }
         mass = mass*3.5; //Give it more inertia
         Vector forwardDragForce = vel.clone().multiply(-Math.abs(getDragForce(forwardVel,boat.getCurrentPitch()/*getNominalPitch(forwardVel)*/)));
-        if(Math.abs(forwardVel)<0.01){
+        if(Math.abs(forwardVel)<0.1){
             forwardDragForce = vel.clone().setY(0).multiply(-mass);
         }
        /* Bukkit.broadcastMessage("T: "+thrustForce);
