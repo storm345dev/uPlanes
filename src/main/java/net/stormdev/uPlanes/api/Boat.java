@@ -30,8 +30,7 @@ public class Boat extends uPlanesVehicleBase<BoatPreset> implements Serializable
 	private static final long serialVersionUID = 2L;
 	private double turnAmount = DEFAULT_TURN_AMOUNT;
 	private double mass = 1000; //in kg so 1 ton
-	private transient boolean steeringKeyboard = false;
-	private transient long speedLockTime = 0;
+	private transient long lastSpacebarTime = 0;
 	private transient BoatState boatState;
 
 	public void postBoatUpdateEvent(Vector vec) {
@@ -46,14 +45,13 @@ public class Boat extends uPlanesVehicleBase<BoatPreset> implements Serializable
 		this.boatState = new BoatState(this);
 	}
 
-	public Boat(double speed, String name, double health, double accelMod, double turnAmountPerTick) {
+	/*public Boat(double speed, String name, double health, double accelMod, double turnAmountPerTick) {
 		this(speed, name, health, accelMod, turnAmountPerTick, false);
-	}
+	}*/
 
-	public Boat(double speed, String name, double health, double accelMod, double turnAmountPerTick, boolean steeringKeyboard) {
+	public Boat(double speed, String name, double health, double accelMod, double turnAmountPerTick) {
 		super(speed, name, health, accelMod);
 		this.turnAmount = turnAmountPerTick;
-		this.steeringKeyboard = steeringKeyboard;
 		this.boatState = new BoatState(this);
 	}
 
@@ -184,20 +182,12 @@ public class Boat extends uPlanesVehicleBase<BoatPreset> implements Serializable
 		return turnAmount;
 	}
 
-	public boolean isSteeringKeyboard() {
-		return steeringKeyboard;
+	public long getLastSpacebarTime() {
+		return lastSpacebarTime;
 	}
 
-	public void setSteeringKeyboard(boolean steeringKeyboard) {
-		this.steeringKeyboard = steeringKeyboard;
-	}
-
-	public long getSpeedLockTime() {
-		return speedLockTime;
-	}
-
-	public void setSpeedLockTime(long speedLockTime) {
-		this.speedLockTime = speedLockTime;
+	public void setLastSpacebarTime(long lastSpacebarTime) {
+		this.lastSpacebarTime = lastSpacebarTime;
 	}
 
 }

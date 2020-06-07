@@ -24,7 +24,7 @@ public class BoatPreset extends uPlanesVehiclePresetBase<Boat> implements Serial
 	}
 	
 	public Boat toBoat(){
-		Boat p =  new Boat(getSpeed(), getName(), getHealth(), getAccelMod(), getTurnAmountPerTick(), false);
+		Boat p =  new Boat(getSpeed(), getName(), getHealth(), getAccelMod(), getTurnAmountPerTick());
 		p.setMass(this.mass);
 		p.setCartDisplayBlock(this.getDisplayBlock());
 		p.setDisplayOffset(this.getDisplayOffset());

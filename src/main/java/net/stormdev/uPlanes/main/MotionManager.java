@@ -146,6 +146,22 @@ public class MotionManager {
 		}
 		state.setThrustYawOffsetAngleDeg(newSteeringAngle);
 
+		if(keysPressed.contains(Keypress.JUMP) && System.currentTimeMillis()-boat.getLastSpacebarTime() > 200){
+			boat.setLastSpacebarTime(System.currentTimeMillis());
+			double throttleLim = state.getThrottleLimit();
+			if(throttleLim == 0.1){
+				throttleLim = 0.25;
+			}
+			else if(throttleLim < 1){
+				throttleLim = throttleLim+0.25;
+			}
+			else if(throttleLim >= 1){
+				throttleLim = 0.1;
+			}
+			state.setThrottleLimit(throttleLim);
+			player.sendMessage(ChatColor.GREEN+""+ChatColor.BOLD+"Throttle Limit: "+ChatColor.YELLOW+""+ChatColor.BOLD+(throttleLim*100)+"%");
+		}
+
 		//Called every single game tick when player is inside
 		moveBoat(vehicle,boat, true);
 

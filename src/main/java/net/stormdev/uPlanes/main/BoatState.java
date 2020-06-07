@@ -21,10 +21,23 @@ public class BoatState {
     private double planingSpeed = 1; //Blocks/tick
     private double curYaw = 0;//Matches bukkit convention, in degrees
     private double errorY = 0;
+    private double throttleLimit =1;
 
     public BoatState(Boat b){
         this.boat = b;
         this.dragConstant = this.dragConstant*b.getAccelMod(); //Drag is sized from this for speed so increase of larger forces rel to mass and therefore more accel
+    }
+
+    public double getThrottleLimit() {
+        return throttleLimit;
+    }
+
+    public void setThrottleLimit(double throttleLimit) {
+        this.throttleLimit = throttleLimit;
+    }
+
+    public void clearThrottleLimit(){
+        setThrottleLimit(1);
     }
 
     public void updateVelocitiesYawForThisGameTick(Vehicle vehicle){
@@ -70,7 +83,7 @@ public class BoatState {
         double totalMoment = getDragYawingMoment(maxTurnRatePerTick)+getThrustYawingMoment()+getRudderYawingMoment(forwardVel);
 
         double wdot = totalMoment / yawMomentOfInertia(); //rad/sec
-        this.yawRateDeg = this.yawRateDeg+Math.toDegrees(wdot);
+        this.yawRateDeg = !floating ? 0:(this.yawRateDeg+Math.toDegrees(wdot));
         if(this.yawRateDeg > 80){
             this.yawRateDeg = 80;
         }
@@ -88,7 +101,7 @@ public class BoatState {
         //Exactly nullify sideslip...
         //Vector sideslipDragForce = toTheRightOfDir.clone().multiply(-sideSlipVel*boa);
         //Vector sideslipDragForce = toTheRightOfDir.clone().multiply(getSideslipDragForce(sideSlipVel));
-        Vector sideslipDragForce = toTheRightOfDir.clone().multiply(-0.2*sideSlipVel*boat.getMass());
+        Vector sideslipDragForce = toTheRightOfDir.clone().multiply(-0.45*sideSlipVel*boat.getMass());
         /*if(forwardVel < 0.001 || sideSlipVel < 0.001 || true){
             //Exactly cancel sideslip
             sideslipDragForce = toTheRightOfDir.clone().multiply(-0.8*sideSlipVel*boat.getMass());
@@ -99,7 +112,7 @@ public class BoatState {
         }
         mass = mass*3.5; //Give it more inertia
         Vector forwardDragForce = vel.clone().multiply(-Math.abs(getDragForce(forwardVel,boat.getCurrentPitch()/*getNominalPitch(forwardVel)*/)));
-        if(Math.abs(forwardVel)<0.00001){
+        if(Math.abs(forwardVel)<0.01){
             forwardDragForce = vel.clone().setY(0).multiply(-mass);
         }
        /* Bukkit.broadcastMessage("T: "+thrustForce);
@@ -237,7 +250,11 @@ public class BoatState {
                 speedMultiplier = 0.3;
             }
         }
-        return speedMultiplier*0.1*boat.getHitboxX() * Math.sin(Math.toRadians(thrustYawOffsetAngleDeg)) * getMaxThrustForce();/*Math.cos(Math.toRadians(thrustYawOffsetAngleDeg))*/
+        double sign = 1;
+        if(forwardVel < 0){
+            sign = -1;
+        }
+        return sign*speedMultiplier*0.1*boat.getHitboxX() * Math.sin(Math.toRadians(thrustYawOffsetAngleDeg)) * getMaxThrustForce();/*Math.cos(Math.toRadians(thrustYawOffsetAngleDeg))*/
     }
 
     public double getMaxRudderYawingMoment(){
@@ -263,7 +280,7 @@ public class BoatState {
     }
 
     public double getThrustMultiplier(){
-        return (Math.exp(this.throttleAmt)-1) / (Math.exp(1)-1);
+        return getThrottleLimit()*(Math.exp(this.throttleAmt)-1) / (Math.exp(1)-1);
     }
 
     public double getThrustForce(){
