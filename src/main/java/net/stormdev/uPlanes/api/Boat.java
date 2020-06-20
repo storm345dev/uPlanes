@@ -86,15 +86,15 @@ public class Boat extends uPlanesVehicleBase<BoatPreset> implements Serializable
 		this.maxPassengers = maxPassengers;
 	}
 
-	public double getBoatRotationOffsetDegrees() {
+	public double[] getBoatRotationOffsetDegrees() {
 		if (this.maxPassengers < 0 && isFromPreset()) {
 			return getPreset().getBoatRotationOffsetDeg();
 		}
-		return boatRotationOffsetDegrees;
+		return boatsRotationOffsetDegrees;
 	}
 
-	public void setBoatRotationOffsetDegrees(double boatRotationOffsetDegrees) {
-		this.boatRotationOffsetDegrees = boatRotationOffsetDegrees;
+	public void setBoatRotationOffsetDegrees(double[] boatRotationOffsetDegrees) {
+		this.boatsRotationOffsetDegrees = boatRotationOffsetDegrees;
 	}
 
 	public boolean isFromPreset() {

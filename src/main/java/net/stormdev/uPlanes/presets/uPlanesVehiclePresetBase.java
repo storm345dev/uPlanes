@@ -29,7 +29,7 @@ public abstract class uPlanesVehiclePresetBase<T extends uPlanesVehicle> impleme
 	protected float hitBoxX = -1;
 	protected float hitBoxZ = -1;
 	protected int maxPassengers = 1;
-	protected double boatRotationOffsetDeg = 0;
+	protected double[] boatRotationOffsetDeg = new double[]{0};
 
 	public uPlanesVehiclePresetBase(String presetID, double speed, String name, double health, double accelMod, double turnAmountPerTick, double cost, MaterialData displayBlock, double offset, float hitBoxX, float hitBoxZ){
 		this.setPresetID(presetID);
@@ -59,12 +59,12 @@ public abstract class uPlanesVehiclePresetBase<T extends uPlanesVehicle> impleme
 	}
 
 	@Override
-	public double getBoatRotationOffsetDeg() {
+	public double[] getBoatRotationOffsetDeg() {
 		return boatRotationOffsetDeg;
 	}
 
 	@Override
-	public void setBoatRotationOffsetDeg(double boatRotationOffsetDeg) {
+	public void setBoatRotationOffsetDeg(double[] boatRotationOffsetDeg) {
 		this.boatRotationOffsetDeg = boatRotationOffsetDeg;
 	}
 

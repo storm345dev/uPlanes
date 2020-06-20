@@ -136,7 +136,7 @@ public class CraftHoverCart extends CraftArmorStand implements HoverCart {
 	}
 
 	@Override
-	public double getBoatRotationOffsetDegrees() {
+	public double[] getBoatRotationOffsetDegrees() {
 		return getHandle().getBoatOffsetDeg();
 	}
 

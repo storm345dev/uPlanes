@@ -22,7 +22,7 @@ public abstract class uPlanesVehicleBase<P extends uPlanesVehiclePreset> impleme
     protected float hitboxX = -1;
     protected float hitboxZ = -1;
     protected int maxPassengers = -1;
-    protected double boatRotationOffsetDegrees = 0;
+    protected double[] boatsRotationOffsetDegrees = new double[]{0};
 
     protected transient float currentPitch = 0;
     protected transient float roll = 0;
@@ -125,16 +125,16 @@ public abstract class uPlanesVehicleBase<P extends uPlanesVehiclePreset> impleme
     }
 
     @Override
-    public double getBoatRotationOffsetDegrees() {
+    public double[] getBoatRotationOffsetDegrees() {
         if(this.maxPassengers < 0 && isFromPreset()) {
             return getPreset().getBoatRotationOffsetDeg();
         }
-        return boatRotationOffsetDegrees;
+        return boatsRotationOffsetDegrees;
     }
 
     @Override
-    public void setBoatRotationOffsetDegrees(double boatRotationOffsetDegrees) {
-        this.boatRotationOffsetDegrees = boatRotationOffsetDegrees;
+    public void setBoatRotationOffsetDegrees(double[] boatRotationOffsetDegrees) {
+        this.boatsRotationOffsetDegrees = boatRotationOffsetDegrees;
     }
 
     protected String getHandleString(boolean b){

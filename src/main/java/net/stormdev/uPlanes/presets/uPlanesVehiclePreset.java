@@ -11,9 +11,9 @@ public interface uPlanesVehiclePreset<T extends uPlanesVehicle> {
 
     public void setMaxPassengers(int maxPassengers);
 
-    public double getBoatRotationOffsetDeg();
+    public double[] getBoatRotationOffsetDeg();
 
-    public void setBoatRotationOffsetDeg(double boatRotationOffsetDeg);
+    public void setBoatRotationOffsetDeg(double boatRotationOffsetDeg[]);
 
     public float getHitBoxX();
 

@@ -1,13 +1,11 @@
 package net.stormdev.uPlanes.presets;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 import net.stormdev.uPlanes.main.ItemStackFromId;
 import net.stormdev.uPlanes.main.main;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.material.MaterialData;
 
@@ -138,12 +136,12 @@ public class PresetManager {
 					sect.set("passengers.max",1);
 				}
 				if(!sect.contains("passengers.boatRotationOffsetDeg")){
-					sect.set("passengers.boatRotationOffsetDeg",0.0d);
+					sect.set("passengers.boatRotationOffsetDeg", Arrays.asList(new double[]{0}));
 				}
 				
 				PlanePreset pp = new PlanePreset(id, speed, name, health, accelMod, turnAmountPerTick, hover, cost, displayBlock, displayOffset, hitBoxX, hitBoxZ, hoverMidair);
 				pp.setMaxPassengers(sect.getInt("passengers.max"));
-				pp.setBoatRotationOffsetDeg(sect.getDouble("passengers.boatRotationOffsetDeg"));
+				pp.setBoatRotationOffsetDeg(ArrayUtils.toPrimitive(sect.getDoubleList("passengers.boatRotationOffsetDeg").toArray(new Double[]{})));
 
 				this.presets.add(pp);
 			} catch (Exception e) {
@@ -189,7 +187,7 @@ public class PresetManager {
 					sect.set("passengers.max",1);
 				}
 				if(!sect.contains("passengers.boatRotationOffsetDeg")){
-					sect.set("passengers.boatRotationOffsetDeg",0.0d);
+					sect.set("passengers.boatRotationOffsetDeg",Arrays.asList(new double[]{0}));
 				}
 				if(!sect.contains("mass")){
 					sect.set("mass",1000.0d);
@@ -198,7 +196,7 @@ public class PresetManager {
 				BoatPreset pp = new BoatPreset(id, speed, name, health, accelMod, turnAmountPerTick, cost, displayBlock, displayOffset, hitBoxX, hitBoxZ);
 				pp.setMass(sect.getDouble("mass"));
 				pp.setMaxPassengers(sect.getInt("passengers.max"));
-				pp.setBoatRotationOffsetDeg(sect.getDouble("passengers.boatRotationOffsetDeg"));
+				pp.setBoatRotationOffsetDeg(ArrayUtils.toPrimitive(sect.getDoubleList("passengers.boatRotationOffsetDeg").toArray(new Double[]{})));
 
 				this.boatPresets.add(pp);
 			} catch (Exception e) {

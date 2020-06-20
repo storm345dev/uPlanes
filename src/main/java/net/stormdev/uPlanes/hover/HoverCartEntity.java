@@ -39,14 +39,14 @@ public class HoverCartEntity extends EntityArmorStand {
 	private double heightOffset = 0;
 	private float hitBoxX = -1;
 	private float hitBoxZ = -1;
-	private double boatOffsetDeg = 0;
+	private double[] boatOffsetDeg = new double[]{0};
 	private int maxPassengers = 1;
 
-	public double getBoatOffsetDeg() {
+	public double[] getBoatOffsetDeg() {
 		return boatOffsetDeg;
 	}
 
-	public void setBoatOffsetDeg(double boatOffsetDeg) {
+	public void setBoatOffsetDeg(double[] boatOffsetDeg) {
 		this.boatOffsetDeg = boatOffsetDeg;
 	}
 
@@ -60,8 +60,12 @@ public class HoverCartEntity extends EntityArmorStand {
 
 	//Stuff to allow multiple passengers
 	private EntityBoat fakeBoat;
+	private EntityBoat fakeBoat2;
+	private EntityBoat fakeBoat3;
 	private EntityArrow fakeArrow;
 	private EntityArrow fakeArrow2;
+	private EntityArrow fakeArrow3;
+	private EntityArrow fakeArrow4;
 	
 	public static HoverCart getCart(org.bukkit.entity.Entity e){
 		if(((CraftEntity)e).getHandle() instanceof HoverCartEntity){
@@ -142,7 +146,7 @@ public class HoverCartEntity extends EntityArmorStand {
 
 		HoverCart hc= getHoverCartEntity();
 
-		if(hc.getMaxPassengers() == 2){
+		if(hc.getMaxPassengers() > 1){
 			//Allocate entity IDs to fake entities to show only to the client
 			this.fakeBoat = new EntityBoat(w.getHandle());
 			this.fakeArrow = new EntityArrow(w.getHandle()) {
@@ -157,17 +161,98 @@ public class HoverCartEntity extends EntityArmorStand {
 					return null;
 				}
 			};
+			if(hc.getMaxPassengers() > 2){
+				this.fakeBoat2 = new EntityBoat(w.getHandle());
+				this.fakeBoat3 = new EntityBoat(w.getHandle());
+				this.fakeArrow3 = new EntityArrow(w.getHandle()) {
+					@Override
+					protected ItemStack j() {
+						return null;
+					}
+				};
+				this.fakeArrow4 = new EntityArrow(w.getHandle()) {
+					@Override
+					protected ItemStack j() {
+						return null;
+					}
+				};
+			}
 		}
 
 		return hc;
+	}
+
+	public double getFakeBoatRotationOffsetDeg(int i){
+		if(i==0){
+			return getFirstFakeBoatRotationOffsetDeg();
+		}
+		else if(i == 1){
+			return getSecondFakeBoatRotationOffsetDeg();
+		}
+		else {
+			return getThirdFakeBoatRotationOffsetDeg();
+		}
+	}
+
+	public double getFirstFakeBoatRotationOffsetDeg(){
+		if(this.boatOffsetDeg.length < 1){
+			return 0;
+		}
+		return this.boatOffsetDeg[0];
+	}
+
+	public double getSecondFakeBoatRotationOffsetDeg(){
+		if(this.boatOffsetDeg.length > 1){
+			return this.boatOffsetDeg[1];
+		}
+		return getFirstFakeBoatRotationOffsetDeg();
+	}
+
+	public double getThirdFakeBoatRotationOffsetDeg(){
+		if(this.boatOffsetDeg.length > 2){
+			return this.boatOffsetDeg[2];
+		}
+		return getSecondFakeBoatRotationOffsetDeg();
+	}
+
+	public double getNumFakeBoats(){
+		if(!hasFakeBoat()){
+			return 0;
+		}
+		if(!hasExtraFakeBoats()){
+			return 1;
+		}
+		return 3;
+	}
+
+	public boolean hasExtraFakeBoats(){
+		return this.fakeBoat2 != null;
 	}
 
 	public boolean hasFakeBoat() {
 		return this.fakeBoat != null;
 	}
 
+	public EntityBoat getFakeBoat(int i){
+		if (i == 0) {
+			return getFakeBoat();
+		}
+		else if(i == 1){
+			return getFakeBoat2();
+		}
+		else {
+			return getFakeBoat3();
+		}
+	}
+
 	public EntityBoat getFakeBoat() {
 		return fakeBoat;
+	}
+	public EntityBoat getFakeBoat2() {
+		return fakeBoat2;
+	}
+	public EntityBoat getFakeBoat3() {
+		return fakeBoat3;
 	}
 
 	public EntityArrow getFakeArrow() {
@@ -176,6 +261,12 @@ public class HoverCartEntity extends EntityArmorStand {
 
 	public EntityArrow getFakeArrow2() {
 		return fakeArrow2;
+	}
+	public EntityArrow getFakeArrow3() {
+		return fakeArrow3;
+	}
+	public EntityArrow getFakeArrow4() {
+		return fakeArrow4;
 	}
 
 	private List<String> playersKnowAboutFakeEntities = new ArrayList<>();

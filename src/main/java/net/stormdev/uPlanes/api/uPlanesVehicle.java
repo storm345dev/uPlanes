@@ -41,9 +41,9 @@ public interface uPlanesVehicle<P extends uPlanesVehiclePreset> {
 
     public void setMaxPassengers(int maxPassengers);
 
-    public double getBoatRotationOffsetDegrees();
+    public double[] getBoatRotationOffsetDegrees();
 
-    public void setBoatRotationOffsetDegrees(double boatRotationOffsetDegrees);
+    public void setBoatRotationOffsetDegrees(double[] boatRotationOffsetDegrees);
 
     public boolean isFromPreset();
 
