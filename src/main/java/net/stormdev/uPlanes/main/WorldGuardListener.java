@@ -20,42 +20,42 @@ public class WorldGuardListener implements Listener {
 	
 	@EventHandler(priority=EventPriority.LOWEST)
 	void entityDamage(DamageEntityEvent event){
-		if(uPlanesAPI.getPlaneManager().isAPlane(event.getEntity()) && event.getEntity().getType().equals(EntityType.ARMOR_STAND)){
+		if(uPlanesAPI.isPluginControlledEntity(event.getEntity()) && event.getEntity().getType().equals(EntityType.ARMOR_STAND)){
 			event.setCancelled(true);
 		}
 	}
 	
 	@EventHandler(priority=EventPriority.MONITOR)
 	void entityDamageMonitor(DamageEntityEvent event){
-		if(uPlanesAPI.getPlaneManager().isAPlane(event.getEntity()) && event.getEntity().getType().equals(EntityType.ARMOR_STAND)){
+		if(uPlanesAPI.isPluginControlledEntity(event.getEntity()) && event.getEntity().getType().equals(EntityType.ARMOR_STAND)){
 			event.setCancelled(false);
 		}
 	}
 	
 	@EventHandler(priority=EventPriority.LOWEST)
 	void entityDestroy(DestroyEntityEvent event){
-		if(uPlanesAPI.getPlaneManager().isAPlane(event.getEntity()) && event.getEntity().getType().equals(EntityType.ARMOR_STAND)){
+		if(uPlanesAPI.isPluginControlledEntity(event.getEntity()) && event.getEntity().getType().equals(EntityType.ARMOR_STAND)){
 			event.setCancelled(true);
 		}
 	}
 	
 	@EventHandler(priority=EventPriority.MONITOR)
 	void entityDestroyMonitor(DestroyEntityEvent event){
-		if(uPlanesAPI.getPlaneManager().isAPlane(event.getEntity()) && event.getEntity().getType().equals(EntityType.ARMOR_STAND)){
+		if(uPlanesAPI.isPluginControlledEntity(event.getEntity()) && event.getEntity().getType().equals(EntityType.ARMOR_STAND)){
 			event.setCancelled(false);
 		}
 	}
 	
 	@EventHandler(priority=EventPriority.LOWEST)
 	void entityUse(UseEntityEvent event){
-		if(uPlanesAPI.getPlaneManager().isAPlane(event.getEntity()) && event.getEntity().getType().equals(EntityType.ARMOR_STAND)){
+		if(uPlanesAPI.isPluginControlledEntity(event.getEntity()) && event.getEntity().getType().equals(EntityType.ARMOR_STAND)){
 			event.setCancelled(true);
 		}
 	}
 	
 	@EventHandler(priority=EventPriority.MONITOR)
 	void entityUseMonitor(UseEntityEvent event){
-		if(uPlanesAPI.getPlaneManager().isAPlane(event.getEntity()) && event.getEntity().getType().equals(EntityType.ARMOR_STAND)){
+		if(uPlanesAPI.isPluginControlledEntity(event.getEntity()) && event.getEntity().getType().equals(EntityType.ARMOR_STAND)){
 			event.setCancelled(false);
 		}
 	}

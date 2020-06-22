@@ -1,29 +1,19 @@
 package net.stormdev.uPlanes.hover;
 
-import java.util.List;
-
-import net.minecraft.server.v1_8_R3.DamageSource;
-import net.minecraft.server.v1_8_R3.Entity;
-import net.minecraft.server.v1_8_R3.EntityArmorStand;
-import net.minecraft.server.v1_8_R3.EntityHuman;
-import net.minecraft.server.v1_8_R3.EntityMinecartAbstract;
-import net.minecraft.server.v1_8_R3.Vec3D;
-import net.minecraft.server.v1_8_R3.World;
+import net.minecraft.server.v1_12_R1.*;
 import net.stormdev.uPlanes.utils.CustomEntityHandler;
-
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_12_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_12_R1.entity.CraftEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.event.entity.CreatureSpawnEvent;
-import org.bukkit.event.vehicle.VehicleCreateEvent;
-import org.bukkit.event.vehicle.VehicleDamageEvent;
-import org.bukkit.event.vehicle.VehicleDestroyEvent;
-import org.bukkit.event.vehicle.VehicleEntityCollisionEvent;
-import org.bukkit.event.vehicle.VehicleMoveEvent;
-import org.bukkit.event.vehicle.VehicleUpdateEvent;
+import org.bukkit.event.vehicle.*;
 
-public class HoverCartEntity extends EntityArmorStand {	 //TODO Stop it falling out of the world
+import java.util.ArrayList;
+import java.util.List;
+
+public class HoverCartEntity extends EntityArmorStand {
 	public static final double OFFSET_AMOUNT = /*-1*/0;
 	
 	public float getHitBoxX() {
@@ -49,6 +39,33 @@ public class HoverCartEntity extends EntityArmorStand {	 //TODO Stop it falling 
 	private double heightOffset = 0;
 	private float hitBoxX = -1;
 	private float hitBoxZ = -1;
+	private double[] boatOffsetDeg = new double[]{0};
+	private int maxPassengers = 1;
+
+	public double[] getBoatOffsetDeg() {
+		return boatOffsetDeg;
+	}
+
+	public void setBoatOffsetDeg(double[] boatOffsetDeg) {
+		this.boatOffsetDeg = boatOffsetDeg;
+	}
+
+	public int getMaxPassengers() {
+		return maxPassengers;
+	}
+
+	public void setMaxPassengers(int maxPassengers) {
+		this.maxPassengers = maxPassengers;
+	}
+
+	//Stuff to allow multiple passengers
+	private EntityBoat fakeBoat;
+	private EntityBoat fakeBoat2;
+	private EntityBoat fakeBoat3;
+	private EntityArrow fakeArrow;
+	private EntityArrow fakeArrow2;
+	private EntityArrow fakeArrow3;
+	private EntityArrow fakeArrow4;
 	
 	public static HoverCart getCart(org.bukkit.entity.Entity e){
 		if(((CraftEntity)e).getHandle() instanceof HoverCartEntity){
@@ -85,7 +102,11 @@ public class HoverCartEntity extends EntityArmorStand {	 //TODO Stop it falling 
 		}
 	    return true; //Say our size is set
 	}*/
-	
+
+	public float getBukkitYaw() {
+		return this.yaw;
+	}
+
 	private void setSize(){
 		setSize(hitBoxX<0?0.98F:hitBoxX, hitBoxZ<0?0.7F:hitBoxZ);
 	}
@@ -122,17 +143,155 @@ public class HoverCartEntity extends EntityArmorStand {	 //TODO Stop it falling 
 		this.world.getServer().getPluginManager().callEvent(new VehicleCreateEvent((Vehicle)ce));
 		this.bukkitEntity = getHoverCartEntity();
 		updatePosition(loc);
-		return getHoverCartEntity();
-	}
-	
-	@Override
-	public boolean a(EntityHuman entityhuman, Vec3D vec3d)
-	  {
-		if(this.passenger != null){
-			return false;
+
+		HoverCart hc= getHoverCartEntity();
+
+		if(hc.getMaxPassengers() > 1){
+			//Allocate entity IDs to fake entities to show only to the client
+			this.fakeBoat = new EntityBoat(w.getHandle());
+			this.fakeArrow = new EntityArrow(w.getHandle()) {
+				@Override
+				protected ItemStack j() {
+					return null;
+				}
+			};
+			this.fakeArrow2 = new EntityArrow(w.getHandle()) {
+				@Override
+				protected ItemStack j() {
+					return null;
+				}
+			};
+			if(hc.getMaxPassengers() > 2){
+				this.fakeBoat2 = new EntityBoat(w.getHandle());
+				this.fakeBoat3 = new EntityBoat(w.getHandle());
+				this.fakeArrow3 = new EntityArrow(w.getHandle()) {
+					@Override
+					protected ItemStack j() {
+						return null;
+					}
+				};
+				this.fakeArrow4 = new EntityArrow(w.getHandle()) {
+					@Override
+					protected ItemStack j() {
+						return null;
+					}
+				};
+			}
 		}
-		ce.setPassenger(entityhuman.getBukkitEntity());
-		return false;
+
+		return hc;
+	}
+
+	public double getFakeBoatRotationOffsetDeg(int i){
+		if(i==0){
+			return getFirstFakeBoatRotationOffsetDeg();
+		}
+		else if(i == 1){
+			return getSecondFakeBoatRotationOffsetDeg();
+		}
+		else {
+			return getThirdFakeBoatRotationOffsetDeg();
+		}
+	}
+
+	public double getFirstFakeBoatRotationOffsetDeg(){
+		if(this.boatOffsetDeg.length < 1){
+			return 0;
+		}
+		return this.boatOffsetDeg[0];
+	}
+
+	public double getSecondFakeBoatRotationOffsetDeg(){
+		if(this.boatOffsetDeg.length > 1){
+			return this.boatOffsetDeg[1];
+		}
+		return getFirstFakeBoatRotationOffsetDeg();
+	}
+
+	public double getThirdFakeBoatRotationOffsetDeg(){
+		if(this.boatOffsetDeg.length > 2){
+			return this.boatOffsetDeg[2];
+		}
+		return getSecondFakeBoatRotationOffsetDeg();
+	}
+
+	public double getNumFakeBoats(){
+		if(!hasFakeBoat()){
+			return 0;
+		}
+		if(!hasExtraFakeBoats()){
+			return 1;
+		}
+		return 3;
+	}
+
+	public boolean hasExtraFakeBoats(){
+		return this.fakeBoat2 != null;
+	}
+
+	public boolean hasFakeBoat() {
+		return this.fakeBoat != null;
+	}
+
+	public EntityBoat getFakeBoat(int i){
+		if (i == 0) {
+			return getFakeBoat();
+		}
+		else if(i == 1){
+			return getFakeBoat2();
+		}
+		else {
+			return getFakeBoat3();
+		}
+	}
+
+	public EntityBoat getFakeBoat() {
+		return fakeBoat;
+	}
+	public EntityBoat getFakeBoat2() {
+		return fakeBoat2;
+	}
+	public EntityBoat getFakeBoat3() {
+		return fakeBoat3;
+	}
+
+	public EntityArrow getFakeArrow() {
+		return fakeArrow;
+	}
+
+	public EntityArrow getFakeArrow2() {
+		return fakeArrow2;
+	}
+	public EntityArrow getFakeArrow3() {
+		return fakeArrow3;
+	}
+	public EntityArrow getFakeArrow4() {
+		return fakeArrow4;
+	}
+
+	private List<String> playersKnowAboutFakeEntities = new ArrayList<>();
+
+	public boolean doesKnowAboutFakeEntities(Player p){
+		return playersKnowAboutFakeEntities.contains(p.getName());
+	}
+
+	public void setKnowAboutFakeEntities(Player p, boolean b){
+		if(b) {
+			playersKnowAboutFakeEntities.add(p.getName());
+		}
+		else {
+			playersKnowAboutFakeEntities.remove(p.getName());
+		}
+	}
+
+	//Interaction with entity from EntityArmorStand
+	@Override
+	public EnumInteractionResult a(EntityHuman entityhuman, Vec3D vec3d, EnumHand hand)
+	  {
+		if(ce.getPassengers().size() < ce.getMaxPassengers()) {
+			ce.addPassenger(entityhuman.getBukkitEntity());
+		}
+		return EnumInteractionResult.FAIL;
 	  }
 	
 	/*@Override
@@ -157,7 +316,7 @@ public class HoverCartEntity extends EntityArmorStand {	 //TODO Stop it falling 
 	
 	@Override
 	public void collide(Entity entity){
-		if(this.passenger != null && entity.equals(this.passenger)){
+		if(this.passengers.size() >0 && entity.equals(this.passengers.get(0))){
 			return;
 		}
 		
@@ -174,13 +333,13 @@ public class HoverCartEntity extends EntityArmorStand {	 //TODO Stop it falling 
 	}
 	
 	@Override
-	public void t_(){
+	public void Y(){ //Living entity base tick from EntityLiving
 		double prevX = this.locX;
 	    double prevY = this.locY;
 	    double prevZ = this.locZ;
 	    float prevYaw = this.yaw;
 	    float prevPitch = this.pitch;
-	    super.t_();
+	    super.Y();
 	    
 	    org.bukkit.World bworld = this.world.getWorld();
 	    Location from = new Location(bworld, prevX, prevY, prevZ, prevYaw, prevPitch);
@@ -193,9 +352,7 @@ public class HoverCartEntity extends EntityArmorStand {	 //TODO Stop it falling 
 	      this.world.getServer().getPluginManager().callEvent(new VehicleMoveEvent(vehicle, from, to));
 	    }
 	    
-	    if(s()){
-	    	setSize();
-	    }
+	    setSize();
 	}
 	
 	private DamageSource damagesource = null;
@@ -216,7 +373,13 @@ public class HoverCartEntity extends EntityArmorStand {	 //TODO Stop it falling 
 		Vehicle vehicle = (Vehicle)getHoverCartEntity();
 	      org.bukkit.entity.Entity passenger = damagesource.getEntity() == null ? null : damagesource.getEntity().getBukkitEntity();
 
-	      VehicleDamageEvent event = new VehicleDamageEvent(vehicle, passenger, f);
+	      VehicleDamageEvent event = new VehicleDamageEvent(vehicle, passenger, f);/*{
+	      	@Override
+			  public void setCancelled(boolean b){
+	      		new Exception().printStackTrace();
+	      		super.setCancelled(b);
+			}
+		  };*/
 	      this.world.getServer().getPluginManager().callEvent(event);
 
 	      if (event.isCancelled()) {
@@ -308,7 +471,7 @@ public class HoverCartEntity extends EntityArmorStand {	 //TODO Stop it falling 
 	}
 	
 	@Override
-	 protected void bL() {
+	 protected void cB() { //Bounding box collisions in EntityArmorStand
 	    List<?> list = this.world.getEntities(this, getBoundingBox());
 
 	    if ((list != null) && (!list.isEmpty()))

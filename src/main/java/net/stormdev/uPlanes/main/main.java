@@ -1,42 +1,24 @@
 package net.stormdev.uPlanes.main;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.util.HashMap;
-import java.util.Random;
-import java.util.logging.Level;
-
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
+import com.comphenix.protocol.events.PacketAdapter;
+import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.events.PacketEvent;
 import net.milkbowl.vault.economy.Economy;
 import net.stormdev.uPlanes.api.uPlanesAPI;
-import net.stormdev.uPlanes.commands.AdminCommandExecutor;
-import net.stormdev.uPlanes.commands.AutoPilotAdminCommandExecutor;
-import net.stormdev.uPlanes.commands.AutoPilotCommandExecutor;
-import net.stormdev.uPlanes.commands.FuelCommandExecutor;
-import net.stormdev.uPlanes.commands.InfoCommandExecutor;
+import net.stormdev.uPlanes.commands.*;
 import net.stormdev.uPlanes.guis.IconMenuListener;
-import net.stormdev.uPlanes.hover.HoverCart;
 import net.stormdev.uPlanes.hover.HoverCartEntity;
 import net.stormdev.uPlanes.presets.PresetManager;
+import net.stormdev.uPlanes.protocolMagic.ProtocolManipulator;
 import net.stormdev.uPlanes.shops.PlaneShop;
-import net.stormdev.uPlanes.utils.Colors;
-import net.stormdev.uPlanes.utils.CustomLogger;
-import net.stormdev.uPlanes.utils.PEntityMeta;
-import net.stormdev.uPlanes.utils.PMeta;
-import net.stormdev.uPlanes.utils.uCarsCompatibility;
-
+import net.stormdev.uPlanes.utils.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
@@ -44,12 +26,10 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.ProtocolManager;
-import com.comphenix.protocol.events.PacketAdapter;
-import com.comphenix.protocol.events.PacketContainer;
-import com.comphenix.protocol.events.PacketEvent;
+import java.io.*;
+import java.util.HashMap;
+import java.util.Random;
+import java.util.logging.Level;
 
 /**
  * Entry point class for the application
@@ -72,9 +52,12 @@ public class main extends JavaPlugin {
 	public ProtocolManager protocolManager = null;
 	public uPlanesListener listener = null;
 	public PlanesManager planeManager = null;
+	public BoatsManager boatsManager = null;
 	public Random random = new Random();
 	public DestinationManager destinationManager = null;
 	public uPlanesAPI api = null;
+
+	public ProtocolManipulator protocolManipulator;
 	
 	public PlaneShop planeShop = null;
 	public static Economy economy = null;
@@ -116,6 +99,8 @@ public class main extends JavaPlugin {
 				+ File.separator + "lang.yml");
 		File planesSaveFile = new File(getDataFolder().getAbsolutePath()
 				+ File.separator + "Data" + File.separator + "uplanes.data");
+		File boatsSaveFile = new File(getDataFolder().getAbsolutePath()
+				+ File.separator + "Data" + File.separator + "uplanesBoats.data");
 		File destinationSaveFile = new File(getDataFolder().getAbsolutePath()
 				+ File.separator + "Data" + File.separator + "destinations.locationdata");
 		if (langFile.exists() == false
@@ -284,6 +269,9 @@ public class main extends JavaPlugin {
         	if(!config.contains("general.planes.maxSpeed")){
         		config.set("general.planes.maxSpeed", 200.0d);
         	}
+        	if(!config.contains("general.planes.renderAsModelledBlockWhenExist")){
+        		config.set("general.planes.renderAsModelledBlockWhenExist",true);
+			}
         	maxSpeed = config.getDouble("general.planes.maxSpeed");
         	if(!config.contains("general.planes.doAcceleration")){
         		config.set("general.planes.doAcceleration", true);
@@ -378,6 +366,7 @@ public class main extends JavaPlugin {
 		}
 		
 		this.planeManager = new PlanesManager(planesSaveFile);
+		this.boatsManager = new BoatsManager(boatsSaveFile);
 		getServer().getPluginManager().registerEvents(listener, this);
 		
 		//Create a blank plane item
@@ -420,6 +409,7 @@ public class main extends JavaPlugin {
 		
 		getCommand("uPlanes").setExecutor(new InfoCommandExecutor());
 		getCommand("plane").setExecutor(new AdminCommandExecutor());
+		getCommand("boat").setExecutor(new BoatAdminCommandExecutor());
 		AutoPilotCommandExecutor apce = new AutoPilotCommandExecutor();
 		getCommand("destination").setExecutor(apce);
 		getCommand("destinations").setExecutor(apce);
@@ -518,111 +508,22 @@ public class main extends JavaPlugin {
 								PacketContainer packet = event.getPacket();
 								final float sideways = packet.getFloat().read(0);
 								final float forwards = packet.getFloat().read(1);
+								final boolean jumping = packet.getBooleans().read(0);
 								final Player pl = event.getPlayer();
 								
 								Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable(){
 
 									@Override
 									public void run() {
-										MotionManager.move(pl, forwards,
-												sideways);
+										MotionManager.onPacket(pl, forwards, sideways, jumping);
+										/*MotionManager.move(pl, forwards,
+												sideways);*/
 										return;
 									}});
 						  }
 					});
-			
-			try { //These 2 translate our custom entity for rendering display blocks to look in the right place!
-				((ProtocolManager) this.protocolManager).addPacketListener(new PacketAdapter(this, PacketType.Play.Server.ENTITY_TELEPORT){
-							@Override
-							public void onPacketSending(PacketEvent event){
-								int entityId = event.getPacket().getIntegers().read(0);
-								
-								HoverCart hce = null;
-								for(World w:Bukkit.getServer().getWorlds()){
-									for(net.minecraft.server.v1_8_R3.Entity e:((CraftWorld)w).getHandle().entityList){
-										if(entityId == e.getId()){
-											HoverCart hc = HoverCartEntity.getCart(e.getBukkitEntity());
-											if(hc == null){
-												return;
-											}
-											hce = hc;
-										}
-									}
-								}
-								if(hce == null){
-									return;
-								}
-								
-								double y = hce.getLocation().getY()/*(double)event.getPacket().getIntegers().read(2) / 32.0*/;
-								/*Block b = hce.getLocation().getBlock();*/
-								y+= hce.getDisplayOffset()-0.9;
-								event.getPacket().getIntegers().write(2, (int) (y * 32));
-							}
-					
-				});
-				/*((ProtocolManager) this.protocolManager).addPacketListener(new PacketAdapter(this, PacketType.Play.Server.SPAWN_ENTITY){
-					@Override
-					public void onPacketSending(PacketEvent event){
-						int entityId = event.getPacket().getIntegers().read(0);
-						
-						HoverCart hce = null;
-						for(World w:Bukkit.getServer().getWorlds()){
-							for(net.minecraft.server.v1_8_R3.Entity e:((CraftWorld)w).getHandle().entityList){
-								if(entityId == e.getId()){
-									HoverCart hc = HoverCartEntity.getCart(e.getBukkitEntity());
-									if(hc == null){
-										return;
-									}
-									hce = hc;
-								}
-							}
-						}
-						if(hce == null){
-							return;
-						}
-						
-						double y = (double)event.getPacket().getIntegers().read(2) / 32.0;
-						Block b = hce.getLocation().getBlock();
-						if(b.isEmpty() || b.isLiquid()){
-							y+= hce.getDisplayOffset()-0.9;
-						}
-						event.getPacket().getIntegers().write(2, (int) (y * 32));
-					}
-			
-		});*/
-				
-				/*((ProtocolManager) this.protocolManager).addPacketListener(new PacketAdapter(this, PacketType.Play.Server.SPAWN_ENTITY_LIVING){
-					@Override
-					public void onPacketSending(PacketEvent event){
-						int entityId = event.getPacket().getIntegers().read(0);
-						
-						HoverCart hce = null;
-						for(World w:Bukkit.getServer().getWorlds()){
-							for(net.minecraft.server.v1_8_R3.Entity e:((CraftWorld)w).getHandle().entityList){
-								if(entityId == e.getId()){
-									HoverCart hc = HoverCartEntity.getCart(e.getBukkitEntity());
-									if(hc == null){
-										return;
-									}
-									hce = hc;
-								}
-							}
-						}
-						if(hce == null){
-							return;
-						}
-						
-						double y = (double)event.getPacket().getIntegers().read(2) / 32.0;
-						Block b = hce.getLocation().getBlock();
-						if(b.isEmpty() || b.isLiquid()){
-							y+= hce.getDisplayOffset()-0.9;
-						}
-						event.getPacket().getIntegers().write(2, (int) (y * 32));
-					}
-			
-		});*/
-			} catch (Exception e) {
-			}
+			protocolManipulator = new ProtocolManipulator(this.protocolManager);
+			protocolManipulator.registerManipulations();
 		} catch (Exception e) {
 			return false;
 		}

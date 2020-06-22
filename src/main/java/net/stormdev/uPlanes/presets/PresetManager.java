@@ -1,13 +1,11 @@
 package net.stormdev.uPlanes.presets;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 import net.stormdev.uPlanes.main.ItemStackFromId;
 import net.stormdev.uPlanes.main.main;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.material.MaterialData;
 
@@ -15,12 +13,21 @@ public class PresetManager {
 	public static boolean usePresets = false;
 	public static boolean disableItemRenaming = false;
 	private List<PlanePreset> presets = new ArrayList<PlanePreset>();
+	private List<BoatPreset> boatPresets = new ArrayList<>();
 	private Random random = new Random();
 	
 	public PresetManager(){
 		init();
 	}
-	
+
+	public List<BoatPreset> getBoatPresets(){
+		return new ArrayList<BoatPreset>(boatPresets);
+	}
+
+	public BoatPreset getRandomBoatPreset(){
+		return boatPresets.get(random.nextInt(boatPresets.size()));
+	}
+
 	public List<PlanePreset> getPresets(){
 		return new ArrayList<PlanePreset>(presets);
 	}
@@ -39,6 +46,7 @@ public class PresetManager {
 		usePresets = main.config.getBoolean("general.planes.presets.enable");
 		disableItemRenaming = main.config.getBoolean("general.planes.presets.disableItemRename");
 		ConfigurationSection presets = main.config.getConfigurationSection("general.planes.presets.types");
+		ConfigurationSection boatPresets = main.config.getConfigurationSection("general.planes.presets.boatTypes");
 		if(presets == null){ //Write defaults
 			presets = main.config.createSection("general.planes.presets.types");
 			presets.set("superjet.name", "Fast Jet");
@@ -70,8 +78,18 @@ public class PresetManager {
 			presets.set("attackchopper.hover", true);
 			presets.set("attackchopper.cost", 150);
 		}
+		if(boatPresets == null) { //Write defaults
+			boatPresets = main.config.createSection("general.planes.presets.boatTypes");
+			boatPresets.set("boat1.name", "Boat");
+			boatPresets.set("boat1.speed", 50);
+			boatPresets.set("boat1.health", 75);
+			boatPresets.set("boat1.acceleration", 20);
+			boatPresets.set("boat1.handling", 15);
+			boatPresets.set("boat1.cost", 200);
+		}
 		
 		this.presets.clear();
+		this.boatPresets.clear();
 		Set<String> presetIDs = presets.getKeys(false);
 		
 		for(String id:presetIDs){
@@ -83,6 +101,11 @@ public class PresetManager {
 				double accelMod = sect.getDouble("acceleration") / 10.0d;
 				double turnAmountPerTick = sect.getDouble("handling") / 10.0d;
 				boolean hover = sect.contains("hover") ? sect.getBoolean("hover") : false;
+				boolean hoverMidair = sect.contains("planeHover") ? sect.getBoolean("planeHover") : false;
+				if(sect.contains("helicopter")){
+					hoverMidair = hover;
+					hover = sect.getBoolean("helicopter");
+				}
 				double cost = sect.getDouble("cost");
 				
 				if(name == null || speed <= 0 || health <= 0 || accelMod <= 0 || turnAmountPerTick <= 0){
@@ -109,16 +132,80 @@ public class PresetManager {
 				if(sect.contains("hitbox.z")){
 					hitBoxZ = (float) sect.getDouble("hitbox.z");
 				}
+				if(!sect.contains("passengers.max")){
+					sect.set("passengers.max",1);
+				}
+				if(!sect.contains("passengers.boatRotationOffsetDeg")){
+					sect.set("passengers.boatRotationOffsetDeg", Arrays.asList(new double[]{0}));
+				}
 				
-				PlanePreset pp = new PlanePreset(id, speed, name, health, accelMod, turnAmountPerTick, hover, cost, displayBlock, displayOffset, hitBoxX, hitBoxZ);
+				PlanePreset pp = new PlanePreset(id, speed, name, health, accelMod, turnAmountPerTick, hover, cost, displayBlock, displayOffset, hitBoxX, hitBoxZ, hoverMidair);
+				pp.setMaxPassengers(sect.getInt("passengers.max"));
+				pp.setBoatRotationOffsetDeg(ArrayUtils.toPrimitive(sect.getDoubleList("passengers.boatRotationOffsetDeg").toArray(new Double[]{})));
+
 				this.presets.add(pp);
 			} catch (Exception e) {
 				//Error loading this preset!
 				e.printStackTrace();
 			}
 		}
+		for(String id:boatPresets.getKeys(false)){
+			try {
+				ConfigurationSection sect = boatPresets.getConfigurationSection(id);
+				String name = sect.getString("name");
+				double speed = sect.getDouble("speed");
+				double health = sect.getDouble("health");
+				double accelMod = sect.getDouble("acceleration") / 10.0d;
+				double turnAmountPerTick = sect.getDouble("handling") / 3.0d;
+				double cost = sect.getDouble("cost");
+
+				if(name == null || speed <= 0 || health <= 0 || accelMod <= 0 || turnAmountPerTick <= 0){
+					throw new Exception("INVALID boat preset "+id);
+				}
+
+				MaterialData displayBlock = null;
+				double displayOffset = 0;
+				if(sect.contains("display")){
+					try {
+						displayBlock = ItemStackFromId.get(sect.getString("display")).getData();
+					} catch (Exception e) {
+						//Invalid config
+					}
+				}
+				if(sect.contains("displayOffset")){
+					displayOffset = sect.getDouble("displayOffset");
+				}
+				float hitBoxX = -1;
+				float hitBoxZ = -1;
+				if(sect.contains("hitbox.x")){
+					hitBoxX = (float) sect.getDouble("hitbox.x");
+				}
+				if(sect.contains("hitbox.z")){
+					hitBoxZ = (float) sect.getDouble("hitbox.z");
+				}
+				if(!sect.contains("passengers.max")){
+					sect.set("passengers.max",1);
+				}
+				if(!sect.contains("passengers.boatRotationOffsetDeg")){
+					sect.set("passengers.boatRotationOffsetDeg",Arrays.asList(new double[]{0}));
+				}
+				if(!sect.contains("mass")){
+					sect.set("mass",1000.0d);
+				}
+
+				BoatPreset pp = new BoatPreset(id, speed, name, health, accelMod, turnAmountPerTick, cost, displayBlock, displayOffset, hitBoxX, hitBoxZ);
+				pp.setMass(sect.getDouble("mass"));
+				pp.setMaxPassengers(sect.getInt("passengers.max"));
+				pp.setBoatRotationOffsetDeg(ArrayUtils.toPrimitive(sect.getDoubleList("passengers.boatRotationOffsetDeg").toArray(new Double[]{})));
+
+				this.boatPresets.add(pp);
+			} catch (Exception e) {
+				//Error loading this preset!
+				e.printStackTrace();
+			}
+		}
 		
-		if(usePresets && this.presets.size() < 1){
+		if(usePresets && this.presets.size() < 1 && this.boatPresets.size() < 1){
 			usePresets = false;
 		}
 	}

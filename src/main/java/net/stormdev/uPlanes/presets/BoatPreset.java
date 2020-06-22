@@ -1,59 +1,47 @@
 package net.stormdev.uPlanes.presets;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
+import net.stormdev.uPlanes.api.Boat;
+import net.stormdev.uPlanes.api.Plane;
+import net.stormdev.uPlanes.main.main;
+import net.stormdev.uPlanes.utils.Colors;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.MaterialData;
 
-import net.stormdev.uPlanes.api.Plane;
-import net.stormdev.uPlanes.main.main;
-import net.stormdev.uPlanes.utils.Colors;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
-/**
- * Simple serializable format for plane data
- * 
- * Do not manipulate this directly if avoidable, use the API
- *
- */
-public class PlanePreset extends uPlanesVehiclePresetBase<Plane> implements Serializable {
-	
+public class BoatPreset extends uPlanesVehiclePresetBase<Boat> implements Serializable {
+
 	private static final long serialVersionUID = 1L;
-	private boolean hover = false;
-	private boolean canPlaneHoverMidair = false;
+	private double mass = 1000; //In kg
 
-	public PlanePreset(String presetID, double speed, String name, double health, double accelMod, double turnAmountPerTick, boolean hover, double cost, MaterialData displayBlock, double offset, float hitBoxX, float hitBoxZ){
-		this(presetID, speed, name, health, accelMod, turnAmountPerTick, hover, cost, displayBlock, offset, hitBoxX, hitBoxZ, hover);
-	}
-
-	public PlanePreset(String presetID, double speed, String name, double health, double accelMod, double turnAmountPerTick, boolean hover, double cost, MaterialData displayBlock, double offset, float hitBoxX, float hitBoxZ, boolean canPlaneHoverMidair){
+	public BoatPreset(String presetID, double speed, String name, double health, double accelMod, double turnAmountPerTick, double cost, MaterialData displayBlock, double offset, float hitBoxX, float hitBoxZ){
 		super(presetID,speed,name,health,accelMod,turnAmountPerTick,cost,displayBlock,offset,hitBoxX,hitBoxZ);
-		this.hover = hover;
-		this.canPlaneHoverMidair = canPlaneHoverMidair;
-	}
-
-	public void setCanPlaneHoverMidair(boolean b){
-		this.canPlaneHoverMidair = b;
-	}
-
-	public boolean canPlaneHoverMidair(){
-		return this.canPlaneHoverMidair;
 	}
 	
-	public Plane toPlane(){
-		Plane p =  new Plane(getSpeed(), getName(), getHealth(), getAccelMod(), getTurnAmountPerTick(), isHover(), canPlaneHoverMidair());
+	public Boat toBoat(){
+		Boat p =  new Boat(getSpeed(), getName(), getHealth(), getAccelMod(), getTurnAmountPerTick());
+		p.setMass(this.mass);
 		p.setCartDisplayBlock(this.getDisplayBlock());
 		p.setDisplayOffset(this.getDisplayOffset());
 		return p;
 	}
 
+	public double getMass() {
+		return mass;
+	}
+
+	public void setMass(double mass) {
+		this.mass = mass;
+	}
+
 	@Override
-	public Plane toVehicle() {
-		return toPlane();
+	public Boat toVehicle() {
+		return toBoat();
 	}
 
 	@Override
@@ -69,26 +57,15 @@ public class PlanePreset extends uPlanesVehiclePresetBase<Plane> implements Seri
 		}
 		List<String> lore = new ArrayList<String>();
 		ItemMeta meta = stack.getItemMeta();
-		lore.add(ChatColor.GRAY+(hover?"helicopter":"plane"));
+		lore.add(ChatColor.GRAY+"boat");
 		lore.add(main.colors.getTitle()+"[Speed:] "+main.colors.getInfo()+mutliplier);
 		lore.add(main.colors.getTitle()+"[Health:] "+main.colors.getInfo()+health);
 		lore.add(main.colors.getTitle()+"[Acceleration:] "+main.colors.getInfo()+accelMod*10.0d);
 		lore.add(main.colors.getTitle()+"[Handling:] "+main.colors.getInfo()+turnAmount*10.0d);
-		if(hover){
-			lore.add(main.colors.getTitle()+"[Hover:] "+main.colors.getInfo()+getHandleString(hover||canPlaneHoverMidair));
-		}
 		meta.setDisplayName(Colors.colorise(name));
 		meta.setLore(lore);
 		stack.setItemMeta(meta);
 		return stack;
-	}
-
-	public boolean isHover() {
-		return hover;
-	}
-
-	public void setHover(boolean hover) {
-		this.hover = hover;
 	}
 
 	@Override
@@ -100,9 +77,6 @@ public class PlanePreset extends uPlanesVehiclePresetBase<Plane> implements Seri
 		lore.add(main.colors.getTitle()+"[Health:] "+main.colors.getInfo()+health);
 		lore.add(main.colors.getTitle()+"[Acceleration:] "+main.colors.getInfo()+accelMod*10.0d);
 		lore.add(main.colors.getTitle()+"[Handling:] "+main.colors.getInfo()+turnAmount*10.0d);
-		if(hover){
-			lore.add(main.colors.getTitle()+"[Hover:] "+main.colors.getInfo()+getHandleString(hover));
-		}
 		return lore.toArray(new String[]{});
 	}
 }

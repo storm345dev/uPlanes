@@ -1,11 +1,17 @@
 package net.stormdev.uPlanes.hover;
 
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_8_R3.CraftServer;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftArmorStand;
+import org.bukkit.craftbukkit.v1_12_R1.CraftServer;
+import org.bukkit.craftbukkit.v1_12_R1.entity.CraftArmorStand;
+import org.bukkit.entity.Entity;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.EulerAngle;
+import org.bukkit.util.Vector;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class CraftHoverCart extends CraftArmorStand implements HoverCart {
 
@@ -27,11 +33,11 @@ public class CraftHoverCart extends CraftArmorStand implements HoverCart {
 	
 	@Override
 	 public boolean teleport(Location location, PlayerTeleportEvent.TeleportCause cause) {
-		    if ((this.entity.passenger != null) || (this.entity.dead)) {
+		    if ((this.entity.passengers.size() > 0) || (this.entity.dead)) {
 		      return false;
 		    }
 
-		    this.entity.mount(null);
+		    /*this.entity.mount(null);*/
 
 		    if (!location.getWorld().equals(getWorld())) {
 		      this.entity.teleportTo(location, cause.equals(PlayerTeleportEvent.TeleportCause.NETHER_PORTAL));
@@ -46,6 +52,23 @@ public class CraftHoverCart extends CraftArmorStand implements HoverCart {
 	public void setDisplay(ItemStack stack, double offset) {
 		this.setHelmet(stack.clone());
 		getHandle().setHeightOffset(offset);
+	}
+
+	@Override
+	public Entity getPassenger(){
+		List<Entity> pass = getPassengers();
+		if(pass.size() < 1){
+			return null;
+		}
+		return pass.get(0);
+	}
+
+	@Override
+	public List<Entity> getPassengers(){
+		List<Entity> le = new ArrayList<>(super.getPassengers());
+		//Reverse it so that first in vehicle is first, not last
+		Collections.reverse(le);
+		return le;
 	}
 
 	@Override
@@ -87,6 +110,11 @@ public class CraftHoverCart extends CraftArmorStand implements HoverCart {
 	}
 
 	@Override
+	public void setVelocity(Vector vel){
+		super.setVelocity(vel);
+	}
+
+	@Override
 	public void setPitch(float pitch) {
 		double y = pitch;
 		while(y < 0){
@@ -100,6 +128,16 @@ public class CraftHoverCart extends CraftArmorStand implements HoverCart {
 	public void setYawPitch(float yaw, float pitch) {
 		setYaw(yaw);
 		setPitch(pitch);
+	}
+
+	@Override
+	public double getMaxPassengers() {
+		return getHandle().getMaxPassengers();
+	}
+
+	@Override
+	public double[] getBoatRotationOffsetDegrees() {
+		return getHandle().getBoatOffsetDeg();
 	}
 
 	@Override
@@ -127,5 +165,4 @@ public class CraftHoverCart extends CraftArmorStand implements HoverCart {
 	public void setHitBoxZ(float z) {
 		getHandle().setHitBoxZ(z);
 	}
-
 }

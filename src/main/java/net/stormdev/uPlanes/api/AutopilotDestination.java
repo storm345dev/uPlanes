@@ -12,6 +12,14 @@ import org.bukkit.Location;
  
 public interface AutopilotDestination {
 	
+	public default boolean isEndedWhenArrive(){
+		return true;
+	}
+	
+	public default void onEnd(){
+		
+	}
+	
 	/**
 	 * Get the destination the plane is flying to
 	 * 

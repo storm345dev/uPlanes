@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import net.stormdev.uPlanes.main.main;
 
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Minecart;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -23,8 +24,9 @@ public class uCarsCompatibility {
 		
 		api.registerCarCheck(main.plugin, new CarCheck(){
 
-			public Boolean isACar(Minecart car) {
-				if(main.plugin.planeManager.isPlaneInUse(car.getUniqueId())){
+			public Boolean isACar(Entity car) {
+				if(main.plugin.planeManager.isPlaneInUse(car.getUniqueId())
+					|| main.plugin.boatsManager.isBoatInUse(car.getUniqueId())){
 					PEntityMeta.setMetadata(car, "ucars.ignore", new StatValue(true, main.plugin));
 					return false;
 				}
@@ -34,6 +36,9 @@ public class uCarsCompatibility {
 
 			public Boolean isACar(ItemStack carStack) {
 				ItemMeta im = carStack.getItemMeta();
+				if(im == null){
+				    return true;
+                }
 				List<String> lore = im.getLore();
 				if(im == null || lore == null || lore.size() < 1){
 					return true;
@@ -43,9 +48,18 @@ public class uCarsCompatibility {
 				try {
 					uuid = UUID.fromString(id);
 				} catch (Exception e) {
+					return true;
+				}
+				if(main.plugin.planeManager.isAPlane(carStack)){
 					return false;
 				}
 				if(main.plugin.planeManager.isPlaneInUse(uuid)){
+					return false;
+				}
+				if(main.plugin.boatsManager.isABoat(carStack)){
+					return false;
+				}
+				if(main.plugin.boatsManager.isBoatInUse(uuid)){
 					return false;
 				}
 				return true;

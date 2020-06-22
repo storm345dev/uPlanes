@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import net.stormdev.uPlanes.hover.HoverCart;
 import net.stormdev.uPlanes.hover.HoverCartEntity;
 
+import net.stormdev.uPlanes.main.main;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Vehicle;
 
@@ -15,6 +16,7 @@ public class CartOrientationUtil { //TODO Convert yaw to eular angle
 			HoverCart hc = HoverCartEntity.getCart(cart);
 			if(hc != null){
 				hc.setPitch(pitch);
+				main.plugin.protocolManipulator.updateBoatRotationAngle((HoverCart) cart);
 			}
 			return;
 		}
@@ -59,6 +61,9 @@ public class CartOrientationUtil { //TODO Convert yaw to eular angle
 			p.set(ema.cast(nmsCart), yaw);
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+		if(cart instanceof HoverCart) {
+			main.plugin.protocolManipulator.updateBoatRotationAngle((HoverCart) cart);
 		}
 	}
 }

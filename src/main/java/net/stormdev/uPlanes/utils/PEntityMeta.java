@@ -8,11 +8,11 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.stormdev.uPlanes.main.main;
+
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.metadata.MetadataValue;
-
-import com.useful.ucars.ucars;
 
 public class PEntityMeta {
 	
@@ -32,7 +32,7 @@ public class PEntityMeta {
 				e.printStackTrace();
 			}
 		}
-		Bukkit.getScheduler().runTaskAsynchronously(ucars.plugin, new Runnable(){
+		Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
 
 			@Override
 			public void run() {

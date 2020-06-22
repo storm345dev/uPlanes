@@ -8,7 +8,6 @@ import java.util.regex.Pattern;
 import net.stormdev.uPlanes.api.Plane;
 import net.stormdev.uPlanes.guis.PagedMenu;
 import net.stormdev.uPlanes.guis.PagedMenu.MenuDetails;
-import net.stormdev.uPlanes.guis.PagedMenu.MenuDetails.MenuItem;
 import net.stormdev.uPlanes.main.PlaneGenerator;
 import net.stormdev.uPlanes.main.PlaneItemMethods;
 import net.stormdev.uPlanes.main.main;
@@ -133,7 +132,10 @@ public class PlaneShop {
 
 							@Override
 							public ItemStack getDisplayItem() {
-								return new ItemStack(Material.MINECART);
+								ItemStack it = pp.toItemStack();
+								ItemStack res = new ItemStack(it.getType());
+								res.setData(it.getData());
+								return res;
 							}
 
 							@Override
