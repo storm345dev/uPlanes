@@ -28,6 +28,7 @@ import java.util.List;
 
 public class ProtocolManipulator implements Listener {
     private ProtocolManager protocolManager;
+    public static double OFFSET_FIX = -0.9;
 
     public ProtocolManipulator(ProtocolManager manager){
         this.protocolManager = manager;
@@ -227,7 +228,7 @@ public class ProtocolManipulator implements Listener {
 
                     double y = hce.getLocation().getY()/*(double)event.getPacket().getIntegers().read(2) / 32.0*/;
                     /*Block b = hce.getLocation().getBlock();*/
-                    y+= hce.getDisplayOffset()-0.9;
+                    y+= hce.getDisplayOffset()+OFFSET_FIX;
                     event.getPacket().getDoubles().write(1, y);
                     sendFakeBoatAndArrowSpawns(nmsEntity,hce,event.getPlayer());
                 }
@@ -372,7 +373,7 @@ public class ProtocolManipulator implements Listener {
 
                     double y = hce.getLocation().getY();//(double)event.getPacket().getDoubles().read(1) /*/ 32.0*/;
                     Block b = hce.getLocation().getBlock();
-                    y+= hce.getDisplayOffset()-0.9;
+                    y+= hce.getDisplayOffset()+OFFSET_FIX;
                     event.getPacket().getDoubles().write(1, /*(int) (*/y/* * 32)*/);
                     sendFakeBoatAndArrowSpawns(nmsEntity,hce,event.getPlayer());
                     /*System.out.println("Packet integers:");
