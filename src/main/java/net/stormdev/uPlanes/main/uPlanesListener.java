@@ -108,6 +108,11 @@ public class uPlanesListener implements Listener {
 		}
 		
 		Entity collided = event.getEntity();
+		if(PEntityMeta.hasMetadata(collided, "IGNORE_COLLISIONS")){
+			event.setCancelled(true);
+			event.setCollisionCancelled(true);
+			return;
+		}
 		if(collided == null || (collided instanceof Item) || (collided instanceof ItemFrame)){
 			return;
 		}
