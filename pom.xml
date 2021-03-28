@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.stormdev</groupId>
-    <artifactId>uPlanes</artifactId>
+    <artifactId>uplanes</artifactId>
     <name>uPlanes</name>
     <url>http://dev.bukkit.org/bukkit-plugins/uCarsTrade</url>
     <issueManagement>
@@ -131,11 +131,12 @@
    
     </dependencies>
     <distributionManagement>
-        <repository>
-            <id>storm-repo</id>
-            <url>file:///var/lib/jenkins/repo</url>
-        </repository>
-    </distributionManagement>
+   <repository>
+     <id>github</id>
+     <name>GitHub stormdev Apache Maven Packages</name>
+     <url>https://maven.pkg.github.com/storm345dev/uPlanes</url>
+   </repository>
+</distributionManagement>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
