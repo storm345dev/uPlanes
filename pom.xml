@@ -119,7 +119,7 @@
     </dependency>
         <dependency>
             <groupId>com.useful</groupId>
-            <artifactId>uCars</artifactId>
+            <artifactId>ucars</artifactId>
             <version>24</version>
         </dependency>
         <dependency>
