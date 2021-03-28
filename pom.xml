@@ -87,7 +87,7 @@
     	</repository>
         <repository>
 	       <id>stormdev-repo</id>
-	       <url>http://stormdev.org/jenkins/plugin/repository/everything</url>
+	       <url>https://stormdev.org/jenkins/plugin/repository/everything</url>
         </repository>
         <repository>
 	       <id>anticheat-repo</id>
